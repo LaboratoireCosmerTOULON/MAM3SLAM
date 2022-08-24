@@ -1,3 +1,5 @@
+Warning:  this a a working copy of ORB-SLAM3. The following Readme is ORB-SLAM3's original one.
+
 # ORB-SLAM3
 
 ### V1.0, December 22th, 2021
