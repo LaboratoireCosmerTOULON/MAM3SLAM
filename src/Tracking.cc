@@ -117,17 +117,17 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
         }
     }
 
-#ifdef REGISTER_TIMES
-    vdRectStereo_ms.clear();
-    vdResizeImage_ms.clear();
-    vdORBExtract_ms.clear();
-    vdStereoMatch_ms.clear();
-    vdIMUInteg_ms.clear();
-    vdPosePred_ms.clear();
-    vdLMTrack_ms.clear();
-    vdNewKF_ms.clear();
-    vdTrackTotal_ms.clear();
-#endif
+    #ifdef REGISTER_TIMES
+        vdRectStereo_ms.clear();
+        vdResizeImage_ms.clear();
+        vdORBExtract_ms.clear();
+        vdStereoMatch_ms.clear();
+        vdIMUInteg_ms.clear();
+        vdPosePred_ms.clear();
+        vdLMTrack_ms.clear();
+        vdNewKF_ms.clear();
+        vdTrackTotal_ms.clear();
+    #endif
 }
 
 #ifdef REGISTER_TIMES
@@ -1504,10 +1504,10 @@ Sophus::SE3f Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat 
     mCurrentFrame.mNameFile = filename;
     mCurrentFrame.mnDataset = mnNumDataset;
 
-#ifdef REGISTER_TIMES
-    vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
-    vdStereoMatch_ms.push_back(mCurrentFrame.mTimeStereoMatch);
-#endif
+    #ifdef REGISTER_TIMES
+        vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
+        vdStereoMatch_ms.push_back(mCurrentFrame.mTimeStereoMatch);
+    #endif
 
     //cout << "Tracking start" << endl;
     Track();
@@ -1553,9 +1553,9 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, co
     mCurrentFrame.mNameFile = filename;
     mCurrentFrame.mnDataset = mnNumDataset;
 
-#ifdef REGISTER_TIMES
-    vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
-#endif
+    #ifdef REGISTER_TIMES
+        vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
+    #endif
 
     Track();
 
@@ -1604,9 +1604,9 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     mCurrentFrame.mNameFile = filename;
     mCurrentFrame.mnDataset = mnNumDataset;
 
-#ifdef REGISTER_TIMES
-    vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
-#endif
+    #ifdef REGISTER_TIMES
+        vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
+    #endif
 
     lastID = mCurrentFrame.mnId;
     Track();
@@ -1868,16 +1868,16 @@ void Tracking::Track()
 
     if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
     {
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
-#endif
-        PreintegrateIMU();
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
+    #endif
+            PreintegrateIMU();
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
 
-        double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
-        vdIMUInteg_ms.push_back(timePreImu);
-#endif
+            double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
+            vdIMUInteg_ms.push_back(timePreImu);
+    #endif
 
     }
     mbCreatedMap = false;
@@ -1925,9 +1925,9 @@ void Tracking::Track()
         // System is initialized. Track Frame.
         bool bOK;
 
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
-#endif
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
+    #endif
 
         // Initial camera pose estimation using motion model or relocalization (if tracking is lost)
         if(!mbOnlyTracking)
@@ -2108,17 +2108,17 @@ void Tracking::Track()
         if(!mCurrentFrame.mpReferenceKF)
             mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndPosePred = std::chrono::steady_clock::now();
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_EndPosePred = std::chrono::steady_clock::now();
 
-        double timePosePred = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPosePred - time_StartPosePred).count();
-        vdPosePred_ms.push_back(timePosePred);
-#endif
+            double timePosePred = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPosePred - time_StartPosePred).count();
+            vdPosePred_ms.push_back(timePosePred);
+    #endif
 
 
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_StartLMTrack = std::chrono::steady_clock::now();
-#endif
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_StartLMTrack = std::chrono::steady_clock::now();
+    #endif
         // If we have an initial estimation of the camera pose and matching. Track the local map.
         if(!mbOnlyTracking)
         {
@@ -2190,12 +2190,12 @@ void Tracking::Track()
             }
         }
 
-#ifdef REGISTER_TIMES
-        std::chrono::steady_clock::time_point time_EndLMTrack = std::chrono::steady_clock::now();
+    #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_EndLMTrack = std::chrono::steady_clock::now();
 
-        double timeLMTrack = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLMTrack - time_StartLMTrack).count();
-        vdLMTrack_ms.push_back(timeLMTrack);
-#endif
+            double timeLMTrack = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLMTrack - time_StartLMTrack).count();
+            vdLMTrack_ms.push_back(timeLMTrack);
+    #endif
 
         // Update drawer
         mpFrameDrawer->Update(this);
@@ -2238,9 +2238,9 @@ void Tracking::Track()
             }
             mlpTemporalPoints.clear();
 
-#ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_StartNewKF = std::chrono::steady_clock::now();
-#endif
+    #ifdef REGISTER_TIMES
+                std::chrono::steady_clock::time_point time_StartNewKF = std::chrono::steady_clock::now();
+    #endif
             bool bNeedKF = NeedNewKeyFrame();
 
             // Check if we need to insert a new keyframe
@@ -2249,12 +2249,12 @@ void Tracking::Track()
                                    (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD))))
                 CreateNewKeyFrame();
 
-#ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_EndNewKF = std::chrono::steady_clock::now();
+    #ifdef REGISTER_TIMES
+                std::chrono::steady_clock::time_point time_EndNewKF = std::chrono::steady_clock::now();
 
-            double timeNewKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndNewKF - time_StartNewKF).count();
-            vdNewKF_ms.push_back(timeNewKF);
-#endif
+                double timeNewKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndNewKF - time_StartNewKF).count();
+                vdNewKF_ms.push_back(timeNewKF);
+    #endif
 
             // We allow points with high innovation (considererd outliers by the Huber Function)
             // pass to the new keyframe, so that bundle adjustment will finally decide
@@ -2319,16 +2319,16 @@ void Tracking::Track()
 
     }
 
-#ifdef REGISTER_LOOP
-    if (Stop()) {
+    #ifdef REGISTER_LOOP
+        if (Stop()) {
 
-        // Safe area to stop
-        while(isStopped())
-        {
-            usleep(3000);
+            // Safe area to stop
+            while(isStopped())
+            {
+                usleep(3000);
+            }
         }
-    }
-#endif
+    #endif
 }
 
 

@@ -43,6 +43,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false), mbResetActiveMap(false),
     mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mbShutDown(false)
 {
+    cout << "BONJOUR" << endl;
+
     // Output welcome message
     cout << endl <<
     "ORB-SLAM3 Copyright (C) 2017-2020 Carlos Campos, Richard Elvira, Juan J. Gómez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza." << endl <<
@@ -129,7 +131,12 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         //Create the Atlas
         cout << "Initialization of Atlas from scratch " << endl;
+
+        cout << "ok-1" << endl;
+
         mpAtlas = new Atlas(0);
+
+        cout << "ok0" << endl;
     }
     else
     {
@@ -170,6 +177,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
         mpAtlas->CreateNewMap();
 
+
         //clock_t timeElapsed = clock() - start;
         //unsigned msElapsed = timeElapsed / (CLOCKS_PER_SEC / 1000);
         //cout << "Binary file read in " << msElapsed << " ms" << endl;
@@ -191,10 +199,18 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
                              mpAtlas, mpKeyFrameDatabase, strSettingsFile, mSensor, settings_, strSequence);
 
+    cout << "ok1" << std::endl;
+
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(this, mpAtlas, mSensor==MONOCULAR || mSensor==IMU_MONOCULAR,
                                      mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO || mSensor==IMU_RGBD, strSequence);
+
+    cout << "ok2" << std::endl;
+
     mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
+
+    cout << "ok3" << std::endl;
+
     mpLocalMapper->mInitFr = initFr;
     if(settings_)
         mpLocalMapper->mThFarPoints = settings_->thFarPoints();
@@ -208,20 +224,30 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     else
         mpLocalMapper->mbFarPoints = false;
 
+    cout << "ok4" << std::endl;
+
     //Initialize the Loop Closing thread and launch
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR, activeLC); // mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
+    cout << "ok5" << std::endl;
+
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
     mpTracker->SetLoopClosing(mpLoopCloser);
 
+    cout << "ok6" << std::endl;
+
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(mpLoopCloser);
 
+    cout << "ok7" << std::endl;
+
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+    cout << "ok8" << std::endl;
 
     //usleep(10*1000*1000);
 
@@ -236,9 +262,34 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         mpViewer->both = mpFrameDrawer->both;
     }
 
+    std::cout << "ok9" << std::endl;
+
     // Fix verbosity
     Verbose::SetTh(Verbose::VERBOSITY_QUIET);
 
+    mptTracking = new thread(&ORB_SLAM3::System::Run,this);
+
+    std::cout << "ok10" << std::endl;
+
+}
+
+void System::Run() {
+    unique_lock<mutex> lock(mMutexNewFrame);
+    lock.unlock();
+    while(1) {
+        if (CheckNewFrame()) {
+            lock.lock();
+            this -> TrackMonocular(this -> mIm,  this -> mTimestamp, this -> mvImuMeas, this -> mFilename);
+            this -> mGotNewFrame = false;
+            lock.unlock();
+        }
+    }
+}
+
+bool System::CheckNewFrame()
+{
+    unique_lock<mutex> lock(mMutexNewFrame);
+    return(this -> mGotNewFrame);
 }
 
 Sophus::SE3f System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)

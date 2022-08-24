@@ -31,20 +31,20 @@
 
 using namespace std;
 
-class ImageGrabber
-{
-public:
-    ImageGrabber(ORB_SLAM3::System* pSLAM, bool is_img_mono):mpSLAM(pSLAM), is_img_mono(is_img_mono){}
+class ImageGrabber {
+    public:
+        ImageGrabber(ORB_SLAM3::System* pSLAM, bool is_img_mono):mpSLAM(pSLAM), is_img_mono(is_img_mono){}
 
-    void GrabImage(const sensor_msgs::ImageConstPtr& msg);
+        void GrabImage(const sensor_msgs::ImageConstPtr& msg);
 
-    ORB_SLAM3::System* mpSLAM;
+        ORB_SLAM3::System* mpSLAM;
 
-    bool is_img_mono;
+        bool is_img_mono;
+
+        std::mutex mMutexNewFrame;
 };
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     ros::init(argc, argv, "Mono");
     ros::start();
 
@@ -55,26 +55,31 @@ int main(int argc, char **argv)
         return 1;
     }    
 
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
-
     bool is_img_mono = false;
     if (argc == 4) {
         std::string is_img_mono_str(argv[3]);
         is_img_mono = is_img_mono_str == "true";
     }
-    ImageGrabber igb(&SLAM, is_img_mono);
+
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    ORB_SLAM3::System SLAM1(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
+    ImageGrabber igb1(&SLAM1, is_img_mono);
+    // // Create a second one.
+    // ORB_SLAM3::System SLAM2(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
+    // ImageGrabber igb2(&SLAM2, is_img_mono);
 
     ros::NodeHandle nodeHandler;
-    ros::Subscriber sub = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage,&igb);
+    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
+    // ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
 
     ros::spin();
 
     // Stop all threads
-    SLAM.Shutdown();
+    SLAM1.Shutdown();
+    // SLAM2.Shutdown();
 
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+    // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
     ros::shutdown();
 
@@ -101,16 +106,9 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
 
-    // // DEBUT TEST JU
-    // cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
-    // cv::Mat im = cv_ptr->image.clone();
-    // //cv::cvtColor(im,im,cv::COLOR_BGR2GRAY);
-    // clahe->apply(im,im);
-    // cout << im << std::endl;
-    // mpSLAM->TrackMonocular(im,cv_ptr->header.stamp.toSec());
-    // // FIN TEST JU
-
-    mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
+    unique_lock<mutex> lock(mMutexNewFrame);
+    // mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
+    mpSLAM -> mIm = cv_ptr->image;
+    mpSLAM -> mTimestamp = cv_ptr->header.stamp.toSec();
+    mpSLAM -> mGotNewFrame = true;
 }
-
-
