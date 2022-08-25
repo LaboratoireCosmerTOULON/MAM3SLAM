@@ -163,15 +163,19 @@ void Viewer::Run()
 {
     mbFinished = false;
     mbStopped = false;
+    cout << "ok1" << endl;
 
     pangolin::CreateWindowAndBind("ORB-SLAM3: Map Viewer",1024,768);
+    cout << "ok2" << endl;
 
     // 3D Mouse handler requires depth testing to be enabled
     glEnable(GL_DEPTH_TEST);
+    cout << "ok3" << endl;
 
     // Issue specific OpenGl we might need
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    cout << "ok4" << endl;
 
     pangolin::CreatePanel("menu").SetBounds(0.0,1.0,0.0,pangolin::Attach::Pix(175));
     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",false,true);
@@ -195,6 +199,7 @@ void Viewer::Run()
                 pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
                 );
 
+    cout << "ok5 " << endl;
     // Add named OpenGL viewport to window and provide 3D Handler
     pangolin::View& d_cam = pangolin::CreateDisplay()
             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)

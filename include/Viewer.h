@@ -42,6 +42,7 @@ class Viewer
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings);
+    // TODO: Viewer(vector<System*> vpSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, vectod<Tracking*> vpTracking, const string &strSettingPath, Settings* settings);
 
     void newParameterLoader(Settings* settings);
 
@@ -70,10 +71,10 @@ private:
 
     bool Stop();
 
-    System* mpSystem;
+    System* mpSystem; // TODO: vector<System*> mvpSystem
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
-    Tracking* mpTracker;
+    Tracking* mpTracker; // TODO: vector<Tracking*> mvpTracker
 
     // 1/fps in ms
     double mT;
