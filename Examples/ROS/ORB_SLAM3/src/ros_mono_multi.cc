@@ -65,18 +65,18 @@ int main(int argc, char **argv) {
     ORB_SLAM3::System SLAM1(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
     ImageGrabber igb1(&SLAM1, is_img_mono);
     // // Create a second one.
-    ORB_SLAM3::System SLAM2(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,false);
-    ImageGrabber igb2(&SLAM2, is_img_mono);
+    // ORB_SLAM3::System SLAM2(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,false);
+    // ImageGrabber igb2(&SLAM2, is_img_mono);
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
-    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
+    // ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
 
     ros::spin();
 
     // Stop all threads
     SLAM1.Shutdown();
-    SLAM2.Shutdown();
+    // SLAM2.Shutdown();
 
     // Save camera trajectory
     // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
@@ -106,9 +106,10 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
 
-    unique_lock<mutex> lock(mMutexNewFrame);
     // mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
+    unique_lock<mutex> lock(mMutexNewFrame);
     mpSLAM -> mIm = cv_ptr->image;
     mpSLAM -> mTimestamp = cv_ptr->header.stamp.toSec();
     mpSLAM -> mGotNewFrame = true;
+    lock.unlock();
 }

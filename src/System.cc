@@ -252,9 +252,9 @@ void System::Run() {
     while(1) {
         if (CheckNewFrame()) {
             lock.lock();
-            this -> TrackMonocular(this -> mIm,  this -> mTimestamp, this -> mvImuMeas, this -> mFilename);
             this -> mGotNewFrame = false;
             lock.unlock();
+            this -> TrackMonocular(this -> mIm,  this -> mTimestamp, this -> mvImuMeas, this -> mFilename);
         }
     }
 }
