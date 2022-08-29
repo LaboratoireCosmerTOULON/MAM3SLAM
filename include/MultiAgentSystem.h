@@ -38,6 +38,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     MultiAgentSystem(const string &strVocFile);
+    ~MultiAgentSystem();
     void addAgent(const string &strSettingsFile);
 
     // Returns true if there have been a big map change (loop closure, global BA)
