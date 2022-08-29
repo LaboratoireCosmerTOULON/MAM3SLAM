@@ -18,6 +18,13 @@
 
 namespace ORB_SLAM3 {
 
+class Tracking;
+class LocalMapping;
+class LoopClosing;
+class Settings;
+class MultiAgentSystem;
+
+
 class Agent
 {
 public:
@@ -37,7 +44,7 @@ public:
     // Proccess the given monocular frame and optionally imu data
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
-    Sophus::SE3f TrackMonocular(const cv::Mat &im, const double &timestamp, const vector<IMU::Point>& vImuMeas = vector<IMU::Point>(), string filename="");
+    Sophus::SE3f TrackMonocular(const cv::Mat &im, const double &timestamp);
 
     // Information from most recent processed frame
     // You can call this right after TrackMonocular (or stereo or RGBD)

@@ -87,6 +87,8 @@ src/GeometricTools.cc
 src/TwoViewReconstruction.cc
 src/Config.cc
 src/Settings.cc
+src/MultiAgentSystem.cc
+src/Agent.cc
 include/System.h
 include/Tracking.h
 include/LocalMapping.h
@@ -116,7 +118,9 @@ include/GeometricTools.h
 include/TwoViewReconstruction.h
 include/SerializationUtils.h
 include/Config.h
-include/Settings.h)
+include/Settings.h
+include/MultiAgentSystem.h
+include/Agent.h)
 
 add_subdirectory(Thirdparty/g2o)
 
@@ -131,8 +135,6 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 )
 
 # Build tests
-
-Monocular examples
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
 
 add_executable(testMultiAgentSystem

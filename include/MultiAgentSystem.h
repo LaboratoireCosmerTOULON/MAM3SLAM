@@ -30,12 +30,13 @@ class MapDrawer;
 class Atlas;
 class LoopClosing;
 class Settings;
+class Agent;
 
 class MultiAgentSystem 
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    
+
     MultiAgentSystem(const string &strVocFile);
     void addAgent(const string &strSettingsFile);
 
