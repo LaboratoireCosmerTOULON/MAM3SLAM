@@ -130,12 +130,11 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 -lcrypto
 )
 
-# If RealSense SDK is found the library is added and its examples compiled
-if(realsense2_FOUND)
-    include_directories(${PROJECT_NAME}
-    ${realsense_INCLUDE_DIR}
-    )
-    target_link_libraries(${PROJECT_NAME}
-    ${realsense2_LIBRARY}
-    )
-endif()
+# Build tests
+
+Monocular examples
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+
+add_executable(testMultiAgentSystem
+        test/testMultiAgentSystem.cc)
+target_link_libraries(testMultiAgentSystem ${PROJECT_NAME})
