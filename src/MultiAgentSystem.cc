@@ -36,6 +36,21 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mpViewer(static_c
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, true, true);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
+
+    // TODO : fixe this
+    // //Initialize the Viewer thread and launch
+    // if(bUseViewer)
+    // //if(false) // TODO
+    // {
+    //     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
+    //     mptViewer = new thread(&Viewer::Run, mpViewer);
+    //     mpTracker->SetViewer(mpViewer);
+    //     mpLoopCloser->mpViewer = mpViewer;
+    //     mpViewer->both = mpFrameDrawer->both;
+    // }
+
+    // // Fix verbosity
+    // Verbose::SetTh(Verbose::VERBOSITY_QUIET);
 }
 
 MultiAgentSystem::~MultiAgentSystem() {
@@ -45,10 +60,19 @@ MultiAgentSystem::~MultiAgentSystem() {
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {}
 
 bool MultiAgentSystem::MapChanged() {
-    return true;
+    static int n=0;
+    int curn = mpAtlas->GetLastBigChangeIdx();
+    if(n<curn)
+    {
+        n=curn;
+        return true;
+    }
+    else
+        return false;
 }
 
 void MultiAgentSystem::Shutdown() {}
+
 
 bool MultiAgentSystem::isShutDown() {
     return true;
