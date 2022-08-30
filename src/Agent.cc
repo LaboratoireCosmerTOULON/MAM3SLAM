@@ -3,7 +3,11 @@
 namespace ORB_SLAM3
 {
 
+long unsigned int Agent::nNextId=0;
+
 Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) {
+
+    mnId=nNextId++;
 
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);

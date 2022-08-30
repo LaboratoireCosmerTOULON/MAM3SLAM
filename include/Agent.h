@@ -65,6 +65,9 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
+    static long unsigned int nNextId;
+    long unsigned int mnId;
+
 private:
 
     // Input sensor

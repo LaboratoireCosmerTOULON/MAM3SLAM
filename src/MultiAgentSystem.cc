@@ -42,6 +42,7 @@ MultiAgentSystem::~MultiAgentSystem() {
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
     Agent newAgent(strSettingsFile, this);
+    std::cout << "Agent ID : " << newAgent.mnId << std::endl;
     mAgents.push_back(&newAgent);
 }
 
