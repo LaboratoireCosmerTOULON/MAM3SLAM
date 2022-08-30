@@ -56,10 +56,10 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
 
     //Set pointers between threads
     // TO-DO : make sure it is working
-    // mpTracker->SetLocalMapper(mpLocalMapper);
+    mpTracker->SetLocalMapper(mpLocalMapper);
     // mpTracker->SetLoopClosing(mpLoopCloser);
 
-    // mpLocalMapper->SetTracker(mpTracker);
+    mpLocalMapper->SetTracker(mpTracker);
     // mpLocalMapper->SetLoopCloser(mpLoopCloser);
 
     //Initialize the Viewer thread and launch
