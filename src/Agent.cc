@@ -3,7 +3,7 @@
 namespace ORB_SLAM3
 {
 
-Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) {
+Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) {
 
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
@@ -37,22 +37,22 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     // mptTracking = new thread(&ORB_SLAM3::System::Run,this);
 
     //Initialize the Local Mapping thread and launch
-    // TO-DO : modify LocalMapping to use Agent instead of System
     mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
+    // TO-DO : check Run()
     // mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
 
-    // mpLocalMapper->mInitFr = initFr;
-    // if(settings_)
-    //     mpLocalMapper->mThFarPoints = settings_->thFarPoints();
-    // else
-    //     mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
-    // if(mpLocalMapper->mThFarPoints!=0)
-    // {
-    //     cout << "Discard points further than " << mpLocalMapper->mThFarPoints << " m from current camera" << endl;
-    //     mpLocalMapper->mbFarPoints = true;
-    // }
-    // else
-    //     mpLocalMapper->mbFarPoints = false;
+    mpLocalMapper->mInitFr = initFr;
+    if(settings_)
+        mpLocalMapper->mThFarPoints = settings_->thFarPoints();
+    else
+        mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
+    if(mpLocalMapper->mThFarPoints!=0)
+    {
+        cout << "Discard points further than " << mpLocalMapper->mThFarPoints << " m from current camera" << endl;
+        mpLocalMapper->mbFarPoints = true;
+    }
+    else
+        mpLocalMapper->mbFarPoints = false;
 
     //Set pointers between threads
     // TO-DO : make sure it is working
