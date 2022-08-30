@@ -76,4 +76,8 @@ Atlas* MultiAgentSystem::getAtlas() {
     return mpAtlas;
 }
 
+LoopClosing* MultiAgentSystem::getLoopCloser() {
+    return mpLoopCloser;
+}
+
 }

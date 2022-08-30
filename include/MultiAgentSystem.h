@@ -54,6 +54,7 @@ public:
     ORBVocabulary* getVocabulary();
     KeyFrameDatabase* getKeyFrameDatabase();
     Atlas* getAtlas();
+    LoopClosing* getLoopCloser();
 
 private:
     // ORB vocabulary used for place recognition and feature matching.

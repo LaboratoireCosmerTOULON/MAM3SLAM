@@ -145,6 +145,7 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam)
 
     if(bAlreadyInMap)
     {
+        // cout << "camera was already in map" << std::endl;
         return mvpCameras[index_cam];
     }
     else{
