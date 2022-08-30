@@ -40,7 +40,10 @@ MultiAgentSystem::~MultiAgentSystem() {
     mpLoopCloser->RequestFinish();
 }
 
-void MultiAgentSystem::addAgent(const string &strSettingsFile) {}
+void MultiAgentSystem::addAgent(const string &strSettingsFile) {
+    Agent newAgent(strSettingsFile, this);
+    mAgents.push_back(&newAgent);
+}
 
 bool MultiAgentSystem::MapChanged() {
     static int n=0;
