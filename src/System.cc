@@ -231,15 +231,15 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //usleep(10*1000*1000);
 
     //Initialize the Viewer thread and launch
-    if(bUseViewer)
-    //if(false) // TODO
-    {
-        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
-        mptViewer = new thread(&Viewer::Run, mpViewer);
-        mpTracker->SetViewer(mpViewer);
-        mpLoopCloser->mpViewer = mpViewer;
-        mpViewer->both = mpFrameDrawer->both;
-    }
+    // if(bUseViewer)
+    // //if(false) // TODO
+    // {
+    //     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
+    //     mptViewer = new thread(&Viewer::Run, mpViewer);
+    //     mpTracker->SetViewer(mpViewer);
+    //     mpLoopCloser->mpViewer = mpViewer;
+    //     mpViewer->both = mpFrameDrawer->both;
+    // }
 
     // Fix verbosity
     Verbose::SetTh(Verbose::VERBOSITY_QUIET);

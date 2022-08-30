@@ -23,7 +23,7 @@
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
 #include "Tracking.h"
-#include "System.h"
+#include "Agent.h"
 #include "Settings.h"
 
 #include <mutex>
@@ -34,15 +34,14 @@ namespace ORB_SLAM3
 class Tracking;
 class FrameDrawer;
 class MapDrawer;
-class System;
+class Agent;
 class Settings;
 
 class Viewer
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings);
-    // TODO: Viewer(vector<System*> vpSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, vectod<Tracking*> vpTracking, const string &strSettingPath, Settings* settings);
+    Viewer(Agent* pAgent, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings);
 
     void newParameterLoader(Settings* settings);
 
@@ -71,10 +70,10 @@ private:
 
     bool Stop();
 
-    System* mpSystem; // TODO: vector<System*> mvpSystem
+    Agent* mpAgent;
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
-    Tracking* mpTracker; // TODO: vector<Tracking*> mvpTracker
+    Tracking* mpTracker;
 
     // 1/fps in ms
     double mT;

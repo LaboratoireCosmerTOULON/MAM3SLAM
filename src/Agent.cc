@@ -59,7 +59,6 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
         mpLocalMapper->mbFarPoints = false;
 
     //Set pointers between threads
-    // TO-DO : make sure it is working
     LoopClosing* pLoopCloser = mpMultiAgentSystem -> getLoopCloser();
     mpTracker->SetLocalMapper(mpLocalMapper);
     mpTracker->SetLoopClosing(pLoopCloser);
@@ -68,8 +67,8 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpLocalMapper->SetLoopCloser(pLoopCloser);
 
     //Initialize the Viewer thread and launch
+    mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
     // TO-DO : make sure it is working
-    // mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
     // mptViewer = new thread(&Viewer::Run, mpViewer);
     // mpTracker->SetViewer(mpViewer);
     // mpLoopCloser->mpViewer = mpViewer;
@@ -99,6 +98,10 @@ std::vector<MapPoint*> Agent::GetTrackedMapPoints() {
 std::vector<cv::KeyPoint> Agent::GetTrackedKeyPointsUn() {
     std::vector<cv::KeyPoint> foo;
     return foo;
+}
+
+void Agent::Shutdown() {
+    cout << "WARNING: this function (Agent::Shutdown()) should call for thread shutdown but is not implemented !!!!!!!!!!!!!!!! Make sure to have sg to shutdown threads properly" << endl;
 }
 
 }

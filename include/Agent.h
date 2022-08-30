@@ -18,6 +18,8 @@
 
 namespace ORB_SLAM3 {
 
+class FrameDrawer;
+class MapDrawer;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
@@ -67,6 +69,8 @@ public:
 
     static long unsigned int nNextId;
     long unsigned int mnId;
+
+    void Shutdown();
 
 private:
 

@@ -25,8 +25,8 @@
 namespace ORB_SLAM3
 {
 
-Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings):
-    both(false), mpSystem(pSystem), mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer), mpTracker(pTracking),
+Viewer::Viewer(Agent* pAgent, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings):
+    both(false), mpAgent(pAgent), mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer), mpTracker(pTracking),
     mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
 {
     if(settings){
@@ -216,7 +216,7 @@ void Viewer::Run()
     bool bStepByStep = false;
     bool bCameraView = true;
 
-    if(mpTracker->mSensor == mpSystem->MONOCULAR || mpTracker->mSensor == mpSystem->STEREO || mpTracker->mSensor == mpSystem->RGBD)
+    if(mpTracker->mSensor == mpAgent->MONOCULAR || mpTracker->mSensor == mpAgent->STEREO || mpTracker->mSensor == mpAgent->RGBD)
     {
         menuShowGraph = true;
     }
@@ -284,13 +284,13 @@ void Viewer::Run()
 
         if(menuLocalizationMode && !bLocalizationMode)
         {
-            mpSystem->ActivateLocalizationMode();
-            bLocalizationMode = true;
+            // mpSystem->ActivateLocalizationMode();
+            // bLocalizationMode = true;
         }
         else if(!menuLocalizationMode && bLocalizationMode)
         {
-            mpSystem->DeactivateLocalizationMode();
-            bLocalizationMode = false;
+            // mpSystem->DeactivateLocalizationMode();
+            // bLocalizationMode = false;
         }
 
         if(menuStepByStep && !bStepByStep)
@@ -351,25 +351,25 @@ void Viewer::Run()
             menuShowPoints = true;
             menuLocalizationMode = false;
             if(bLocalizationMode)
-                mpSystem->DeactivateLocalizationMode();
+                // mpSystem->DeactivateLocalizationMode();
             bLocalizationMode = false;
             bFollow = true;
             menuFollowCamera = true;
-            mpSystem->ResetActiveMap();
+            mpAgent->ResetActiveMap();
             menuReset = false;
         }
 
         if(menuStop)
         {
             if(bLocalizationMode)
-                mpSystem->DeactivateLocalizationMode();
+                // mpSystem->DeactivateLocalizationMode();
 
             // Stop all threads
-            mpSystem->Shutdown();
+            mpAgent->Shutdown();
 
             // Save camera trajectory
-            mpSystem->SaveTrajectoryEuRoC("CameraTrajectory.txt");
-            mpSystem->SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
+            // mpSystem->SaveTrajectoryEuRoC("CameraTrajectory.txt");
+            // mpSystem->SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
             menuStop = false;
         }
 
