@@ -38,8 +38,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
 
     //Initialize the Local Mapping thread and launch
     // TO-DO : modify LocalMapping to use Agent instead of System
-    // mpLocalMapper = new LocalMapping(this, mpMultiAgentSystem -> getAtlas(), true, false, strSequence);
-
+    mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
     // mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
 
     // mpLocalMapper->mInitFr = initFr;
