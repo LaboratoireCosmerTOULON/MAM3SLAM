@@ -3,7 +3,7 @@
 namespace ORB_SLAM3
 {
 
-MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mpViewer(static_cast<Viewer*>(NULL)), mbShutDown(false) {
+MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false) {
 
     mStrVocabularyFilePath = strVocFile;
 
@@ -15,7 +15,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mpViewer(static_c
     if(!bVocLoad)
     {
         cerr << "Wrong path to vocabulary. " << endl;
-        cerr << "Falied to open at: " << strVocFile << endl;
+        cerr << "Failed to open at: " << strVocFile << endl;
         exit(-1);
     }
     cout << "Vocabulary loaded!" << endl << endl;
@@ -27,27 +27,10 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mpViewer(static_c
     cout << "Initialization of Atlas from scratch " << endl;
     mpAtlas = new Atlas(0);
 
-    //Create Drawers. These are used by the Viewer
-    mpFrameDrawer = new FrameDrawer(mpAtlas);
-    // TODO : deal with the settings
-    // mpMapDrawer = new MapDrawer(mpAtlas, strSettingsFile, settings_);
-
     //Initialize the Loop Closing thread and launch
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, true, true);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
-
-    // TODO : fixe this
-    // //Initialize the Viewer thread and launch
-    // if(bUseViewer)
-    // //if(false) // TODO
-    // {
-    //     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
-    //     mptViewer = new thread(&Viewer::Run, mpViewer);
-    //     mpTracker->SetViewer(mpViewer);
-    //     mpLoopCloser->mpViewer = mpViewer;
-    //     mpViewer->both = mpFrameDrawer->both;
-    // }
 
     // // Fix verbosity
     // Verbose::SetTh(Verbose::VERBOSITY_QUIET);
@@ -76,6 +59,10 @@ void MultiAgentSystem::Shutdown() {}
 
 bool MultiAgentSystem::isShutDown() {
     return true;
+}
+
+Atlas* MultiAgentSystem::getAtlas() {
+    return mpAtlas;
 }
 
 }

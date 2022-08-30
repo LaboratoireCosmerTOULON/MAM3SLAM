@@ -140,3 +140,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
 add_executable(testMultiAgentSystem
         test/testMultiAgentSystem.cc)
 target_link_libraries(testMultiAgentSystem ${PROJECT_NAME})
+
+add_executable(testAgent
+        test/testAgent.cc)
+target_link_libraries(testAgent ${PROJECT_NAME})

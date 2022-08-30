@@ -28,9 +28,19 @@ class MultiAgentSystem;
 class Agent
 {
 public:
+    // Input sensor
+    enum eSensor{
+        MONOCULAR=0,
+        STEREO=1,
+        RGBD=2,
+        IMU_MONOCULAR=3,
+        IMU_STEREO=4,
+        IMU_RGBD=5,
+    };
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Agent(const string &strSettingsFile);
+    Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const string &strSequence = std::string());
     
     // Main function
     void Run();
@@ -54,6 +64,9 @@ public:
 
 private:
 
+    // Input sensor
+    eSensor mSensor = MONOCULAR;
+
     // Tracker. It receives a frame and computes the associated camera pose.
     // It also decides when to insert a new keyframe, create some new MapPoints and
     // performs relocalization if tracking fails.
@@ -62,9 +75,15 @@ private:
     // Local Mapper. It manages the local map and performs local bundle adjustment.
     LocalMapping* mpLocalMapper;
 
-    // System threads: Local Mapping, Tracking.
+    // The viewer draws the map and the current camera pose. It uses Pangolin.
+    Viewer* mpViewer;
+    FrameDrawer* mpFrameDrawer;
+    MapDrawer* mpMapDrawer;
+
+    // System threads: Local Mapping, Tracking, Viewer.
     std::thread* mptLocalMapping;
     std::thread* mptTracking;
+    std::thread* mptViewer;
 
     // Tracking state
     int mTrackingState;

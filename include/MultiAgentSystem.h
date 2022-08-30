@@ -51,6 +51,8 @@ public:
     void Shutdown();
     bool isShutDown();
 
+    Atlas* getAtlas();
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;
@@ -66,12 +68,7 @@ private:
     // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
     LoopClosing* mpLoopCloser;
 
-    // The viewer draws the map and the current camera pose. It uses Pangolin.
-    Viewer* mpViewer;
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
-
-    // System threads: Loop Closing and Viewer.
+    // System threads: Loop Closing.
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
 
@@ -82,8 +79,6 @@ private:
     bool mbShutDown;
 
     string mStrVocabularyFilePath;
-
-    Settings* settings_;
 
 };
 
