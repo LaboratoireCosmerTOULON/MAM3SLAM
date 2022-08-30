@@ -22,16 +22,18 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
         exit(-1);
     }
 
+    Atlas* pAtlas = mpMultiAgentSystem -> getAtlas();
+    ORBVocabulary* pVoc = mpMultiAgentSystem -> getVocabulary();
+    KeyFrameDatabase* pKFDB = mpMultiAgentSystem -> getKeyFrameDatabase();
+
     //Create Drawers. These are used by the Viewer
-    mpFrameDrawer = new FrameDrawer(mpMultiAgentSystem -> getAtlas());
-    mpMapDrawer = new MapDrawer(mpMultiAgentSystem -> getAtlas(), strSettingsFile, settings_);
+    mpFrameDrawer = new FrameDrawer(pAtlas);
+    mpMapDrawer = new MapDrawer(pAtlas, strSettingsFile, settings_);
 
     //Initialize the Tracking thread
-    // TO-DO : modify Tracking to use Agent instead of System
-    // cout << "Seq. Name: " << strSequence << endl;
-    // mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-    //                          mpMultiAgentSystem -> getAtlas(), mpKeyFrameDatabase, strSettingsFile, mSensor, settings_, strSequence);
-
+    cout << "Seq. Name: " << strSequence << endl;
+    mpTracker = new Tracking(this, pVoc, mpFrameDrawer, mpMapDrawer, pAtlas, pKFDB, strSettingsFile, mSensor, settings_, strSequence);
+    // TO-DO : check Run()
     // mptTracking = new thread(&ORB_SLAM3::System::Run,this);
 
     //Initialize the Local Mapping thread and launch
@@ -78,6 +80,8 @@ bool Agent::CheckNewFrame() {}
 Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp) {
     return Sophus::SE3f();
 }
+
+void Agent::ResetActiveMap() {}
 
 int Agent::GetTrackingState() {
     return 0;

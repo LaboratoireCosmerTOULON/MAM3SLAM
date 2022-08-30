@@ -42,6 +42,8 @@
 #include <mutex>
 #include <unordered_set>
 
+#include "Agent.h"
+
 namespace ORB_SLAM3
 {
 
@@ -50,7 +52,7 @@ class FrameDrawer;
 class Atlas;
 class LocalMapping;
 class LoopClosing;
-class System;
+class Agent;
 class Settings;
 
 class Tracking
@@ -58,8 +60,10 @@ class Tracking
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas,
-             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq=std::string());
+    // Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq=std::string());
+
+    Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Atlas* pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq=std::string());
+
 
     ~Tracking();
 
@@ -275,7 +279,8 @@ protected:
     std::vector<MapPoint*> mvpLocalMapPoints;
     
     // System
-    System* mpSystem;
+    // System* mpSystem;
+    Agent* mpAgent;
     
     //Drawers
     Viewer* mpViewer;

@@ -51,6 +51,8 @@ public:
     void Shutdown();
     bool isShutDown();
 
+    ORBVocabulary* getVocabulary();
+    KeyFrameDatabase* getKeyFrameDatabase();
     Atlas* getAtlas();
 
 private:

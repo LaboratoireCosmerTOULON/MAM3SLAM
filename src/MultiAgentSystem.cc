@@ -64,6 +64,14 @@ bool MultiAgentSystem::isShutDown() {
     return true;
 }
 
+ORBVocabulary* MultiAgentSystem::getVocabulary() {
+    return mpVocabulary;
+}
+
+KeyFrameDatabase* MultiAgentSystem::getKeyFrameDatabase() {
+    return mpKeyFrameDatabase;
+}
+
 Atlas* MultiAgentSystem::getAtlas() {
     return mpAtlas;
 }

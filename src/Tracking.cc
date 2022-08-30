@@ -41,10 +41,99 @@ namespace ORB_SLAM3
 {
 
 
-Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Atlas *pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq):
+// Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Atlas *pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq):
+//     mState(NO_IMAGES_YET), mSensor(sensor), mTrackedFr(0), mbStep(false),
+//     mbOnlyTracking(false), mbMapUpdated(false), mbVO(false), mpORBVocabulary(pVoc), mpKeyFrameDB(pKFDB),
+//     mbReadyToInitializate(false), mpSystem(pSys), mpViewer(NULL), bStepByStep(false),
+//     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
+//     mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL))
+// {
+//     // Load camera parameters from settings file
+//     if(settings){
+//         newParameterLoader(settings);
+//     }
+//     else{
+//         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+
+//         bool b_parse_cam = ParseCamParamFile(fSettings);
+//         if(!b_parse_cam)
+//         {
+//             std::cout << "*Error with the camera parameters in the config file*" << std::endl;
+//         }
+
+//         // Load ORB parameters
+//         bool b_parse_orb = ParseORBParamFile(fSettings);
+//         if(!b_parse_orb)
+//         {
+//             std::cout << "*Error with the ORB parameters in the config file*" << std::endl;
+//         }
+
+//         bool b_parse_imu = true;
+//         if(sensor==System::IMU_MONOCULAR || sensor==System::IMU_STEREO || sensor==System::IMU_RGBD)
+//         {
+//             b_parse_imu = ParseIMUParamFile(fSettings);
+//             if(!b_parse_imu)
+//             {
+//                 std::cout << "*Error with the IMU parameters in the config file*" << std::endl;
+//             }
+
+//             mnFramesToResetIMU = mMaxFrames;
+//         }
+
+//         if(!b_parse_cam || !b_parse_orb || !b_parse_imu)
+//         {
+//             std::cerr << "**ERROR in the config file, the format is not correct**" << std::endl;
+//             try
+//             {
+//                 throw -1;
+//             }
+//             catch(exception &e)
+//             {
+
+//             }
+//         }
+//     }
+
+//     initID = 0; lastID = 0;
+//     mbInitWith3KFs = false;
+//     mnNumDataset = 0;
+
+//     vector<GeometricCamera*> vpCams = mpAtlas->GetAllCameras();
+//     std::cout << "There are " << vpCams.size() << " cameras in the atlas" << std::endl;
+//     for(GeometricCamera* pCam : vpCams)
+//     {
+//         std::cout << "Camera " << pCam->GetId();
+//         if(pCam->GetType() == GeometricCamera::CAM_PINHOLE)
+//         {
+//             std::cout << " is pinhole" << std::endl;
+//         }
+//         else if(pCam->GetType() == GeometricCamera::CAM_FISHEYE)
+//         {
+//             std::cout << " is fisheye" << std::endl;
+//         }
+//         else
+//         {
+//             std::cout << " is unknown" << std::endl;
+//         }
+//     }
+
+//     #ifdef REGISTER_TIMES
+//         vdRectStereo_ms.clear();
+//         vdResizeImage_ms.clear();
+//         vdORBExtract_ms.clear();
+//         vdStereoMatch_ms.clear();
+//         vdIMUInteg_ms.clear();
+//         vdPosePred_ms.clear();
+//         vdLMTrack_ms.clear();
+//         vdNewKF_ms.clear();
+//         vdTrackTotal_ms.clear();
+//     #endif
+// }
+
+Tracking::Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Atlas *pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq):
     mState(NO_IMAGES_YET), mSensor(sensor), mTrackedFr(0), mbStep(false),
     mbOnlyTracking(false), mbMapUpdated(false), mbVO(false), mpORBVocabulary(pVoc), mpKeyFrameDB(pKFDB),
-    mbReadyToInitializate(false), mpSystem(pSys), mpViewer(NULL), bStepByStep(false),
+    mbReadyToInitializate(false), mpAgent(pAgent), mpViewer(NULL), bStepByStep(false),
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
     mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL))
 {
@@ -1805,7 +1894,7 @@ void Tracking::Track()
     if(mpLocalMapper->mbBadImu)
     {
         cout << "TRACK: Reset map because local mapper set the bad imu flag " << endl;
-        mpSystem->ResetActiveMap();
+        mpAgent->ResetActiveMap();
         return;
     }
 
@@ -1837,7 +1926,7 @@ void Tracking::Track()
                     cout << "Timestamp jump detected. State set to LOST. Reseting IMU integration..." << endl;
                     if(!pCurrentMap->GetIniertialBA2())
                     {
-                        mpSystem->ResetActiveMap();
+                        mpAgent->ResetActiveMap();
                     }
                     else
                     {
@@ -1847,7 +1936,7 @@ void Tracking::Track()
                 else
                 {
                     cout << "Timestamp jump detected, before IMU initialization. Reseting..." << endl;
-                    mpSystem->ResetActiveMap();
+                    mpAgent->ResetActiveMap();
                 }
                 return;
             }
@@ -2018,7 +2107,7 @@ void Tracking::Track()
 
                     if (pCurrentMap->KeyFramesInMap()<10)
                     {
-                        mpSystem->ResetActiveMap();
+                        mpAgent->ResetActiveMap();
                         Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
                     }else
                         CreateMapInAtlas();
@@ -2149,7 +2238,7 @@ void Tracking::Track()
                 if(!pCurrentMap->isImuInitialized() || !pCurrentMap->GetIniertialBA2())
                 {
                     cout << "IMU is not or recently initialized. Reseting active map..." << endl;
-                    mpSystem->ResetActiveMap();
+                    mpAgent->ResetActiveMap();
                 }
 
                 mState=RECENTLY_LOST;
@@ -2272,14 +2361,14 @@ void Tracking::Track()
         {
             if(pCurrentMap->KeyFramesInMap()<=10)
             {
-                mpSystem->ResetActiveMap();
+                mpAgent->ResetActiveMap();
                 return;
             }
             if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
                 if (!pCurrentMap->isImuInitialized())
                 {
                     Verbose::PrintMess("Track lost before IMU initialisation, reseting...", Verbose::VERBOSITY_QUIET);
-                    mpSystem->ResetActiveMap();
+                    mpAgent->ResetActiveMap();
                     return;
                 }
 
@@ -2589,7 +2678,7 @@ void Tracking::CreateInitialMapMonocular()
     if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<50) // TODO Check, originally 100 tracks
     {
         Verbose::PrintMess("Wrong initialization, reseting...", Verbose::VERBOSITY_QUIET);
-        mpSystem->ResetActiveMap();
+        mpAgent->ResetActiveMap();
         return;
     }
 
@@ -4067,15 +4156,15 @@ int Tracking::GetMatchesInliers()
 
 void Tracking::SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, string strFolder)
 {
-    mpSystem->SaveTrajectoryEuRoC(strFolder + strNameFile_frames);
+    // mpSystem->SaveTrajectoryEuRoC(strFolder + strNameFile_frames);
     //mpSystem->SaveKeyFrameTrajectoryEuRoC(strFolder + strNameFile_kf);
 }
 
 void Tracking::SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, Map* pMap)
 {
-    mpSystem->SaveTrajectoryEuRoC(strNameFile_frames, pMap);
-    if(!strNameFile_kf.empty())
-        mpSystem->SaveKeyFrameTrajectoryEuRoC(strNameFile_kf, pMap);
+    // mpSystem->SaveTrajectoryEuRoC(strNameFile_frames, pMap);
+    // if(!strNameFile_kf.empty())
+    //     mpSystem->SaveKeyFrameTrajectoryEuRoC(strNameFile_kf, pMap);
 }
 
 float Tracking::GetImageScale()
