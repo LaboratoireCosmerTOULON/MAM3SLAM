@@ -45,11 +45,7 @@ MultiAgentSystem::~MultiAgentSystem() {
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
     Agent* pNewAgent = new Agent(strSettingsFile, this);
-    // std::cout << "Agent ID : " << newAgent.mnId << std::endl;
     mvpAgents.push_back(pNewAgent);
-    for (int i = 0 ; i < mvpAgents.size() ; i++) {
-        cout << mvpAgents[i] << endl;
-    }
 }
 
 bool MultiAgentSystem::MapChanged() {
