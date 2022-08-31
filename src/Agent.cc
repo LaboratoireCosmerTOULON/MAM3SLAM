@@ -5,8 +5,8 @@ namespace ORB_SLAM3
 
 long unsigned int Agent::nNextId=0;
 
-Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) {
-
+Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) 
+{
     mnId=nNextId++;
 
     //Check settings file
@@ -97,8 +97,48 @@ bool Agent::CheckNewFrame() {
     return mGotNewFrame;
 }
 
-Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp) {
-    return Sophus::SE3f();
+Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp) 
+{
+    cout << "ok1" << endl;
+    vector<IMU::Point> vImuMeas = vector<IMU::Point>();
+    string filename="";
+    cout << "ok2" << endl;
+    {
+        unique_lock<mutex> lock(mMutexReset);
+        if(mbShutDown)
+            return Sophus::SE3f();
+    }
+    cout << "ok3" << endl;
+    if(mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR)
+    {
+        cerr << "ERROR: you called TrackMonocular but input sensor was not set to Monocular nor Monocular-Inertial." << endl;
+        exit(-1);
+    }
+    cout << "ok4" << endl;
+    // cv::Mat imToFeed = mIm.clone();
+    cv::Mat imToFeed;
+    {
+        unique_lock<mutex> lock(mMutexNewFrame);
+        im.assignTo(imToFeed);
+    }
+    cout << "ok4bis" << endl;
+    if(settings_ && settings_->needToResize()){
+        cout << "ok4ter" << endl;
+        cv::Mat resizedIm;
+        cv::resize(im,resizedIm,settings_->newImSize());
+        imToFeed = resizedIm;
+    }
+    cout << "ok5" << endl;
+    Sophus::SE3f Tcw = mpTracker->GrabImageMonocular(imToFeed,timestamp,filename);
+    cout << "ok6" << endl;
+    unique_lock<mutex> lock2(mMutexState);
+    mTrackingState = mpTracker->mState;
+    cout << "ok7" << endl;
+    mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
+    cout << "ok8" << endl;
+    mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+    cout << "ok9" << endl;
+    return Tcw;
 }
 
 void Agent::ResetActiveMap() {}

@@ -27,17 +27,17 @@
 
 #include<opencv2/core/core.hpp>
 
-#include"../../../include/System.h"
+#include"../../../include/Agent.h"
 
 using namespace std;
 
 class ImageGrabber {
     public:
-        ImageGrabber(ORB_SLAM3::System* pSLAM, bool is_img_mono):mpSLAM(pSLAM), is_img_mono(is_img_mono){}
+        ImageGrabber(ORB_SLAM3::Agent* pAgent, bool is_img_mono):mpAgent(pAgent), is_img_mono(is_img_mono){}
 
         void GrabImage(const sensor_msgs::ImageConstPtr& msg);
 
-        ORB_SLAM3::System* mpSLAM;
+        ORB_SLAM3::Agent* mpAgent;
 
         bool is_img_mono;
 
@@ -62,21 +62,17 @@ int main(int argc, char **argv) {
     }
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM1(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
-    ImageGrabber igb1(&SLAM1, is_img_mono);
-    // // Create a second one.
-    // ORB_SLAM3::System SLAM2(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,false);
-    // ImageGrabber igb2(&SLAM2, is_img_mono);
+    ORB_SLAM3::MultiAgentSystem mas(argv[1]);
+    ORB_SLAM3::Agent jeanPhilippe(argv[2], &mas);
+    ImageGrabber igb1(&jeanPhilippe, is_img_mono);
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
-    // ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
-
+    
     ros::spin();
 
     // Stop all threads
-    SLAM1.Shutdown();
-    // SLAM2.Shutdown();
+    jeanPhilippe.Shutdown();
 
     // Save camera trajectory
     // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
@@ -107,9 +103,11 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
     }
 
     // mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
-    unique_lock<mutex> lock(mMutexNewFrame);
-    mpSLAM -> mIm = cv_ptr->image;
-    mpSLAM -> mTimestamp = cv_ptr->header.stamp.toSec();
-    mpSLAM -> mGotNewFrame = true;
-    lock.unlock();
+    {
+        unique_lock<mutex> lock(mMutexNewFrame);
+        cv::Mat im = cv_ptr->image;
+        mpAgent -> mIm = cv_ptr->image;
+        mpAgent -> mTimestamp = cv_ptr->header.stamp.toSec();
+        mpAgent -> mGotNewFrame = true;
+    }
 }

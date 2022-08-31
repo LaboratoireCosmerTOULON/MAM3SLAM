@@ -51,6 +51,7 @@ public:
 
     bool mGotNewFrame = false;
     cv::Mat mIm;
+    cv::Mat mIm2;
     double mTimestamp;
     std::mutex mMutexNewFrame;
 
