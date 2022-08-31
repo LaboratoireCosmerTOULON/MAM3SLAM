@@ -37,13 +37,19 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false)
 }
 
 MultiAgentSystem::~MultiAgentSystem() {
-    mpLoopCloser->RequestFinish();
+    Shutdown();
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        mvpAgents[i] -> Shutdown();
+    }
 }
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
-    Agent newAgent(strSettingsFile, this);
+    Agent* pNewAgent = new Agent(strSettingsFile, this);
     // std::cout << "Agent ID : " << newAgent.mnId << std::endl;
-    mAgents.push_back(&newAgent);
+    mvpAgents.push_back(pNewAgent);
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        cout << mvpAgents[i] << endl;
+    }
 }
 
 bool MultiAgentSystem::MapChanged() {
@@ -58,7 +64,14 @@ bool MultiAgentSystem::MapChanged() {
         return false;
 }
 
-void MultiAgentSystem::Shutdown() {}
+void MultiAgentSystem::Shutdown() {
+    {
+        unique_lock<mutex> lock(mMutexReset);
+        mbShutDown = true;
+    }
+    mpLoopCloser->RequestFinish();
+    cout << "Shutdown MultiAgentsystem" << endl;
+}
 
 
 bool MultiAgentSystem::isShutDown() {

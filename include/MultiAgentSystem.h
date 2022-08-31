@@ -76,7 +76,10 @@ private:
     std::thread* mptViewer;
 
     // Agents
-    std::vector<Agent*> mAgents;
+    std::vector<Agent*> mvpAgents;
+
+    // Reset flag
+    std::mutex mMutexReset;
 
     // Shutdown flag
     bool mbShutDown;

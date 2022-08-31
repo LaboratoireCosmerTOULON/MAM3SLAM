@@ -14,9 +14,10 @@ int main(int argc, char **argv) {
     ORB_SLAM3::MultiAgentSystem mas(pathToVoc);
 
     // void MultiAgentSystem::addAgent(const string &strSettingsFile)
-    std::string strSettingsFile("./settingsForTest.yaml");
-    mas.addAgent(strSettingsFile);
-    mas.addAgent(strSettingsFile);
+    std::string strSettingsFile1("./settingsForTest_00.yaml");
+    std::string strSettingsFile2("./settingsForTest_01.yaml");
+    mas.addAgent(strSettingsFile1);
+    mas.addAgent(strSettingsFile2);
 
     return 0;
 }

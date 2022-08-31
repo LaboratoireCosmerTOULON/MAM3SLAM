@@ -70,12 +70,16 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
     // TO-DO : make sure it is working
     // mptViewer = new thread(&Viewer::Run, mpViewer);
-    // mpTracker->SetViewer(mpViewer);
+    mpTracker->SetViewer(mpViewer);
     // mpLoopCloser->mpViewer = mpViewer;
-    // mpViewer->both = mpFrameDrawer->both;
+    mpViewer->both = mpFrameDrawer->both;
 
 }
-    
+
+Agent::~Agent() {
+    Shutdown();
+}
+
 void Agent::Run() {}
 
 bool Agent::CheckNewFrame() {}
@@ -101,7 +105,13 @@ std::vector<cv::KeyPoint> Agent::GetTrackedKeyPointsUn() {
 }
 
 void Agent::Shutdown() {
-    cout << "WARNING: this function (Agent::Shutdown()) should call for thread shutdown but is not implemented !!!!!!!!!!!!!!!! Make sure to have sg to shutdown threads properly" << endl;
+    // cout << "WARNING: this function (Agent::Shutdown()) should call for thread shutdown but is not implemented !!!!!!!!!!!!!!!! Make sure to have sg to shutdown threads properly" << endl;
+    {
+        unique_lock<mutex> lock(mMutexReset);
+        mbShutDown = true;
+    } // mutes automatically released here
+    mpLocalMapper->RequestFinish();
+    cout << "Shutdown Agent " << mnId << endl;
 }
 
 }

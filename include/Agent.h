@@ -43,7 +43,8 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr = 0, const string &strSequence = std::string());
-    
+    ~Agent();
+
     // Main function
     void Run();
     bool CheckNewFrame();
@@ -94,6 +95,12 @@ private:
     std::thread* mptLocalMapping;
     std::thread* mptTracking;
     std::thread* mptViewer;
+
+    // Reset flag
+    std::mutex mMutexReset;
+
+    // Shutdown flag
+    bool mbShutDown;
 
     // Tracking state
     int mTrackingState;

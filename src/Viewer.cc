@@ -361,7 +361,7 @@ void Viewer::Run()
 
         if(menuStop)
         {
-            if(bLocalizationMode)
+            // if(bLocalizationMode)
                 // mpSystem->DeactivateLocalizationMode();
 
             // Stop all threads
