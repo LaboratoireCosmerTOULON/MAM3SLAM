@@ -15,12 +15,12 @@ int main(int argc, char **argv) {
     ORB_SLAM3::MultiAgentSystem mas(pathToVoc);
     ORB_SLAM3::Agent jeanPhilippe(strSettingsFile, &mas);
 
-    std::mutex mMutexNewFrame;
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    {
-        unique_lock<mutex> lock(mMutexNewFrame);
-        jeanPhilippe.mGotNewFrame = true;
-    }
+    // std::mutex mMutexNewFrame;
+    // std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    // {
+    //     unique_lock<mutex> lock(mMutexNewFrame);
+    //     jeanPhilippe.mGotNewFrame = true;
+    // }
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
     return 0;

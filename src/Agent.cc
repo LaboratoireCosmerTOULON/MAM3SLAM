@@ -37,13 +37,13 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     //Initialize the Tracking thread
     cout << "Seq. Name: " << strSequence << endl;
     mpTracker = new Tracking(this, pVoc, mpFrameDrawer, mpMapDrawer, pAtlas, pKFDB, strSettingsFile, mSensor, settings_, strSequence);
-    // TO-DO : check Run()
+    // TO-DO : make Run() perform Tracking
     mptTracking = new thread(&ORB_SLAM3::Agent::Run,this);
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
     // TO-DO : check Run()
-    // mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
+    mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
 
     mpLocalMapper->mInitFr = initFr;
     if(settings_)
@@ -81,16 +81,19 @@ Agent::~Agent() {
 }
 
 void Agent::Run() {
-    while(1) {
+    while(!mbShutDown) {
         if (CheckNewFrame()) {
-            cout << "saucisse" << endl;
-        } else {
-            cout << "fllbllbbflb" << endl;
+            {
+                unique_lock<mutex> lock(mMutexNewFrame);
+                this -> mGotNewFrame = false;
+            }
+            this -> TrackMonocular(this -> mIm,  this -> mTimestamp);
         }
     }
 }
 
 bool Agent::CheckNewFrame() {
+    unique_lock<mutex> lock(mMutexNewFrame);
     return mGotNewFrame;
 }
 
