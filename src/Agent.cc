@@ -38,7 +38,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     cout << "Seq. Name: " << strSequence << endl;
     mpTracker = new Tracking(this, pVoc, mpFrameDrawer, mpMapDrawer, pAtlas, pKFDB, strSettingsFile, mSensor, settings_, strSequence);
     // TO-DO : check Run()
-    // mptTracking = new thread(&ORB_SLAM3::System::Run,this);
+    mptTracking = new thread(&ORB_SLAM3::Agent::Run,this);
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
@@ -80,9 +80,19 @@ Agent::~Agent() {
     Shutdown();
 }
 
-void Agent::Run() {}
+void Agent::Run() {
+    while(1) {
+        if (CheckNewFrame()) {
+            cout << "saucisse" << endl;
+        } else {
+            cout << "fllbllbbflb" << endl;
+        }
+    }
+}
 
-bool Agent::CheckNewFrame() {}
+bool Agent::CheckNewFrame() {
+    return mGotNewFrame;
+}
 
 Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp) {
     return Sophus::SE3f();
@@ -105,11 +115,10 @@ std::vector<cv::KeyPoint> Agent::GetTrackedKeyPointsUn() {
 }
 
 void Agent::Shutdown() {
-    // cout << "WARNING: this function (Agent::Shutdown()) should call for thread shutdown but is not implemented !!!!!!!!!!!!!!!! Make sure to have sg to shutdown threads properly" << endl;
     {
         unique_lock<mutex> lock(mMutexReset);
         mbShutDown = true;
-    } // mutes automatically released here
+    } // mutex automatically released here
     mpLocalMapper->RequestFinish();
     cout << "Shutdown Agent " << mnId << endl;
 }
