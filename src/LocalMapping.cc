@@ -250,7 +250,7 @@ void LocalMapping::Run()
                 vdKFCullingSync_ms.push_back(timeKFCulling_ms);
             #endif
             cout << "ok-LM-12" << endl;
-            //mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
+            mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
             cout << "ok-LM-13" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
