@@ -86,7 +86,6 @@ void Agent::Run() {
             {
                 unique_lock<mutex> lock(mMutexNewFrame);
                 this -> mGotNewFrame = false;
-                this -> mIm = cv::Mat::zeros(3,3, CV_64F);
             }
             this -> TrackMonocular(this -> mIm,  this -> mTimestamp);
         }
@@ -117,12 +116,6 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
     }
     cout << "ok4" << endl;
     cv::Mat imToFeed = mIm.clone();
-    // cv::Mat im1 = cv::Mat::zeros(3,3, CV_64F);
-    // cv::Mat im2;
-    // im2 = im1.clone();
-    // im1.at<double>(0,0) = 1;
-    // cout << im1.at<double>(0,0) << endl;
-    // cout << im2.at<double>(0,0) << endl;
     cout << "ok4bis" << endl;
     if(settings_ && settings_->needToResize()){
         cout << "ok4ter" << endl;

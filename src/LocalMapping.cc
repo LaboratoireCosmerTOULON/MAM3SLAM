@@ -62,7 +62,7 @@ void LocalMapping::SetTracker(Tracking *pTracker)
 }
 
 void LocalMapping::Run()
-{
+/*{
     mbFinished = false;
 
     while(1)
@@ -276,7 +276,8 @@ void LocalMapping::Run()
     }
 
     SetFinish();
-}
+}*/
+{}
 
 void LocalMapping::InsertKeyFrame(KeyFrame *pKF)
 {
