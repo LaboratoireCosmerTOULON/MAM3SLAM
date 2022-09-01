@@ -158,6 +158,7 @@ void Agent::Shutdown() {
         mbShutDown = true;
     } // mutex automatically released here
     mpLocalMapper->RequestFinish();
+    mpViewer->RequestFinish();
     cout << "Shutdown Agent " << mnId << endl;
 }
 

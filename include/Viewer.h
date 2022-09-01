@@ -94,6 +94,9 @@ private:
 
     bool mbStopTrack;
 
+    string mMapWindowName;
+    string mCurrentFrameWindowName;
+
 };
 
 }

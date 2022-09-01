@@ -56,6 +56,9 @@ public:
     Atlas* getAtlas();
     LoopClosing* getLoopCloser();
 
+    // FIXME !!! Pratique à risque.
+    Agent* getAgent(int i);
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;

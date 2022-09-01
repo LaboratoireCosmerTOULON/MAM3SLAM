@@ -61,6 +61,7 @@ int main(int argc, char **argv) {
         is_img_mono = is_img_mono_str == "true";
     }
 
+    
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::MultiAgentSystem mas(argv[1]);
     ORB_SLAM3::Agent jeanPhilippe(argv[2], &mas);
@@ -73,6 +74,7 @@ int main(int argc, char **argv) {
 
     // Stop all threads
     jeanPhilippe.Shutdown();
+    
 
     // Save camera trajectory
     // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");

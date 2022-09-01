@@ -91,4 +91,9 @@ LoopClosing* MultiAgentSystem::getLoopCloser() {
     return mpLoopCloser;
 }
 
+// FIXME !!! Pratique à risque.
+Agent* MultiAgentSystem::getAgent(int i) {
+    return mvpAgents[i];
+}
+
 }

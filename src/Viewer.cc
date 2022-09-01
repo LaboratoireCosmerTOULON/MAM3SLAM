@@ -29,6 +29,8 @@ Viewer::Viewer(Agent* pAgent, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, 
     both(false), mpAgent(pAgent), mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer), mpTracker(pTracking),
     mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
 {
+    mMapWindowName = "ORB-SLAM3: Current Frame - Agent " + to_string(mpAgent -> mnId);
+    mCurrentFrameWindowName = "ORB-SLAM3: Map Viewer - Agent " + to_string(mpAgent -> mnId);
     if(settings){
         newParameterLoader(settings);
     }
@@ -163,19 +165,19 @@ void Viewer::Run()
 {
     mbFinished = false;
     mbStopped = false;
-    cout << "ok1" << endl;
+    cout << "ok-V-1-A-" << mpAgent -> mnId << endl;
 
-    pangolin::CreateWindowAndBind("ORB-SLAM3: Map Viewer",1024,768);
-    cout << "ok2" << endl;
-
+    pangolin::CreateWindowAndBind(mMapWindowName,1024,768);
+    cout << "ok-V-2-A-" << mpAgent -> mnId << endl;
+    
     // 3D Mouse handler requires depth testing to be enabled
     glEnable(GL_DEPTH_TEST);
-    cout << "ok3" << endl;
-
+    cout << "ok-V-3-A-" << mpAgent -> mnId << endl;
+    
     // Issue specific OpenGl we might need
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    cout << "ok4" << endl;
+    cout << "ok-V-4-A-" << mpAgent -> mnId << endl;
 
     pangolin::CreatePanel("menu").SetBounds(0.0,1.0,0.0,pangolin::Attach::Pix(175));
     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",false,true);
@@ -198,19 +200,25 @@ void Viewer::Run()
                 pangolin::ProjectionMatrix(1024,768,mViewpointF,mViewpointF,512,389,0.1,1000),
                 pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
                 );
-
-    cout << "ok5 " << endl;
+    cout << "ok-V-5-A-" << mpAgent -> mnId << endl;
     // Add named OpenGL viewport to window and provide 3D Handler
-    pangolin::View& d_cam = pangolin::CreateDisplay()
+    // pangolin::View& d_cam = pangolin::CreateDisplay()
+    //         .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
+    //         .SetHandler(new pangolin::Handler3D(s_cam));
+    pangolin::View& d_cam = pangolin::Display(mMapWindowName)
             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
             .SetHandler(new pangolin::Handler3D(s_cam));
-
+    cout << "ok-V-6-A-" << mpAgent -> mnId << endl;
     pangolin::OpenGlMatrix Twc, Twr;
     Twc.SetIdentity();
     pangolin::OpenGlMatrix Ow; // Oriented with g in the z axis
     Ow.SetIdentity();
-    cv::namedWindow("ORB-SLAM3: Current Frame");
-
+    cout << "ok-V-10-A-" << mpAgent -> mnId << endl;
+    if (mpAgent -> mnId == 0) {
+        cv::namedWindow(mCurrentFrameWindowName);
+    }
+    // cout << "ok-V-11-A-" << mpAgent -> mnId << endl;
+    
     bool bFollow = true;
     bool bLocalizationMode = false;
     bool bStepByStep = false;
@@ -224,6 +232,8 @@ void Viewer::Run()
     float trackedImageScale = mpTracker->GetImageScale();
 
     cout << "Starting the Viewer" << endl;
+    cout << "ok-V-7-A-" << mpAgent -> mnId << endl;
+    
     while(1)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -322,26 +332,28 @@ void Viewer::Run()
 
         pangolin::FinishFrame();
 
-        cv::Mat toShow;
-        cv::Mat im = mpFrameDrawer->DrawFrame(trackedImageScale);
+        if (mpAgent -> mnId == 0) {
+            cv::Mat toShow;
+            cv::Mat im = mpFrameDrawer->DrawFrame(trackedImageScale);
 
-        if(both){
-            cv::Mat imRight = mpFrameDrawer->DrawRightFrame(trackedImageScale);
-            cv::hconcat(im,imRight,toShow);
-        }
-        else{
-            toShow = im;
-        }
+            if(both){
+                cv::Mat imRight = mpFrameDrawer->DrawRightFrame(trackedImageScale);
+                cv::hconcat(im,imRight,toShow);
+            }
+            else{
+                toShow = im;
+            }
 
-        if(mImageViewerScale != 1.f)
-        {
-            int width = toShow.cols * mImageViewerScale;
-            int height = toShow.rows * mImageViewerScale;
-            cv::resize(toShow, toShow, cv::Size(width, height));
-        }
+            if(mImageViewerScale != 1.f)
+            {
+                int width = toShow.cols * mImageViewerScale;
+                int height = toShow.rows * mImageViewerScale;
+                cv::resize(toShow, toShow, cv::Size(width, height));
+            }
 
-        cv::imshow("ORB-SLAM3: Current Frame",toShow);
-        cv::waitKey(mT);
+            cv::imshow(mCurrentFrameWindowName,toShow);
+            cv::waitKey(mT);
+        }
 
         if(menuReset)
         {
@@ -384,7 +396,6 @@ void Viewer::Run()
         if(CheckFinish())
             break;
     }
-
     SetFinish();
 }
 
