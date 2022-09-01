@@ -69,7 +69,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     //Initialize the Viewer thread and launch
     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
     // TO-DO : make sure it is working
-    // mptViewer = new thread(&Viewer::Run, mpViewer);
+    mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
     // mpLoopCloser->mpViewer = mpViewer;
     mpViewer->both = mpFrameDrawer->both;
