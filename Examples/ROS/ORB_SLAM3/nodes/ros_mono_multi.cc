@@ -28,6 +28,7 @@
 #include<opencv2/core/core.hpp>
 
 #include"../../../include/Agent.h"
+#include"AgentROS.h"
 
 using namespace std;
 
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
     
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::MultiAgentSystem mas(argv[1]);
-    ORB_SLAM3::Agent jeanPhilippe(argv[2], &mas);
+    ORB_SLAM3::AgentROS jeanPhilippe(argv[2], &mas);
     ImageGrabber igb1(&jeanPhilippe, is_img_mono);
 
     ros::NodeHandle nodeHandler;
