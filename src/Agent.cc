@@ -66,13 +66,13 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(pLoopCloser);
 
-    //Initialize the Viewer thread and launch
-    mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
-    // TO-DO : make sure it is working
-    mptViewer = new thread(&Viewer::Run, mpViewer);
-    mpTracker->SetViewer(mpViewer);
-    // mpLoopCloser->mpViewer = mpViewer;
-    mpViewer->both = mpFrameDrawer->both;
+    // //Initialize the Viewer thread and launch
+    // mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
+    // // TO-DO : make sure it is working
+    // mptViewer = new thread(&Viewer::Run, mpViewer);
+    // mpTracker->SetViewer(mpViewer);
+    // // mpLoopCloser->mpViewer = mpViewer;
+    // mpViewer->both = mpFrameDrawer->both;
 
 }
 

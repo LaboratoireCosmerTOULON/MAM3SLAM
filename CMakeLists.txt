@@ -89,6 +89,8 @@ src/Config.cc
 src/Settings.cc
 src/MultiAgentSystem.cc
 src/Agent.cc
+src/MultiAgentViewer.cc
+src/AgentViewer.cc
 include/System.h
 include/Tracking.h
 include/LocalMapping.h
@@ -120,7 +122,9 @@ include/SerializationUtils.h
 include/Config.h
 include/Settings.h
 include/MultiAgentSystem.h
-include/Agent.h)
+include/Agent.h
+include/MultiAgentViewer.h
+include/AgentViewer.h)
 
 add_subdirectory(Thirdparty/g2o)
 

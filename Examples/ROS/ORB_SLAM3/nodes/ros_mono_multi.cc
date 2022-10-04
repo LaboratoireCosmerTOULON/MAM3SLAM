@@ -65,14 +65,15 @@ int main(int argc, char **argv) {
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::MultiAgentSystem mas(argv[1]);
     std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
-    std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
+    std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
     mas.addAgent(strSettingsFile1);
-    mas.addAgent(strSettingsFile1);
+    mas.addAgent(strSettingsFile2);
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
+    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
     
     ros::MultiThreadedSpinner s(0);
     ros::spin();
