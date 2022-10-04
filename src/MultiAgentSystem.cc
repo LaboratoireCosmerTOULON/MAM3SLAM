@@ -49,6 +49,10 @@ void MultiAgentSystem::addAgent(const string &strSettingsFile) {
     mvpAgents.push_back(pNewAgent);
 }
 
+void MultiAgentSystem::addAgent(Agent* pNewAgent) {
+    mvpAgents.push_back(pNewAgent);
+}
+
 bool MultiAgentSystem::MapChanged() {
     static int n=0;
     int curn = mpAtlas->GetLastBigChangeIdx();

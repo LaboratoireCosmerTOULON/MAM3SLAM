@@ -28,7 +28,7 @@
 #include<opencv2/core/core.hpp>
 
 #include"../../../include/Agent.h"
-#include"AgentROS.h"
+// #include"AgentROS.h"
 
 using namespace std;
 
@@ -62,19 +62,34 @@ int main(int argc, char **argv) {
         is_img_mono = is_img_mono_str == "true";
     }
 
-    
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::MultiAgentSystem mas(argv[1]);
-    ORB_SLAM3::AgentROS jeanPhilippe(argv[2], &mas);
-    ImageGrabber igb1(&jeanPhilippe, is_img_mono);
+    std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
+    std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
+    mas.addAgent(strSettingsFile1);
+    mas.addAgent(strSettingsFile1);
+    ImageGrabber igb1(mas.getAgent(0), is_img_mono);
+    ImageGrabber igb2(mas.getAgent(1), is_img_mono);
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
     
+    ros::MultiThreadedSpinner s(0);
     ros::spin();
 
-    // Stop all threads
-    jeanPhilippe.Shutdown();
+    // // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    // ORB_SLAM3::MultiAgentSystem mas(argv[1]);
+    // ORB_SLAM3::Agent jeanPhilippe(argv[2], &mas);
+    // ImageGrabber igb1(&jeanPhilippe, is_img_mono);
+
+    // ros::NodeHandle nodeHandler;
+    // ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
+    
+    // ros::MultiThreadedSpinner s(0);
+    // ros::spin();
+
+    // // Stop all threads
+    // jeanPhilippe.Shutdown();
     
 
     // Save camera trajectory

@@ -63,7 +63,7 @@ ${PROJECT_SOURCE_DIR}/../../../lib/libORB_SLAM3.so
 # Node for multi monocular camera
 rosbuild_add_executable(MonoMulti
 nodes/ros_mono_multi.cc
-src/AgentROS.cc
+# src/AgentROS.cc
 )
 
 target_link_libraries(MonoMulti

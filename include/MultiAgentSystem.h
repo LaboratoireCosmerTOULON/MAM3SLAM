@@ -40,6 +40,7 @@ public:
     MultiAgentSystem(const string &strVocFile);
     ~MultiAgentSystem();
     void addAgent(const string &strSettingsFile);
+    void addAgent(Agent* pNewAgent);
 
     // Returns true if there have been a big map change (loop closure, global BA)
     // since last call to this function
