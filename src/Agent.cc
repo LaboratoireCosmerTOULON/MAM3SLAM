@@ -5,7 +5,7 @@ namespace ORB_SLAM3
 
 long unsigned int Agent::nNextId=0;
 
-Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpViewer(static_cast<Viewer*>(NULL)),mpMultiAgentSystem(pMultiAgentSystem) 
+Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem) 
 {
     mnId=nNextId++;
 
@@ -73,6 +73,9 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     // mpTracker->SetViewer(mpViewer);
     // // mpLoopCloser->mpViewer = mpViewer;
     // mpViewer->both = mpFrameDrawer->both;
+
+    // AgentViewer
+    mpAgentViewer = new AgentViewer(this, mpFrameDrawer,mpTracker,strSettingsFile,settings_);
 
 }
 
@@ -158,8 +161,12 @@ void Agent::Shutdown() {
         mbShutDown = true;
     } // mutex automatically released here
     mpLocalMapper->RequestFinish();
-    mpViewer->RequestFinish();
+    // mpViewer->RequestFinish();
     cout << "Shutdown Agent " << mnId << endl;
+}
+
+AgentViewer* Agent::getAgentViewer() {
+    return mpAgentViewer;
 }
 
 }

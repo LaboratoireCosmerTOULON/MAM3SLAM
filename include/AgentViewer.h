@@ -24,6 +24,8 @@ public:
 
     void newParameterLoader(Settings* settings);
 
+    void CreateWindow();
+
     void Update();
 
 private:

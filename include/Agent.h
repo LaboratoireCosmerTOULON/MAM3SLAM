@@ -10,7 +10,8 @@
 
 #include "Tracking.h"
 #include "LocalMapping.h"
-#include "Viewer.h"
+// #include "Viewer.h"
+#include "AgentViewer.h"
 #include "ImuTypes.h"
 #include "Settings.h"
 
@@ -25,6 +26,7 @@ class LocalMapping;
 class LoopClosing;
 class Settings;
 class MultiAgentSystem;
+class AgentViewer;
 
 
 class Agent
@@ -74,6 +76,8 @@ public:
 
     void Shutdown();
 
+    AgentViewer* getAgentViewer();
+
 private:
 
     // Input sensor
@@ -88,14 +92,15 @@ private:
     LocalMapping* mpLocalMapper;
 
     // The viewer draws the map and the current camera pose. It uses Pangolin.
-    Viewer* mpViewer;
+    // Viewer* mpViewer;
+    AgentViewer* mpAgentViewer;
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
 
     // System threads: Local Mapping, Tracking, Viewer.
     std::thread* mptLocalMapping;
     std::thread* mptTracking;
-    std::thread* mptViewer;
+    // std::thread* mptViewer;
 
     // Reset flag
     std::mutex mMutexReset;

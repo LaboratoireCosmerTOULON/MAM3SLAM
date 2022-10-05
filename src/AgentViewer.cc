@@ -30,9 +30,8 @@ AgentViewer::AgentViewer(Agent* pAgent, FrameDrawer* pFrameDrawer, Tracking *pTr
     }
     mbStopTrack = false;
 
-    // OpenCV window
+    // OpenCV window params
     mCurrentFrameWindowName = "ORB-SLAM3: Current Frame - Agent " + to_string(mpAgent -> mnId);
-    cv::namedWindow(mCurrentFrameWindowName);
     mtrackedImageScale = mpTracker->GetImageScale();
 }
 
@@ -92,6 +91,10 @@ bool AgentViewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     }
 
     return !b_miss_params;
+}
+
+void AgentViewer::CreateWindow() {
+    cv::namedWindow(mCurrentFrameWindowName);
 }
 
 void AgentViewer::Update()

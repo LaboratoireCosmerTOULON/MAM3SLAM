@@ -35,6 +35,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false)
 
     // // Fix verbosity
     // Verbose::SetTh(Verbose::VERBOSITY_QUIET);
+
 }
 
 MultiAgentSystem::~MultiAgentSystem() {
@@ -98,6 +99,15 @@ LoopClosing* MultiAgentSystem::getLoopCloser() {
 // FIXME !!! Pratique à risque.
 Agent* MultiAgentSystem::getAgent(int i) {
     return mvpAgents[i];
+}
+
+void MultiAgentSystem::StartViewer() {
+       // MultiAgentViewer
+    mpMultiAgentViewer = new MultiAgentViewer();
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        mpMultiAgentViewer -> AddAgentViewer(mvpAgents[i] -> getAgentViewer());
+    }
+    mptMultiAgentViewer = new thread(&ORB_SLAM3::MultiAgentViewer::Run, mpMultiAgentViewer);
 }
 
 }

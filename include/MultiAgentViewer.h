@@ -8,6 +8,8 @@
 namespace ORB_SLAM3
 {
 
+class AgentViewer;
+
 class MultiAgentViewer
 {
 public:

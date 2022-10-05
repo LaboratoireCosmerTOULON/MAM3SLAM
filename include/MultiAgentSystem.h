@@ -8,13 +8,12 @@
 #include<thread>
 #include<opencv2/core/core.hpp>
 
-#include "FrameDrawer.h"
-#include "MapDrawer.h"
 #include "Atlas.h"
 #include "LoopClosing.h"
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
-#include "Viewer.h"
+// #include "Viewer.h"
+#include "MultiAgentViewer.h"
 #include "ImuTypes.h"
 #include "Settings.h"
 
@@ -24,13 +23,12 @@
 namespace ORB_SLAM3
 {
 
-class Viewer;
-class FrameDrawer;
-class MapDrawer;
+// class Viewer;
 class Atlas;
 class LoopClosing;
 class Settings;
 class Agent;
+class MultiAgentViewer;
 
 class MultiAgentSystem 
 {
@@ -60,6 +58,8 @@ public:
     // FIXME !!! Pratique à risque.
     Agent* getAgent(int i);
 
+    void StartViewer(); // WARNING : adding new agents after starting viewer may lead to core dumped
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;
@@ -77,7 +77,6 @@ private:
 
     // System threads: Loop Closing.
     std::thread* mptLoopClosing;
-    std::thread* mptViewer;
 
     // Agents
     std::vector<Agent*> mvpAgents;
@@ -90,6 +89,9 @@ private:
 
     string mStrVocabularyFilePath;
 
+    // MultiAgentViewer anf thread
+    MultiAgentViewer* mpMultiAgentViewer;
+    std::thread* mptMultiAgentViewer;
 };
 
 }

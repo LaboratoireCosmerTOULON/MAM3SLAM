@@ -9,6 +9,10 @@ void MultiAgentViewer::AddAgentViewer(AgentViewer* pNewAgentViewer) {
 
 void MultiAgentViewer::Run()
 {
+    for (int i = 0 ; i < mvpAgentViewers.size() ; i++)
+        {
+            mvpAgentViewers[i] -> CreateWindow();
+        }
     while(1)
     {
         for (int i = 0 ; i < mvpAgentViewers.size() ; i++)

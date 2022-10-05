@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
     mas.addAgent(strSettingsFile2);
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
+    mas.StartViewer();
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
