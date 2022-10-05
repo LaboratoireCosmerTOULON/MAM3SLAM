@@ -94,7 +94,7 @@ void Agent::Run() {
                 unique_lock<mutex> lock(mMutexNewFrame);
                 this -> mGotNewFrame = false;
             }
-            // std::cout << "Agent " << mnId << " got new frame" << std::endl;
+            std::cout << "Agent " << mnId << " got new frame" << std::endl;
             this -> TrackMonocular(this -> mIm,  this -> mTimestamp);
         }
     }
@@ -141,6 +141,7 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
     // cout << "ok8" << endl;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
     // cout << "ok9" << endl;
+    std::cout << "Agent " << mnId << " achieved TrackMonocular" << std::endl;
     return Tcw;
 }
 
