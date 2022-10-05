@@ -106,7 +106,7 @@ private:
     std::mutex mMutexReset;
 
     // Shutdown flag
-    bool mbShutDown;
+    bool mbShutDown = false;
 
     // Tracking state
     int mTrackingState;

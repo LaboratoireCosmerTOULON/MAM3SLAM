@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
     std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
     mas.addAgent(strSettingsFile1);
-    mas.addAgent(strSettingsFile2);
+    mas.addAgent(strSettingsFile1);
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
     mas.StartViewer();
@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
 
 void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
 {
+    // std::cout << "got1" << std::endl;
     // Copy the ros image message to cv::Mat.
     cv_bridge::CvImageConstPtr cv_ptr;
     try

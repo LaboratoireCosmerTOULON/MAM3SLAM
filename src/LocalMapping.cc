@@ -79,10 +79,10 @@ void LocalMapping::Run()
 
                 std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
             #endif
-            cout << "ok-LM-1" << endl;
+            // cout << "ok-LM-1" << endl;
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
-            cout << "ok-LM-2" << endl;
+            // cout << "ok-LM-2" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
 
@@ -92,7 +92,7 @@ void LocalMapping::Run()
 
             // Check recent MapPoints
             MapPointCulling();
-            cout << "ok-LM-3" << endl;
+            // cout << "ok-LM-3" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndMPCulling = std::chrono::steady_clock::now();
 
@@ -102,16 +102,16 @@ void LocalMapping::Run()
 
             // Triangulate new MapPoints
             CreateNewMapPoints();
-            cout << "ok-LM-4" << endl;
+            // cout << "ok-LM-4" << endl;
             mbAbortBA = false;
 
             if(!CheckNewKeyFrames())
             {
                 // Find more matches in neighbor keyframes and fuse point duplications
                 SearchInNeighbors();
-                cout << "ok-LM-4bis" << endl;
+                // cout << "ok-LM-4bis" << endl;
             }
-            cout << "ok-LM-5" << endl;
+            // cout << "ok-LM-5" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndMPCreation = std::chrono::steady_clock::now();
                 double timeMPCreation = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCreation - time_EndMPCulling).count();
@@ -126,10 +126,10 @@ void LocalMapping::Run()
 
             if(!CheckNewKeyFrames() && !stopRequested())
             {
-                cout << "ok-LM-6" << endl;
+                // cout << "ok-LM-6" << endl;
                 if(mpAtlas->KeyFramesInMap()>2)
                 {
-                    cout << "ok-LM-7" << endl;
+                    // cout << "ok-LM-7" << endl;
                     if(mbInertial && mpCurrentKeyFrame->GetMap()->isImuInitialized())
                     {
                         float dist = (mpCurrentKeyFrame->mPrevKF->GetCameraCenter() - mpCurrentKeyFrame->GetCameraCenter()).norm() +
@@ -155,11 +155,11 @@ void LocalMapping::Run()
                     }
                     else
                     {
-                        cout << "ok-LM-8" << endl;
+                        // cout << "ok-LM-8" << endl;
                         Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
                         b_doneLBA = true;
                     }
-                    cout << "ok-LM-9" << endl;
+                    // cout << "ok-LM-9" << endl;
                 }
                 #ifdef REGISTER_TIMES
                     std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
@@ -189,10 +189,10 @@ void LocalMapping::Run()
                         InitializeIMU(1e2, 1e5, true);
                 }
 
-                cout << "ok-LM-10" << endl;
+                // cout << "ok-LM-10" << endl;
                 // Check redundant local Keyframes
                 KeyFrameCulling();
-                cout << "ok-LM-11" << endl;
+                // cout << "ok-LM-11" << endl;
                 #ifdef REGISTER_TIMES
                     std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
 
@@ -249,9 +249,9 @@ void LocalMapping::Run()
                 vdLBASync_ms.push_back(timeKFCulling_ms);
                 vdKFCullingSync_ms.push_back(timeKFCulling_ms);
             #endif
-            cout << "ok-LM-12" << endl;
+            // cout << "ok-LM-12" << endl;
             mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
-            cout << "ok-LM-13" << endl;
+            // cout << "ok-LM-13" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
 
@@ -280,7 +280,7 @@ void LocalMapping::Run()
 
         usleep(3000);
     }
-    cout << "ok-LM-14" << endl;
+    // cout << "ok-LM-14" << endl;
     SetFinish();
 }
 

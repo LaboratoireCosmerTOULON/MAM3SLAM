@@ -39,6 +39,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpTracker = new Tracking(this, pVoc, mpFrameDrawer, mpMapDrawer, pAtlas, pKFDB, strSettingsFile, mSensor, settings_, strSequence);
     // TO-DO : make Run() perform Tracking
     mptTracking = new thread(&ORB_SLAM3::Agent::Run,this);
+    std::cout << "attached for Agent " << mnId << std::endl;
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
@@ -84,12 +85,16 @@ Agent::~Agent() {
 }
 
 void Agent::Run() {
+    // std::cout << "Agent " << mnId << " is starting running" << std::endl;
+    // std:: cout << "mbShutDown : " << mbShutDown << std::endl;
     while(!mbShutDown) {
+        // std::cout << "Agent " << mnId << " is running" << std::endl;
         if (CheckNewFrame()) {
             {
                 unique_lock<mutex> lock(mMutexNewFrame);
                 this -> mGotNewFrame = false;
             }
+            // std::cout << "Agent " << mnId << " got new frame" << std::endl;
             this -> TrackMonocular(this -> mIm,  this -> mTimestamp);
         }
     }
@@ -102,40 +107,40 @@ bool Agent::CheckNewFrame() {
 
 Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp) 
 {
-    cout << "ok1" << endl;
+    // cout << "ok1" << endl;
     vector<IMU::Point> vImuMeas = vector<IMU::Point>();
     string filename="";
-    cout << "ok2" << endl;
+    // cout << "ok2" << endl;
     {
         unique_lock<mutex> lock(mMutexReset);
         if(mbShutDown)
             return Sophus::SE3f();
     }
-    cout << "ok3" << endl;
+    // cout << "ok3" << endl;
     if(mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR)
     {
         cerr << "ERROR: you called TrackMonocular but input sensor was not set to Monocular nor Monocular-Inertial." << endl;
         exit(-1);
     }
-    cout << "ok4" << endl;
+    // cout << "ok4" << endl;
     cv::Mat imToFeed = mIm.clone();
-    cout << "ok4bis" << endl;
+    // cout << "ok4bis" << endl;
     if(settings_ && settings_->needToResize()){
-        cout << "ok4ter" << endl;
+        // cout << "ok4ter" << endl;
         cv::Mat resizedIm;
         cv::resize(im,resizedIm,settings_->newImSize());
         imToFeed = resizedIm;
     }
-    cout << "ok5" << endl;
+    // cout << "ok5" << endl;
     Sophus::SE3f Tcw = mpTracker->GrabImageMonocular(imToFeed,timestamp,filename);
-    cout << "ok6" << endl;
+    // cout << "ok6" << endl;
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
-    cout << "ok7" << endl;
+    // cout << "ok7" << endl;
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-    cout << "ok8" << endl;
+    // cout << "ok8" << endl;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
-    cout << "ok9" << endl;
+    // cout << "ok9" << endl;
     return Tcw;
 }
 
