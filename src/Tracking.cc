@@ -1608,6 +1608,7 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     #endif
 
     lastID = mCurrentFrame.mnId;
+    std::cout << "Agent " << mpAgent -> mnId << "'s tracking got new current frame with id : " << lastID << std::endl; // DEBUG
     Track();
 
     return mCurrentFrame.GetPose();
@@ -1867,16 +1868,16 @@ void Tracking::Track()
 
     if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
     {
-    #ifdef REGISTER_TIMES
+        #ifdef REGISTER_TIMES
             std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
-    #endif
-            PreintegrateIMU();
-    #ifdef REGISTER_TIMES
+        #endif
+        PreintegrateIMU();
+        #ifdef REGISTER_TIMES
             std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
 
             double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
             vdIMUInteg_ms.push_back(timePreImu);
-    #endif
+        #endif
 
     }
     mbCreatedMap = false;
@@ -1903,6 +1904,7 @@ void Tracking::Track()
         }
         else
         {
+            std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
             MonocularInitialization();
         }
 
@@ -2446,7 +2448,7 @@ void Tracking::StereoInitialization()
 
 void Tracking::MonocularInitialization()
 {
-
+    std::cout << "Entering initialization for Agent " << mpAgent -> mnId << std::endl; // DEBUG
     if(!mbReadyToInitializate)
     {
         // Set Reference Frame
@@ -2473,7 +2475,7 @@ void Tracking::MonocularInitialization()
             }
 
             mbReadyToInitializate = true;
-
+            std::cout << "Reference frame set for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
     }
@@ -2482,18 +2484,20 @@ void Tracking::MonocularInitialization()
         if (((int)mCurrentFrame.mvKeys.size()<=100)||((mSensor == System::IMU_MONOCULAR)&&(mLastFrame.mTimeStamp-mInitialFrame.mTimeStamp>1.0)))
         {
             mbReadyToInitializate = false;
-
+            std::cout << "mCurrentFrame.mvKeys.size()<=100 for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
 
         // Find correspondences
         ORBmatcher matcher(0.9,true);
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
+        std::cout << nmatches << " matches with ref frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
         // Check if there are enough correspondences
         if(nmatches<100)
         {
             mbReadyToInitializate = false;
+            std::cout << "Not enough matches for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
 
@@ -2516,6 +2520,11 @@ void Tracking::MonocularInitialization()
             mCurrentFrame.SetPose(Tcw);
 
             CreateInitialMapMonocular();
+
+            std::cout << "Correctly initialized map for Agent " << mpAgent -> mnId << ". Tcw is : " << Tcw.matrix() << std::endl; // DEBUG
+        }
+        else {
+            std::cout << "Bad triangulation, failed to initialize for Agent " << mpAgent -> mnId << std::endl; // DEBUG
         }
     }
 }
