@@ -67,14 +67,14 @@ int main(int argc, char **argv) {
     std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
     std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
     mas.addAgent(strSettingsFile1);
-    mas.addAgent(strSettingsFile1);
+    mas.addAgent(strSettingsFile2);
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
     mas.StartViewer();
 
     ros::NodeHandle nodeHandler;
-    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
-    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
+    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/left/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
+    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/right/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
     
     ros::spin();
 
