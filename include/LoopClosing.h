@@ -27,6 +27,7 @@
 #include "Tracking.h"
 
 #include "KeyFrameDatabase.h"
+#include "Viewer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <thread>
@@ -40,7 +41,7 @@ class Tracking;
 class LocalMapping;
 class KeyFrameDatabase;
 class Map;
-
+class Viewer;
 
 class LoopClosing
 {

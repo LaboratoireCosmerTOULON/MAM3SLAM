@@ -16,6 +16,7 @@
 #include "Settings.h"
 
 #include "MultiAgentSystem.h"
+#include "Map.h"
 
 namespace ORB_SLAM3 {
 
@@ -78,6 +79,10 @@ public:
 
     AgentViewer* getAgentViewer();
 
+    // current map
+    void setCurrentMap(Map* newActiveMap);
+    Map* getCurrentMap();
+
 private:
 
     // Input sensor
@@ -104,6 +109,7 @@ private:
 
     // Reset flag
     std::mutex mMutexReset;
+    std::mutex mMutexMap;
 
     // Shutdown flag
     bool mbShutDown = false;
@@ -117,6 +123,9 @@ private:
     Settings* settings_;
 
     MultiAgentSystem* mpMultiAgentSystem;
+
+    // Current current map
+    Map* mpCurrentMap;
 
 };
 

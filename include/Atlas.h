@@ -25,6 +25,7 @@
 #include "GeometricCamera.h"
 #include "Pinhole.h"
 #include "KannalaBrandt8.h"
+#include "Agent.h"
 
 #include <set>
 #include <mutex>
@@ -42,6 +43,8 @@ class KeyFrameDatabase;
 class Frame;
 class KannalaBrandt8;
 class Pinhole;
+
+class Agent;
 
 //BOOST_CLASS_EXPORT_GUID(Pinhole, "Pinhole")
 //BOOST_CLASS_EXPORT_GUID(KannalaBrandt8, "KannalaBrandt8")
@@ -138,6 +141,11 @@ public:
     long unsigned int GetNumLivedKF();
 
     long unsigned int GetNumLivedMP();
+
+    // agent's current maps
+    Map* getAgentCurrentMap(Agent* agent);
+    void setAgentCurrentMap(Agent* agent, Map* map);
+    void CreateNewMap(Agent* agent);
 
 protected:
 

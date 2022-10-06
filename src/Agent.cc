@@ -7,7 +7,8 @@ long unsigned int Agent::nNextId=0;
 
 Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem) 
 {
-    mnId=nNextId++;
+    mnId=nNextId++; // ID
+    mpCurrentMap = static_cast<Map*>(NULL); // current map
 
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
@@ -145,7 +146,7 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
     return Tcw;
 }
 
-void Agent::ResetActiveMap() {}
+void Agent::ResetActiveMap() {} // TODO ?
 
 int Agent::GetTrackingState() {
     return 0;
@@ -173,6 +174,16 @@ void Agent::Shutdown() {
 
 AgentViewer* Agent::getAgentViewer() {
     return mpAgentViewer;
+}
+
+void Agent::setCurrentMap(Map* newActiveMap) {
+    unique_lock<mutex> lock(mMutexMap);
+    mpCurrentMap = newActiveMap;
+}
+
+Map* Agent::getCurrentMap() {
+    unique_lock<mutex> lock(mMutexMap);
+    return mpCurrentMap;
 }
 
 }

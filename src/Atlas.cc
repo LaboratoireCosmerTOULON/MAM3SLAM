@@ -411,4 +411,32 @@ map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes()
     return mpIdKFs;
 }
 
+// agent's current maps
+Map* Atlas::getAgentCurrentMap(Agent* agent) 
+{
+    bool isMapOk = agent -> getCurrentMap();
+    if(!isMapOk)
+    {   
+        CreateNewMap(agent);
+    }
+    while(agent -> getCurrentMap()->IsBad())
+    {
+        usleep(3000);
+    }
+    return agent -> getCurrentMap();  
+}
+
+void Atlas::setAgentCurrentMap(Agent* agent, Map* map) { // the mutex is in agent fct
+    agent -> setCurrentMap(map);
+}
+
+void Atlas::CreateNewMap(Agent* agent)
+{
+    cout << "Creation of new map with id: " << Map::nNextId  << " for Agent " << agent -> mnId << endl;
+    Map* newMap = new Map(mnLastInitKFidMap);
+    agent -> setCurrentMap(newMap);
+    unique_lock<mutex> lock(mMutexAtlas);
+    mspMaps.insert(newMap);
+}
+
 } //namespace ORB_SLAM3

@@ -1793,7 +1793,7 @@ void Tracking::ResetFrameIMU()
 
 void Tracking::Track()
 {
-
+    std::cout << "Agent " << mpAgent -> mnId << " in track fct" << std::endl;
     if (bStepByStep)
     {
         std::cout << "Tracking: Waiting to the next step" << std::endl;
@@ -1802,17 +1802,13 @@ void Tracking::Track()
         mbStep = false;
     }
 
-    if(mpLocalMapper->mbBadImu)
-    {
-        cout << "TRACK: Reset map because local mapper set the bad imu flag " << endl;
-        mpAgent->ResetActiveMap();
-        return;
-    }
+    // Map* pCurrentMap = mpAtlas->GetCurrentMap();
+    Map* pCurrentMap = mpAtlas->getAgentCurrentMap(mpAgent);
+    std::cout << "Agent " << mpAgent -> mnId << " has map " << pCurrentMap -> GetId() << std::endl;
 
-    Map* pCurrentMap = mpAtlas->GetCurrentMap();
     if(!pCurrentMap)
     {
-        cout << "ERROR: There is not an active map in the atlas" << endl;
+        cout << "ERROR: There is not an active map for agent " << mpAgent -> mnId << endl;
     }
 
     if(mState!=NO_IMAGES_YET)
@@ -1820,108 +1816,77 @@ void Tracking::Track()
         if(mLastFrame.mTimeStamp>mCurrentFrame.mTimeStamp)
         {
             cerr << "ERROR: Frame with a timestamp older than previous frame detected!" << endl;
-            unique_lock<mutex> lock(mMutexImuQueue);
-            mlQueueImuData.clear();
             CreateMapInAtlas();
             return;
         }
-        else if(mCurrentFrame.mTimeStamp>mLastFrame.mTimeStamp+1.0)
-        {
-            // cout << mCurrentFrame.mTimeStamp << ", " << mLastFrame.mTimeStamp << endl;
-            // cout << "id last: " << mLastFrame.mnId << "    id curr: " << mCurrentFrame.mnId << endl;
-            if(mpAtlas->isInertial())
-            {
-
-                if(mpAtlas->isImuInitialized())
-                {
-                    cout << "Timestamp jump detected. State set to LOST. Reseting IMU integration..." << endl;
-                    if(!pCurrentMap->GetIniertialBA2())
-                    {
-                        mpAgent->ResetActiveMap();
-                    }
-                    else
-                    {
-                        CreateMapInAtlas();
-                    }
-                }
-                else
-                {
-                    cout << "Timestamp jump detected, before IMU initialization. Reseting..." << endl;
-                    mpAgent->ResetActiveMap();
-                }
-                return;
-            }
-
-        }
     }
+    std::cout << "Agent " << mpAgent -> mnId << " ok1" << std::endl;
+    // if(mState==NO_IMAGES_YET)
+    // {
+    //     mState = NOT_INITIALIZED;
+    // }
+
+    // mLastProcessedState=mState;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl;
+    // if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
+    // {
+    //     #ifdef REGISTER_TIMES
+    //         std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
+    //     #endif
+    //     PreintegrateIMU();
+    //     #ifdef REGISTER_TIMES
+    //         std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
+
+    //         double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
+    //         vdIMUInteg_ms.push_back(timePreImu);
+    //     #endif
+
+    // }
+    // mbCreatedMap = false;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl;
+    // // Get Map Mutex -> Map cannot be changed
+    // unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
+
+    // mbMapUpdated = false;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl;
+    // int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
+    // int nMapChangeIndex = pCurrentMap->GetLastMapChange();
+    // if(nCurMapChangeIndex>nMapChangeIndex)
+    // {
+    //     pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
+    //     mbMapUpdated = true;
+    // }
+    // std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl;
+
+    // if(mState==NOT_INITIALIZED)
+    // {
+    //     std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl;
+    //     if(mSensor==System::STEREO || mSensor==System::RGBD || mSensor==System::IMU_STEREO || mSensor==System::IMU_RGBD)
+    //     {
+    //         StereoInitialization();
+    //     }
+    //     else
+    //     {
+    //         std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    //         MonocularInitialization();
+    //     }
+
+    //     //mpFrameDrawer->Update(this);
+
+    //     if(mState!=OK) // If rightly initialized, mState=OK
+    //     {
+    //         mLastFrame = Frame(mCurrentFrame);
+    //         return;
+    //     }
+
+    //     if(mpAtlas->GetAllMaps().size() == 1) // FIXME : will not work if mutliple agents. Used in void Tracking::ResetActiveMap(bool bLocMap) and void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurrentKeyFrame) so maybe no need to fix this now.
+    //     {
+    //         mnFirstFrameId = mCurrentFrame.mnId;
+    //     }
+    // }
 
 
-    if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && mpLastKeyFrame)
-        mCurrentFrame.SetNewBias(mpLastKeyFrame->GetImuBias());
-
-    if(mState==NO_IMAGES_YET)
-    {
-        mState = NOT_INITIALIZED;
-    }
-
-    mLastProcessedState=mState;
-
-    if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
-    {
-        #ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_StartPreIMU = std::chrono::steady_clock::now();
-        #endif
-        PreintegrateIMU();
-        #ifdef REGISTER_TIMES
-            std::chrono::steady_clock::time_point time_EndPreIMU = std::chrono::steady_clock::now();
-
-            double timePreImu = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPreIMU - time_StartPreIMU).count();
-            vdIMUInteg_ms.push_back(timePreImu);
-        #endif
-
-    }
-    mbCreatedMap = false;
-
-    // Get Map Mutex -> Map cannot be changed
-    unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
-
-    mbMapUpdated = false;
-
-    int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
-    int nMapChangeIndex = pCurrentMap->GetLastMapChange();
-    if(nCurMapChangeIndex>nMapChangeIndex)
-    {
-        pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
-        mbMapUpdated = true;
-    }
-
-
-    if(mState==NOT_INITIALIZED)
-    {
-        if(mSensor==System::STEREO || mSensor==System::RGBD || mSensor==System::IMU_STEREO || mSensor==System::IMU_RGBD)
-        {
-            StereoInitialization();
-        }
-        else
-        {
-            std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
-            MonocularInitialization();
-        }
-
-        //mpFrameDrawer->Update(this);
-
-        if(mState!=OK) // If rightly initialized, mState=OK
-        {
-            mLastFrame = Frame(mCurrentFrame);
-            return;
-        }
-
-        if(mpAtlas->GetAllMaps().size() == 1)
-        {
-            mnFirstFrameId = mCurrentFrame.mnId;
-        }
-    }
-    else // FIXME : uncomment and update when current map / agent linkage ok
+    // else // FIXME : uncomment and update when current map / agent linkage ok
     // {
     //     // System is initialized. Track Frame.
     //     bool bOK;
@@ -1945,11 +1910,13 @@ void Tracking::Track()
 
     //             if((!mbVelocity && !pCurrentMap->isImuInitialized()) || mCurrentFrame.mnId<mnLastRelocFrameId+2)
     //             {
+    //                 std::cout << "Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
     //                 Verbose::PrintMess("TRACK: Track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
     //                 bOK = TrackReferenceKeyFrame();
     //             }
     //             else
     //             {
+    //                 std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
     //                 Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
     //                 bOK = TrackWithMotionModel();
     //                 if(!bOK)
@@ -2294,43 +2261,41 @@ void Tracking::Track()
 
     //     mLastFrame = Frame(mCurrentFrame);
     // }
-    {}
 
 
 
+    // if(mState==OK || mState==RECENTLY_LOST)
+    // {
+    //     // Store frame pose information to retrieve the complete camera trajectory afterwards.
+    //     if(mCurrentFrame.isSet())
+    //     {
+    //         Sophus::SE3f Tcr_ = mCurrentFrame.GetPose() * mCurrentFrame.mpReferenceKF->GetPoseInverse();
+    //         mlRelativeFramePoses.push_back(Tcr_);
+    //         mlpReferences.push_back(mCurrentFrame.mpReferenceKF);
+    //         mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
+    //         mlbLost.push_back(mState==LOST);
+    //     }
+    //     else
+    //     {
+    //         // This can happen if tracking is lost
+    //         mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
+    //         mlpReferences.push_back(mlpReferences.back());
+    //         mlFrameTimes.push_back(mlFrameTimes.back());
+    //         mlbLost.push_back(mState==LOST);
+    //     }
 
-    if(mState==OK || mState==RECENTLY_LOST)
-    {
-        // Store frame pose information to retrieve the complete camera trajectory afterwards.
-        if(mCurrentFrame.isSet())
-        {
-            Sophus::SE3f Tcr_ = mCurrentFrame.GetPose() * mCurrentFrame.mpReferenceKF->GetPoseInverse();
-            mlRelativeFramePoses.push_back(Tcr_);
-            mlpReferences.push_back(mCurrentFrame.mpReferenceKF);
-            mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
-            mlbLost.push_back(mState==LOST);
-        }
-        else
-        {
-            // This can happen if tracking is lost
-            mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
-            mlpReferences.push_back(mlpReferences.back());
-            mlFrameTimes.push_back(mlFrameTimes.back());
-            mlbLost.push_back(mState==LOST);
-        }
+    // }
 
-    }
+    // #ifdef REGISTER_LOOP
+    //     if (Stop()) {
 
-    #ifdef REGISTER_LOOP
-        if (Stop()) {
-
-            // Safe area to stop
-            while(isStopped())
-            {
-                usleep(3000);
-            }
-        }
-    #endif
+    //         // Safe area to stop
+    //         while(isStopped())
+    //         {
+    //             usleep(3000);
+    //         }
+    //     }
+    // #endif
 }
 
 
@@ -2668,12 +2633,51 @@ void Tracking::CreateInitialMapMonocular()
 }
 
 
+// void Tracking::CreateMapInAtlas()
+// {
+//     mnLastInitFrameId = mCurrentFrame.mnId;
+//     mpAtlas->CreateNewMap();
+//     if (mSensor==System::IMU_STEREO || mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_RGBD)
+//         mpAtlas->SetInertialSensor();
+//     mbSetInit=false;
+
+//     mnInitialFrameId = mCurrentFrame.mnId+1;
+//     mState = NO_IMAGES_YET;
+
+//     // Restart the variable with information about the last KF
+//     mbVelocity = false;
+//     //mnLastRelocFrameId = mnLastInitFrameId; // The last relocation KF_id is the current id, because it is the new starting point for new map
+//     Verbose::PrintMess("First frame id in map: " + to_string(mnLastInitFrameId+1), Verbose::VERBOSITY_NORMAL);
+//     mbVO = false; // Init value for know if there are enough MapPoints in the last KF
+//     if(mSensor == System::MONOCULAR || mSensor == System::IMU_MONOCULAR)
+//     {
+//         mbReadyToInitializate = false;
+//     }
+
+//     if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && mpImuPreintegratedFromLastKF)
+//     {
+//         delete mpImuPreintegratedFromLastKF;
+//         mpImuPreintegratedFromLastKF = new IMU::Preintegrated(IMU::Bias(),*mpImuCalib);
+//     }
+
+//     if(mpLastKeyFrame)
+//         mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
+
+//     if(mpReferenceKF)
+//         mpReferenceKF = static_cast<KeyFrame*>(NULL);
+
+//     mLastFrame = Frame();
+//     mCurrentFrame = Frame();
+//     mvIniMatches.clear();
+
+//     mbCreatedMap = true;
+// }
+
 void Tracking::CreateMapInAtlas()
 {
     mnLastInitFrameId = mCurrentFrame.mnId;
-    mpAtlas->CreateNewMap();
-    if (mSensor==System::IMU_STEREO || mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_RGBD)
-        mpAtlas->SetInertialSensor();
+    mpAtlas->CreateNewMap(this -> mpAgent);
+    
     mbSetInit=false;
 
     mnInitialFrameId = mCurrentFrame.mnId+1;
@@ -2687,12 +2691,6 @@ void Tracking::CreateMapInAtlas()
     if(mSensor == System::MONOCULAR || mSensor == System::IMU_MONOCULAR)
     {
         mbReadyToInitializate = false;
-    }
-
-    if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && mpImuPreintegratedFromLastKF)
-    {
-        delete mpImuPreintegratedFromLastKF;
-        mpImuPreintegratedFromLastKF = new IMU::Preintegrated(IMU::Bias(),*mpImuCalib);
     }
 
     if(mpLastKeyFrame)
@@ -2738,6 +2736,8 @@ bool Tracking::TrackReferenceKeyFrame()
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
+    std::cout << nmatches << " found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl;
+
     if(nmatches<15)
     {
         cout << "TRACK_REF_KF: Less than 15 matches!!\n";
@@ -2780,6 +2780,8 @@ bool Tracking::TrackReferenceKeyFrame()
                 nmatchesMap++;
         }
     }
+
+    std::cout << nmatchesMap << " found for current frame for Agent " << mpAgent -> mnId << std::endl;
 
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
