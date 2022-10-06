@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
     mas.StartViewer();
 
     ros::NodeHandle nodeHandler;
-    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/left/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
-    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/right/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
+    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/left00_1/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
+    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/left00_2/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
     
     ros::spin();
 

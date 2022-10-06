@@ -87,7 +87,7 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 }
 
 
-void LoopClosing::Run()
+void LoopClosing::Run() // FIXME : uncomment and update when current map / agent linkage ok
 /*{
     mbFinished =false;
 
