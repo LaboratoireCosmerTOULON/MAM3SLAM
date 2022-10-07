@@ -183,6 +183,12 @@ long unsigned int Atlas::MapPointsInMap()
     return mpCurrentMap->MapPointsInMap();
 }
 
+long unsigned int Atlas::MapPointsInAgentMap(Agent* agent)
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    return agent->GetCurrentMap(false)->MapPointsInMap();
+}
+
 long unsigned Atlas::KeyFramesInMap()
 {
     unique_lock<mutex> lock(mMutexAtlas);
@@ -412,29 +418,29 @@ map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes()
 }
 
 // agent's current maps
-Map* Atlas::getAgentCurrentMap(Agent* agent) 
+Map* Atlas::GetAgentCurrentMap(Agent* agent) 
 {
-    bool isMapOk = agent -> getCurrentMap();
+    bool isMapOk = agent -> GetCurrentMap();
     if(!isMapOk)
     {   
         CreateNewMap(agent);
     }
-    while(agent -> getCurrentMap()->IsBad())
+    while(agent -> GetCurrentMap()->IsBad())
     {
         usleep(3000);
     }
-    return agent -> getCurrentMap();  
+    return agent -> GetCurrentMap();  
 }
 
-void Atlas::setAgentCurrentMap(Agent* agent, Map* map) { // the mutex is in agent fct
-    agent -> setCurrentMap(map);
+void Atlas::SetAgentCurrentMap(Agent* agent, Map* map) { // the mutex is in agent fct
+    agent -> SetCurrentMap(map);
 }
 
 void Atlas::CreateNewMap(Agent* agent)
 {
     cout << "Creation of new map with id: " << Map::nNextId  << " for Agent " << agent -> mnId << endl;
     Map* newMap = new Map(mnLastInitKFidMap);
-    agent -> setCurrentMap(newMap);
+    agent -> SetCurrentMap(newMap);
     unique_lock<mutex> lock(mMutexAtlas);
     mspMaps.insert(newMap);
 }

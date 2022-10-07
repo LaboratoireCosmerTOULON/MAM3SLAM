@@ -80,8 +80,8 @@ public:
     AgentViewer* getAgentViewer();
 
     // current map
-    void setCurrentMap(Map* newActiveMap);
-    Map* getCurrentMap();
+    void SetCurrentMap(Map* newActiveMap);
+    Map* GetCurrentMap(bool doLock = true);
 
 private:
 

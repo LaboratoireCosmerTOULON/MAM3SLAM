@@ -146,7 +146,9 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
     return Tcw;
 }
 
-void Agent::ResetActiveMap() {} // TODO ?
+void Agent::ResetActiveMap() {
+    std::cout << "Warning : agent::ResetActiveMap() called but not implemented" << std::endl;
+} // TODO ?
 
 int Agent::GetTrackingState() {
     return 0;
@@ -176,14 +178,18 @@ AgentViewer* Agent::getAgentViewer() {
     return mpAgentViewer;
 }
 
-void Agent::setCurrentMap(Map* newActiveMap) {
+void Agent::SetCurrentMap(Map* newActiveMap) {
     unique_lock<mutex> lock(mMutexMap);
     mpCurrentMap = newActiveMap;
 }
 
-Map* Agent::getCurrentMap() {
-    unique_lock<mutex> lock(mMutexMap);
-    return mpCurrentMap;
+Map* Agent::GetCurrentMap(bool doLock) {
+    if (doLock) {
+        unique_lock<mutex> lock(mMutexMap);
+        return mpCurrentMap;
+    } else {
+        return mpCurrentMap;
+    }
 }
 
 }

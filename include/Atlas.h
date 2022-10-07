@@ -101,6 +101,7 @@ public:
     int GetLastBigChangeIdx();
 
     long unsigned int MapPointsInMap();
+    long unsigned int MapPointsInAgentMap(Agent* agent); // multiagent
     long unsigned KeyFramesInMap();
 
     // Method for get data in current map
@@ -143,8 +144,8 @@ public:
     long unsigned int GetNumLivedMP();
 
     // agent's current maps
-    Map* getAgentCurrentMap(Agent* agent);
-    void setAgentCurrentMap(Agent* agent, Map* map);
+    Map* GetAgentCurrentMap(Agent* agent);
+    void SetAgentCurrentMap(Agent* agent, Map* map);
     void CreateNewMap(Agent* agent);
 
 protected:

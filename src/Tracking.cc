@@ -1803,7 +1803,7 @@ void Tracking::Track()
     }
 
     // Map* pCurrentMap = mpAtlas->GetCurrentMap();
-    Map* pCurrentMap = mpAtlas->getAgentCurrentMap(mpAgent);
+    Map* pCurrentMap = mpAtlas->GetAgentCurrentMap(mpAgent);
     std::cout << "Agent " << mpAgent -> mnId << " has map " << pCurrentMap -> GetId() << std::endl;
 
     if(!pCurrentMap)
@@ -1813,7 +1813,7 @@ void Tracking::Track()
 
     if(mState!=NO_IMAGES_YET)
     {
-        if(mLastFrame.mTimeStamp>mCurrentFrame.mTimeStamp)
+        if(mLastFrame.mTimeStamp>mCurrentFrame.mTimeStamp) // WARNING : CORRECTLY HANDLING THIS ERROR CASE NEEDS MODIFS
         {
             cerr << "ERROR: Frame with a timestamp older than previous frame detected!" << endl;
             CreateMapInAtlas();
@@ -1821,13 +1821,13 @@ void Tracking::Track()
         }
     }
     std::cout << "Agent " << mpAgent -> mnId << " ok1" << std::endl;
-    // if(mState==NO_IMAGES_YET)
-    // {
-    //     mState = NOT_INITIALIZED;
-    // }
+    if(mState==NO_IMAGES_YET)
+    {
+        mState = NOT_INITIALIZED;
+    }
 
-    // mLastProcessedState=mState;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl;
+    mLastProcessedState=mState;
+    std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl;
     // if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
     // {
     //     #ifdef REGISTER_TIMES
@@ -1842,34 +1842,34 @@ void Tracking::Track()
     //     #endif
 
     // }
-    // mbCreatedMap = false;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl;
-    // // Get Map Mutex -> Map cannot be changed
-    // unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
+    mbCreatedMap = false;
+    std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl;
+    // Get Map Mutex -> Map cannot be changed
+    unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
 
-    // mbMapUpdated = false;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl;
-    // int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
-    // int nMapChangeIndex = pCurrentMap->GetLastMapChange();
-    // if(nCurMapChangeIndex>nMapChangeIndex)
-    // {
-    //     pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
-    //     mbMapUpdated = true;
-    // }
-    // std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl;
+    mbMapUpdated = false;
+    std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl;
+    int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
+    int nMapChangeIndex = pCurrentMap->GetLastMapChange();
+    if(nCurMapChangeIndex>nMapChangeIndex)
+    {
+        pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
+        mbMapUpdated = true;
+    }
+    std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl;
 
-    // if(mState==NOT_INITIALIZED)
-    // {
-    //     std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl;
-    //     if(mSensor==System::STEREO || mSensor==System::RGBD || mSensor==System::IMU_STEREO || mSensor==System::IMU_RGBD)
-    //     {
+    if(mState==NOT_INITIALIZED)
+    {
+        std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl;
+        if(mSensor==System::STEREO || mSensor==System::RGBD || mSensor==System::IMU_STEREO || mSensor==System::IMU_RGBD)
+        {
     //         StereoInitialization();
-    //     }
-    //     else
-    //     {
-    //         std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
-    //         MonocularInitialization();
-    //     }
+        }
+        else
+        {
+            std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            MonocularInitialization();
+        }
 
     //     //mpFrameDrawer->Update(this);
 
@@ -1883,7 +1883,7 @@ void Tracking::Track()
     //     {
     //         mnFirstFrameId = mCurrentFrame.mnId;
     //     }
-    // }
+    }
 
 
     // else // FIXME : uncomment and update when current map / agent linkage ok
@@ -2497,11 +2497,13 @@ void Tracking::MonocularInitialization() // OK
 
 
 
-void Tracking::CreateInitialMapMonocular()
+void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the output good ?)
 {
     // Create KeyFrames
-    KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
-    KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
+    KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
+    KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
+    std::cout << "Adding KFini with id " << pKFini -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl;
+    std::cout << "Adding pKFcur with id " << pKFcur -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl;
 
     if(mSensor == System::IMU_MONOCULAR)
         pKFini->mpImuPreintegrated = (IMU::Preintegrated*)(NULL);
@@ -2522,7 +2524,7 @@ void Tracking::CreateInitialMapMonocular()
         //Create MapPoint.
         Eigen::Vector3f worldPos;
         worldPos << mvIniP3D[i].x, mvIniP3D[i].y, mvIniP3D[i].z;
-        MapPoint* pMP = new MapPoint(worldPos,pKFcur,mpAtlas->GetCurrentMap());
+        MapPoint* pMP = new MapPoint(worldPos,pKFcur,mpAtlas->GetAgentCurrentMap(mpAgent));
 
         pKFini->AddMapPoint(pMP,i);
         pKFcur->AddMapPoint(pMP,mvIniMatches[i]);
@@ -2541,17 +2543,18 @@ void Tracking::CreateInitialMapMonocular()
         mpAtlas->AddMapPoint(pMP);
     }
 
-
     // Update Connections
     pKFini->UpdateConnections();
     pKFcur->UpdateConnections();
+    std::cout << "Connections updated" << std::endl;
 
     std::set<MapPoint*> sMPs;
     sMPs = pKFini->GetMapPoints();
 
     // Bundle Adjustment
-    Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInMap()) + " points", Verbose::VERBOSITY_QUIET);
-    Optimizer::GlobalBundleAdjustemnt(mpAtlas->GetCurrentMap(),20);
+    Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInAgentMap(mpAgent)) + " points", Verbose::VERBOSITY_QUIET);
+    Optimizer::GlobalBundleAdjustemnt(mpAtlas->GetAgentCurrentMap(mpAgent),20);
+    std::cout << "GlobalBundleAdjustemnt ok" << std::endl;
 
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth;
@@ -2563,14 +2566,16 @@ void Tracking::CreateInitialMapMonocular()
     if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<50) // TODO Check, originally 100 tracks
     {
         Verbose::PrintMess("Wrong initialization, reseting...", Verbose::VERBOSITY_QUIET);
-        mpAgent->ResetActiveMap();
+        mpAgent->ResetActiveMap(); // does nothing yet actually
         return;
     }
+    std::cout << "Median depth ok" << std::endl;
 
     // Scale initial baseline
     Sophus::SE3f Tc2w = pKFcur->GetPose();
     Tc2w.translation() *= invMedianDepth;
     pKFcur->SetPose(Tc2w);
+    std::cout << "Tc2w ok" << std::endl;
 
     // Scale points
     vector<MapPoint*> vpAllMapPoints = pKFini->GetMapPointMatches();
@@ -2583,6 +2588,7 @@ void Tracking::CreateInitialMapMonocular()
             pMP->UpdateNormalAndDepth();
         }
     }
+    std::cout << "Scale points ok" << std::endl;
 
     if (mSensor == System::IMU_MONOCULAR)
     {
@@ -2597,39 +2603,48 @@ void Tracking::CreateInitialMapMonocular()
     mpLocalMapper->InsertKeyFrame(pKFini);
     mpLocalMapper->InsertKeyFrame(pKFcur);
     mpLocalMapper->mFirstTs=pKFcur->mTimeStamp;
+    std::cout << "Giving KF to local mapper ok" << std::endl;
 
     mCurrentFrame.SetPose(pKFcur->GetPose());
-    mnLastKeyFrameId=mCurrentFrame.mnId;
+    mnLastKeyFrameId=mCurrentFrame.mnId; // WARNING FIXME why an ID ?
     mpLastKeyFrame = pKFcur;
     //mnLastRelocFrameId = mInitialFrame.mnId;
+    std::cout << "Scale points ok" << std::endl;
 
     mvpLocalKeyFrames.push_back(pKFcur);
     mvpLocalKeyFrames.push_back(pKFini);
     mvpLocalMapPoints=mpAtlas->GetAllMapPoints();
     mpReferenceKF = pKFcur;
     mCurrentFrame.mpReferenceKF = pKFcur;
+    std::cout << "Local KF ok" << std::endl;
 
-    // Compute here initial velocity
-    vector<KeyFrame*> vKFs = mpAtlas->GetAllKeyFrames();
-
-    Sophus::SE3f deltaT = vKFs.back()->GetPose() * vKFs.front()->GetPoseInverse();
+    // Compute here initial velocity FIXME!!!!!!!!!!!!!!!!!!!!
+    // vector<KeyFrame*> vKFs = mpAtlas->GetAllKeyFrames();
+    // Sophus::SE3f deltaT = vKFs.back()->GetPose() * vKFs.front()->GetPoseInverse();
+    Sophus::SE3f deltaT = pKFini->GetPose() * pKFcur->GetPoseInverse();
     mbVelocity = false;
     Eigen::Vector3f phi = deltaT.so3().log();
 
     double aux = (mCurrentFrame.mTimeStamp-mLastFrame.mTimeStamp)/(mCurrentFrame.mTimeStamp-mInitialFrame.mTimeStamp);
     phi *= aux;
+    std::cout << "Velocity ok" << std::endl;
 
     mLastFrame = Frame(mCurrentFrame);
+    std::cout << "mLastFrame ok" << std::endl;
 
     mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
+    std::cout << "SetReferenceMapPoints ok" << std::endl;
 
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
+    std::cout << "SetCurrentCameraPose ok" << std::endl;
 
-    mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
+    mpAtlas->GetAgentCurrentMap(mpAgent)->mvpKeyFrameOrigins.push_back(pKFini);
+    std::cout << "mvpKeyFrameOrigins ok" << std::endl;
 
     mState=OK;
 
     initID = pKFcur->mnId;
+    std::cout << "map initializtion ok" << std::endl;
 }
 
 
