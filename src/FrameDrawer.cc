@@ -201,6 +201,56 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
     return imWithInfo;
 }
 
+// cv::Mat FrameDrawer::DrawFrame(float imageScale)
+// {
+//     cv::Mat im;
+//     vector<cv::KeyPoint> vIniKeys; // Initialization: KeyPoints in reference frame
+//     vector<int> vMatches; // Initialization: correspondeces with reference keypoints
+//     vector<cv::KeyPoint> vCurrentKeys; // KeyPoints in current frame
+//     vector<bool> vbVO, vbMap; // Tracked MapPoints in current frame
+//     vector<pair<cv::Point2f, cv::Point2f> > vTracks;
+//     int state; // Tracking state
+//     vector<float> vCurrentDepth;
+//     float thDepth;
+
+//     Frame currentFrame;
+//     vector<MapPoint*> vpLocalMap;
+//     vector<cv::KeyPoint> vMatchesKeys;
+//     vector<MapPoint*> vpMatchedMPs;
+//     vector<cv::KeyPoint> vOutlierKeys;
+//     vector<MapPoint*> vpOutlierMPs;
+//     map<long unsigned int, cv::Point2f> mProjectPoints;
+//     map<long unsigned int, cv::Point2f> mMatchedInImage;
+
+//     cv::Scalar standardColor(0,255,0);
+//     cv::Scalar odometryColor(255,0,0);
+
+//     //Copy variables within scoped mutex
+//     {
+//         unique_lock<mutex> lock(mMutex);
+//         state=mState;
+//         if(mState==Tracking::SYSTEM_NOT_READY)
+//             mState=Tracking::NO_IMAGES_YET;
+
+//         mIm.copyTo(im);
+//     }
+
+//     if(imageScale != 1.f)
+//     {
+//         int imWidth = im.cols / imageScale;
+//         int imHeight = im.rows / imageScale;
+//         cv::resize(im, im, cv::Size(imWidth, imHeight));
+//     }
+
+//     if(im.channels()<3) //this should be always true
+//         cvtColor(im,im,cv::COLOR_GRAY2BGR);
+
+//     cv::Mat imWithInfo;
+//     DrawTextInfo(im,state, imWithInfo);
+
+//     return imWithInfo;
+// }
+
 cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
 {
     cv::Mat im;
