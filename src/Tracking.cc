@@ -1820,14 +1820,14 @@ void Tracking::Track()
             return;
         }
     }
-    std::cout << "Agent " << mpAgent -> mnId << " ok1" << std::endl;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok1" << std::endl; // DEBUG
     if(mState==NO_IMAGES_YET)
     {
         mState = NOT_INITIALIZED;
     }
 
     mLastProcessedState=mState;
-    std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl; // DEBUG
     // if ((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mbCreatedMap)
     // {
     //     #ifdef REGISTER_TIMES
@@ -1843,12 +1843,12 @@ void Tracking::Track()
 
     // }
     mbCreatedMap = false;
-    std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl; // DEBUG
     // Get Map Mutex -> Map cannot be changed
     unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
 
     mbMapUpdated = false;
-    std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl; // DEBUG
     int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
     int nMapChangeIndex = pCurrentMap->GetLastMapChange();
     if(nCurMapChangeIndex>nMapChangeIndex)
@@ -1856,11 +1856,11 @@ void Tracking::Track()
         pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
         mbMapUpdated = true;
     }
-    std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl;
+    // std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl; // DEBUG
 
     if(mState==NOT_INITIALIZED)
     {
-        std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl;
+        // std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl; // DEBUG
         if(mSensor==System::STEREO || mSensor==System::RGBD || mSensor==System::IMU_STEREO || mSensor==System::IMU_RGBD)
         {
     //         StereoInitialization();
@@ -1871,13 +1871,13 @@ void Tracking::Track()
             MonocularInitialization();
         }
 
-    //     //mpFrameDrawer->Update(this);
+        //mpFrameDrawer->Update(this);
 
-    //     if(mState!=OK) // If rightly initialized, mState=OK
-    //     {
-    //         mLastFrame = Frame(mCurrentFrame);
-    //         return;
-    //     }
+        if(mState!=OK) // If rightly initialized, mState=OK
+        {
+            mLastFrame = Frame(mCurrentFrame);
+            return;
+        }
 
     //     if(mpAtlas->GetAllMaps().size() == 1) // FIXME : will not work if mutliple agents. Used in void Tracking::ResetActiveMap(bool bLocMap) and void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurrentKeyFrame) so maybe no need to fix this now.
     //     {
@@ -1886,42 +1886,44 @@ void Tracking::Track()
     }
 
 
-    // else // FIXME : uncomment and update when current map / agent linkage ok
-    // {
-    //     // System is initialized. Track Frame.
-    //     bool bOK;
+    else // FIXME : uncomment and update when current map / agent linkage ok
+    {
+        // System is initialized. Track Frame.
+        bool bOK;
 
-    //     #ifdef REGISTER_TIMES
-    //         std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
-    //     #endif
+        #ifdef REGISTER_TIMES
+            std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
+        #endif
 
-    //     // Initial camera pose estimation using motion model or relocalization (if tracking is lost)
-    //     if(!mbOnlyTracking)
-    //     {
+        // Initial camera pose estimation using motion model or relocalization (if tracking is lost)
+        if(!mbOnlyTracking)
+        {
 
-    //         // State OK
-    //         // Local Mapping is activated. This is the normal behaviour, unless
-    //         // you explicitly activate the "only tracking" mode.
-    //         if(mState==OK)
-    //         {
+            // State OK
+            // Local Mapping is activated. This is the normal behaviour, unless
+            // you explicitly activate the "only tracking" mode.
+            if(mState==OK)
+            {
 
-    //             // Local Mapping might have changed some MapPoints tracked in last frame
-    //             CheckReplacedInLastFrame();
+                // Local Mapping might have changed some MapPoints tracked in last frame
+                CheckReplacedInLastFrame();
 
-    //             if((!mbVelocity && !pCurrentMap->isImuInitialized()) || mCurrentFrame.mnId<mnLastRelocFrameId+2)
-    //             {
-    //                 std::cout << "Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
-    //                 Verbose::PrintMess("TRACK: Track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
-    //                 bOK = TrackReferenceKeyFrame();
-    //             }
-    //             else
-    //             {
-    //                 std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
-    //                 Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
-    //                 bOK = TrackWithMotionModel();
-    //                 if(!bOK)
-    //                     bOK = TrackReferenceKeyFrame();
-    //             }
+                if((!mbVelocity && !pCurrentMap->isImuInitialized()) || mCurrentFrame.mnId<mnLastRelocFrameId+2)
+                {
+                    std::cout << "Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
+                    Verbose::PrintMess("TRACK: Track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
+                    bOK = TrackReferenceKeyFrame();
+                }
+                else
+                {
+                    std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
+                    Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
+                    // bOK = TrackWithMotionModel();
+                    // if(!bOK)
+                    // {
+                    //     bOK = TrackReferenceKeyFrame();
+                    // } 
+                }
 
 
     //             if (!bOK)
@@ -1942,7 +1944,7 @@ void Tracking::Track()
     //                     mState = LOST;
     //                 }
     //             }
-    //         }
+            }
     //         else
     //         {
 
@@ -2000,7 +2002,7 @@ void Tracking::Track()
     //             }
     //         }
 
-    //     }
+        }
     //     else
     //     {
     //         // Localization Mode: Local Mapping is deactivated (TODO Not available in inertial mode)
@@ -2260,7 +2262,7 @@ void Tracking::Track()
     //         mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
     //     mLastFrame = Frame(mCurrentFrame);
-    // }
+    }
 
 
 
@@ -2412,7 +2414,7 @@ void Tracking::StereoInitialization()
 }
 
 
-void Tracking::MonocularInitialization() // OK
+void Tracking::MonocularInitialization() // OK (no core dumped but is the output good ?)
 {
     std::cout << "Entering initialization for Agent " << mpAgent -> mnId << std::endl; // DEBUG
     if(!mbReadyToInitializate)
@@ -2618,7 +2620,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     mCurrentFrame.mpReferenceKF = pKFcur;
     std::cout << "Local KF ok" << std::endl;
 
-    // Compute here initial velocity FIXME!!!!!!!!!!!!!!!!!!!!
+    // Compute here initial velocity FIXME!!!!!!!!!!!!!!!!!!!! -> fixed ?
     // vector<KeyFrame*> vKFs = mpAtlas->GetAllKeyFrames();
     // Sophus::SE3f deltaT = vKFs.back()->GetPose() * vKFs.front()->GetPoseInverse();
     Sophus::SE3f deltaT = pKFini->GetPose() * pKFcur->GetPoseInverse();
@@ -2644,7 +2646,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     mState=OK;
 
     initID = pKFcur->mnId;
-    std::cout << "map initializtion ok" << std::endl;
+    std::cout << "map initialization ok" << std::endl;
 }
 
 
@@ -2739,7 +2741,7 @@ void Tracking::CheckReplacedInLastFrame()
 }
 
 
-bool Tracking::TrackReferenceKeyFrame()
+bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem good but is the output good ?)
 {
     // Compute Bag of Words vector
     mCurrentFrame.ComputeBoW();
@@ -2749,9 +2751,12 @@ bool Tracking::TrackReferenceKeyFrame()
     ORBmatcher matcher(0.7,true);
     vector<MapPoint*> vpMapPointMatches;
 
+    std::cout << "Current map has id " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl; // DEBUG
+    std::cout << "Current ref KF has id " << mpReferenceKF -> mnId << "and belongs to map " << mpReferenceKF->GetMap()->GetId() << std::endl; // DEBUG
+
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
-    std::cout << nmatches << " found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl;
+    std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     if(nmatches<15)
     {
@@ -2764,9 +2769,10 @@ bool Tracking::TrackReferenceKeyFrame()
 
     //mCurrentFrame.PrintPointDistribution();
 
-
+    std::cout << "Pose initialized" << std::endl;
     // cout << " TrackReferenceKeyFrame mLastFrame.mTcw:  " << mLastFrame.mTcw << endl;
     Optimizer::PoseOptimization(&mCurrentFrame);
+    std::cout << "Pose optimized" << std::endl;
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -2796,7 +2802,7 @@ bool Tracking::TrackReferenceKeyFrame()
         }
     }
 
-    std::cout << nmatchesMap << " found for current frame for Agent " << mpAgent -> mnId << std::endl;
+    std::cout << nmatchesMap << " matches found for current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
