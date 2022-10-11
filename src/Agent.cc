@@ -43,7 +43,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     std::cout << "attached for Agent " << mnId << std::endl;
 
     //Initialize the Local Mapping thread and launch
-    mpLocalMapper = new LocalMapping(pAtlas, true, false, strSequence);
+    mpLocalMapper = new LocalMapping(this, pAtlas, true, false, strSequence);
     // TO-DO : check Run()
     mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
 

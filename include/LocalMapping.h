@@ -37,12 +37,13 @@ class System;
 class Tracking;
 class LoopClosing;
 class Atlas;
+class Agent;
 
 class LocalMapping
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    LocalMapping(Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
+    LocalMapping(Agent* pAgent, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
 
@@ -155,6 +156,8 @@ protected:
     std::mutex mMutexFinish;
 
     Atlas* mpAtlas;
+
+    Agent* mpAgent; // agent
 
     LoopClosing* mpLoopCloser;
     Tracking* mpTracker;
