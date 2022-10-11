@@ -1869,7 +1869,7 @@ void Tracking::Track()
             return;
         }
 
-    //     if(mpAtlas->GetAllMaps().size() == 1) // FIXME : will not work if mutliple agents. Used in void Tracking::ResetActiveMap(bool bLocMap) and void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurrentKeyFrame) so maybe no need to fix this now.
+    //     if(mpAtlas->GetAllMaps().size() == 1) // FIXME : will not work if multiple agents. Used in void Tracking::ResetActiveMap(bool bLocMap) and void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurrentKeyFrame) so maybe no need to fix this now.
     //     {
     //         mnFirstFrameId = mCurrentFrame.mnId;
     //     }
@@ -1908,11 +1908,12 @@ void Tracking::Track()
                 { // FIXME : TO UNCOMMENT + VALIDATE
                     std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
                     Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
-                    // bOK = TrackWithMotionModel();
-                    // if(!bOK)
-                    // {
-                    //     bOK = TrackReferenceKeyFrame();
-                    // } 
+                    bOK = TrackWithMotionModel();
+                    if(!bOK)
+                    {
+                        std::cout << "Tracking with motion model failed. Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
+                        bOK = TrackReferenceKeyFrame();
+                    } 
                 }
 
 
@@ -1930,45 +1931,45 @@ void Tracking::Track()
                     }
                 }
             }
-            else
-            {
+            // else
+            // {
 
-                if (mState == RECENTLY_LOST)
-                {
-                    Verbose::PrintMess("Lost for a short time", Verbose::VERBOSITY_NORMAL);
-                    bOK = true;
-                    // Relocalization
-                    bOK = Relocalization();
-                    //std::cout << "mCurrentFrame.mTimeStamp:" << to_string(mCurrentFrame.mTimeStamp) << std::endl;
-                    //std::cout << "mTimeStampLost:" << to_string(mTimeStampLost) << std::endl;
-                    if(mCurrentFrame.mTimeStamp-mTimeStampLost>3.0f && !bOK)
-                    {
-                        mState = LOST;
-                        Verbose::PrintMess("Track Lost...", Verbose::VERBOSITY_NORMAL);
-                        bOK=false;
-                    }
-                }
-                else if (mState == LOST)
-                {
+            //     if (mState == RECENTLY_LOST)
+            //     {
+            //         Verbose::PrintMess("Lost for a short time", Verbose::VERBOSITY_NORMAL);
+            //         bOK = true;
+            //         // Relocalization
+            //         bOK = Relocalization();
+            //         //std::cout << "mCurrentFrame.mTimeStamp:" << to_string(mCurrentFrame.mTimeStamp) << std::endl;
+            //         //std::cout << "mTimeStampLost:" << to_string(mTimeStampLost) << std::endl;
+            //         if(mCurrentFrame.mTimeStamp-mTimeStampLost>3.0f && !bOK)
+            //         {
+            //             mState = LOST;
+            //             Verbose::PrintMess("Track Lost...", Verbose::VERBOSITY_NORMAL);
+            //             bOK=false;
+            //         }
+            //     }
+            //     else if (mState == LOST)
+            //     {
 
-                    Verbose::PrintMess("A new map is started...", Verbose::VERBOSITY_NORMAL);
+            //         Verbose::PrintMess("A new map is started...", Verbose::VERBOSITY_NORMAL);
 
-                    if (pCurrentMap->KeyFramesInMap()<10)
-                    {
-                        mpAgent->ResetActiveMap(); // does nothing yet actually
-                        Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
-                    } else {
-                        // CreateMapInAtlas(); // FIXME : create new map when agent lost
-                    }
+            //         if (pCurrentMap->KeyFramesInMap()<10)
+            //         {
+            //             mpAgent->ResetActiveMap(); // does nothing yet actually
+            //             Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
+            //         } else {
+            //             // CreateMapInAtlas(); // FIXME : create new map when agent lost
+            //         }
                         
-                    if(mpLastKeyFrame)
-                        mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
+            //         if(mpLastKeyFrame)
+            //             mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
 
-                    Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
+            //         Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
 
-                    return;
-                }
-            }
+            //         return;
+            //     }
+            // }
 
         }
         // else
@@ -2056,7 +2057,8 @@ void Tracking::Track()
         {
             if(bOK)
             {
-                // bOK = TrackLocalMap(); // FIXME
+                std::cout << "Agent " << mpAgent->mnId << " trying to track local map" << std::endl;
+                bOK = TrackLocalMap(); // FIXME
 
             }
             if(!bOK)
@@ -2631,7 +2633,7 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
 
     std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
-    // if(nmatches<15)
+    // if(nmatches<15) // FIXME : uncomment
     // {
     //     cout << "TRACK_REF_KF: Less than 15 matches!!\n";
     //     return false;
@@ -2683,7 +2685,7 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
         return nmatchesMap>=10;
 }
 
-void Tracking::UpdateLastFrame()
+void Tracking::UpdateLastFrame() // Concretement, ne fait rien si mono sauf set la pose de mLastFrame via mlRelativeFramePoses
 {
     // Update pose according to reference keyframe
     KeyFrame* pRef = mLastFrame.mpReferenceKF;
@@ -2772,13 +2774,14 @@ bool Tracking::TrackWithMotionModel()
     }
     else
     {
+        std::cout << "Initializing current frame pose for Agent " << mpAgent->mnId << std::endl;
         mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
     }
 
 
 
 
-    fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
+    fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL)); // ?? What for ??
 
     // Project points seen in previous frame
     int th;
@@ -2789,6 +2792,7 @@ bool Tracking::TrackWithMotionModel()
         th=15;
 
     int nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,th,mSensor==System::MONOCULAR || mSensor==System::IMU_MONOCULAR);
+        std::cout << nmatches << " matches found for Agent " << mpAgent->mnId << std::endl;
 
     // If few matches, uses a wider window search
     if(nmatches<20)
@@ -2812,6 +2816,7 @@ bool Tracking::TrackWithMotionModel()
 
     // Optimize frame pose with all matches
     Optimizer::PoseOptimization(&mCurrentFrame);
+    std::cout << "Pose optimized for Agent " << mpAgent->mnId << std::endl;
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -2838,6 +2843,7 @@ bool Tracking::TrackWithMotionModel()
                 nmatchesMap++;
         }
     }
+    std::cout << "Outliers discarded for Agent " << mpAgent->mnId << ". There are " << nmatchesMap << " map matches" << std::endl;
 
     if(mbOnlyTracking)
     {
@@ -2859,7 +2865,9 @@ bool Tracking::TrackLocalMap()
     mTrackedFr++;
 
     UpdateLocalMap();
+    std::cout << "Local map updated" << std::endl;
     SearchLocalPoints();
+    std::cout << "Local points searched" << std::endl;
 
     // TOO check outliers before PO
     int aux1 = 0, aux2=0;
@@ -2872,30 +2880,7 @@ bool Tracking::TrackLocalMap()
         }
 
     int inliers;
-    if (!mpAtlas->isImuInitialized())
-        Optimizer::PoseOptimization(&mCurrentFrame);
-    else
-    {
-        if(mCurrentFrame.mnId<=mnLastRelocFrameId+mnFramesToResetIMU)
-        {
-            Verbose::PrintMess("TLM: PoseOptimization ", Verbose::VERBOSITY_DEBUG);
-            Optimizer::PoseOptimization(&mCurrentFrame);
-        }
-        else
-        {
-            // if(!mbMapUpdated && mState == OK) //  && (mnMatchesInliers>30))
-            if(!mbMapUpdated) //  && (mnMatchesInliers>30))
-            {
-                Verbose::PrintMess("TLM: PoseInertialOptimizationLastFrame ", Verbose::VERBOSITY_DEBUG);
-                inliers = Optimizer::PoseInertialOptimizationLastFrame(&mCurrentFrame); // , !mpLastKeyFrame->GetMap()->GetIniertialBA1());
-            }
-            else
-            {
-                Verbose::PrintMess("TLM: PoseInertialOptimizationLastKeyFrame ", Verbose::VERBOSITY_DEBUG);
-                inliers = Optimizer::PoseInertialOptimizationLastKeyFrame(&mCurrentFrame); // , !mpLastKeyFrame->GetMap()->GetIniertialBA1());
-            }
-        }
-    }
+    Optimizer::PoseOptimization(&mCurrentFrame);
 
     aux1 = 0, aux2 = 0;
     for(int i=0; i<mCurrentFrame.N; i++)
@@ -2932,52 +2917,32 @@ bool Tracking::TrackLocalMap()
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     mpLocalMapper->mnMatchesInliers=mnMatchesInliers;
-    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
+    std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl;
+    if(mnFramesSinceLastReloc<mMaxFrames && mnMatchesInliers<50)
+    {
+        std::cout << "Local map tracking = failure" << std::endl;
         return false;
+    }
 
     if((mnMatchesInliers>10)&&(mState==RECENTLY_LOST))
+    {    
+        std::cout << "Local map tracking = success" << std::endl;
         return true;
-
-
-    if (mSensor == System::IMU_MONOCULAR)
-    {
-        if((mnMatchesInliers<15 && mpAtlas->isImuInitialized())||(mnMatchesInliers<50 && !mpAtlas->isImuInitialized()))
-        {
-            return false;
-        }
-        else
-            return true;
     }
-    else if (mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
+    if(mnMatchesInliers<30)
     {
-        if(mnMatchesInliers<15)
-        {
-            return false;
-        }
-        else
-            return true;
+        std::cout << "Local map tracking = failure" << std::endl;
+        return false;
     }
     else
     {
-        if(mnMatchesInliers<30)
-            return false;
-        else
-            return true;
+        std::cout << "Local map tracking = success" << std::endl;
+        return true;
     }
 }
 
 bool Tracking::NeedNewKeyFrame()
 {
-    if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mpAtlas->GetCurrentMap()->isImuInitialized())
-    {
-        if (mSensor == System::IMU_MONOCULAR && (mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.25)
-            return true;
-        else if ((mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && (mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.25)
-            return true;
-        else
-            return false;
-    }
-
     if(mbOnlyTracking)
         return false;
 
@@ -3289,40 +3254,30 @@ void Tracking::SearchLocalPoints()
             mCurrentFrame.mmProjectPoints[pMP->mnId] = cv::Point2f(pMP->mTrackProjX, pMP->mTrackProjY);
         }
     }
+    std::cout << nToMatch << " points to match for Agent " << mpAgent-> mnId << std::endl;
 
     if(nToMatch>0)
     {
         ORBmatcher matcher(0.8);
         int th = 1;
-        if(mSensor==System::RGBD || mSensor==System::IMU_RGBD)
-            th=3;
-        if(mpAtlas->isImuInitialized())
-        {
-            if(mpAtlas->GetCurrentMap()->GetIniertialBA2())
-                th=2;
-            else
-                th=6;
-        }
-        else if(!mpAtlas->isImuInitialized() && (mSensor==System::IMU_MONOCULAR || mSensor==System::IMU_STEREO || mSensor == System::IMU_RGBD))
-        {
-            th=10;
-        }
 
         // If the camera has been relocalised recently, perform a coarser search
-        if(mCurrentFrame.mnId<mnLastRelocFrameId+2)
+        if(mnFramesSinceLastReloc<2)
             th=5;
 
         if(mState==LOST || mState==RECENTLY_LOST) // Lost for less than 1 second
             th=15; // 15
 
         int matches = matcher.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th, mpLocalMapper->mbFarPoints, mpLocalMapper->mThFarPoints);
+        std::cout << matches << " matches found for Agent " << mpAgent-> mnId << std::endl;
     }
 }
 
 void Tracking::UpdateLocalMap()
 {
     // This is for visualization
-    mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
+    mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints, mpAgent);
+    std::cout << "Reference map points set for agent " << mpAgent->mnId << std::endl;
 
     // Update
     UpdateLocalKeyFrames();
@@ -3356,6 +3311,7 @@ void Tracking::UpdateLocalPoints()
             }
         }
     }
+    std::cout << mvpLocalMapPoints.size() << " MP found for Agent " << mpAgent->mnId << std::endl;
 }
 
 
@@ -3363,7 +3319,7 @@ void Tracking::UpdateLocalKeyFrames()
 {
     // Each map point vote for the keyframes in which it has been observed
     map<KeyFrame*,int> keyframeCounter;
-    if(!mpAtlas->isImuInitialized() || (mCurrentFrame.mnId<mnLastRelocFrameId+2))
+    if(mnFramesSinceLastReloc<2)
     {
         for(int i=0; i<mCurrentFrame.N; i++)
         {
@@ -3442,7 +3398,7 @@ void Tracking::UpdateLocalKeyFrames()
 
         KeyFrame* pKF = *itKF;
 
-        const vector<KeyFrame*> vNeighs = pKF->GetBestCovisibilityKeyFrames(10);
+        const vector<KeyFrame*> vNeighs = pKF->GetBestCovisibilityKeyFrames(10); // FIXME : is index used ?
 
 
         for(vector<KeyFrame*>::const_iterator itNeighKF=vNeighs.begin(), itEndNeighKF=vNeighs.end(); itNeighKF!=itEndNeighKF; itNeighKF++)
@@ -3486,29 +3442,12 @@ void Tracking::UpdateLocalKeyFrames()
         }
     }
 
-    // Add 10 last temporal KFs (mainly for IMU)
-    if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) &&mvpLocalKeyFrames.size()<80)
-    {
-        KeyFrame* tempKeyFrame = mCurrentFrame.mpLastKeyFrame;
-
-        const int Nd = 20;
-        for(int i=0; i<Nd; i++){
-            if (!tempKeyFrame)
-                break;
-            if(tempKeyFrame->mnTrackReferenceForFrame!=mCurrentFrame.mnId)
-            {
-                mvpLocalKeyFrames.push_back(tempKeyFrame);
-                tempKeyFrame->mnTrackReferenceForFrame=mCurrentFrame.mnId;
-                tempKeyFrame=tempKeyFrame->mPrevKF;
-            }
-        }
-    }
-
     if(pKFmax)
     {
         mpReferenceKF = pKFmax;
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
     }
+    std::cout << mvpLocalKeyFrames.size() << " local KF found for Agent " << mpAgent->mnId << std::endl;
 }
 
 bool Tracking::Relocalization()

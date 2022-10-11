@@ -97,6 +97,7 @@ public:
 
     /* All methods without Map pointer work on current map */
     void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
+    void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs, Agent* pAgent);
     void InformNewBigChange();
     int GetLastBigChangeIdx();
 

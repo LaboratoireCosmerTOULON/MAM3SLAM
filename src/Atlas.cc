@@ -165,6 +165,12 @@ void Atlas::SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs)
     mpCurrentMap->SetReferenceMapPoints(vpMPs);
 }
 
+void Atlas::SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs, Agent* pAgent) {
+    unique_lock<mutex> lock(mMutexAtlas);
+    Map* pAgentCurrentMap = pAgent->GetCurrentMap(false);
+    pAgentCurrentMap->SetReferenceMapPoints(vpMPs);
+}
+
 void Atlas::InformNewBigChange()
 {
     unique_lock<mutex> lock(mMutexAtlas);
