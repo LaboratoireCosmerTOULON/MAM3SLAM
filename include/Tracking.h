@@ -362,6 +362,7 @@ protected:
     void newParameterLoader(Settings* settings);
 
     unsigned int mnFramesSinceLastReloc;
+    unsigned int mnFramesSinceLastKF;
 
 #ifdef REGISTER_LOOP
     bool Stop();

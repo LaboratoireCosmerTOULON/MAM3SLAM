@@ -45,7 +45,7 @@ Tracking::Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer
     mbOnlyTracking(false), mbMapUpdated(false), mbVO(false), mpORBVocabulary(pVoc), mpKeyFrameDB(pKFDB),
     mbReadyToInitializate(false), mpAgent(pAgent), mpViewer(NULL), bStepByStep(false),
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
-    mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL)), mnFramesSinceLastReloc(0)
+    mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL)), mnFramesSinceLastReloc(0), mnFramesSinceLastKF(0)
 {
     // Load camera parameters from settings file
     if(settings){
@@ -1610,6 +1610,7 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     lastID = mCurrentFrame.mnId;
     std::cout << "Agent " << mpAgent -> mnId << "'s tracking got new current frame with id : " << lastID << std::endl; // DEBUG
     mnFramesSinceLastReloc ++;
+    mnFramesSinceLastReloc ++;
     Track();
 
     return mCurrentFrame.GetPose();
@@ -2941,7 +2942,7 @@ bool Tracking::TrackLocalMap()
     }
 }
 
-bool Tracking::NeedNewKeyFrame()
+bool Tracking::NeedNewKeyFrame() // semms ok
 {
     if(mbOnlyTracking)
         return false;
@@ -2955,10 +2956,11 @@ bool Tracking::NeedNewKeyFrame()
         return false;
     }
 
-    const int nKFs = mpAtlas->KeyFramesInMap();
+    const int nKFs = mpAtlas->KeyFramesInMap(mpAgent);
+    std::cout << nKFs << " KF in current map for Agent " << mpAgent->mnId << std::endl;
 
     // Do not insert keyframes if not enough frames have passed from last relocalisation
-    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && nKFs>mMaxFrames)
+    if(mnFramesSinceLastReloc<mMaxFrames && nKFs>mMaxFrames)
     {
         return false;
     }
@@ -2976,23 +2978,6 @@ bool Tracking::NeedNewKeyFrame()
     int nNonTrackedClose = 0;
     int nTrackedClose= 0;
 
-    if(mSensor!=System::MONOCULAR && mSensor!=System::IMU_MONOCULAR)
-    {
-        int N = (mCurrentFrame.Nleft == -1) ? mCurrentFrame.N : mCurrentFrame.Nleft;
-        for(int i =0; i<N; i++)
-        {
-            if(mCurrentFrame.mvDepth[i]>0 && mCurrentFrame.mvDepth[i]<mThDepth)
-            {
-                if(mCurrentFrame.mvpMapPoints[i] && !mCurrentFrame.mvbOutlier[i])
-                    nTrackedClose++;
-                else
-                    nNonTrackedClose++;
-
-            }
-        }
-        //Verbose::PrintMess("[NEEDNEWKF]-> closed points: " + to_string(nTrackedClose) + "; non tracked closed points: " + to_string(nNonTrackedClose), Verbose::VERBOSITY_NORMAL);// Verbose::VERBOSITY_DEBUG);
-    }
-
     bool bNeedToInsertClose;
     bNeedToInsertClose = (nTrackedClose<100) && (nNonTrackedClose>70);
 
@@ -3009,81 +2994,45 @@ bool Tracking::NeedNewKeyFrame()
         thRefRatio = 0.9f;
     }*/
 
-    if(mSensor==System::MONOCULAR)
-        thRefRatio = 0.9f;
-
-    if(mpCamera2) thRefRatio = 0.75f;
-
-    if(mSensor==System::IMU_MONOCULAR)
-    {
-        if(mnMatchesInliers>350) // Points tracked from the local map
-            thRefRatio = 0.75f;
-        else
-            thRefRatio = 0.90f;
-    }
+    thRefRatio = 0.9f;
 
     // Condition 1a: More than "MaxFrames" have passed from last keyframe insertion
-    const bool c1a = mCurrentFrame.mnId>=mnLastKeyFrameId+mMaxFrames;
+    const bool c1a = mnFramesSinceLastKF>mMaxFrames;
     // Condition 1b: More than "MinFrames" have passed and Local Mapping is idle
-    const bool c1b = ((mCurrentFrame.mnId>=mnLastKeyFrameId+mMinFrames) && bLocalMappingIdle); //mpLocalMapper->KeyframesInQueue() < 2);
+    const bool c1b = ((mnFramesSinceLastKF>mMinFrames) && bLocalMappingIdle); //mpLocalMapper->KeyframesInQueue() < 2);
     //Condition 1c: tracking is weak
     const bool c1c = mSensor!=System::MONOCULAR && mSensor!=System::IMU_MONOCULAR && mSensor!=System::IMU_STEREO && mSensor!=System::IMU_RGBD && (mnMatchesInliers<nRefMatches*0.25 || bNeedToInsertClose) ;
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = (((mnMatchesInliers<nRefMatches*thRefRatio || bNeedToInsertClose)) && mnMatchesInliers>15);
 
-    //std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl;
+    std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl;
     // Temporal condition for Inertial cases
     bool c3 = false;
-    if(mpLastKeyFrame)
-    {
-        if (mSensor==System::IMU_MONOCULAR)
-        {
-            if ((mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.5)
-                c3 = true;
-        }
-        else if (mSensor==System::IMU_STEREO || mSensor == System::IMU_RGBD)
-        {
-            if ((mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.5)
-                c3 = true;
-        }
-    }
 
     bool c4 = false;
-    if ((((mnMatchesInliers<75) && (mnMatchesInliers>15)) || mState==RECENTLY_LOST) && (mSensor == System::IMU_MONOCULAR)) // MODIFICATION_2, originally ((((mnMatchesInliers<75) && (mnMatchesInliers>15)) || mState==RECENTLY_LOST) && ((mSensor == System::IMU_MONOCULAR)))
-        c4=true;
-    else
-        c4=false;
 
     if(((c1a||c1b||c1c) && c2)||c3 ||c4)
     {
+        std::cout << "Need new KF" << std::endl;
         // If the mapping accepts keyframes, insert keyframe.
         // Otherwise send a signal to interrupt BA
         if(bLocalMappingIdle || mpLocalMapper->IsInitializing())
         {
+            std::cout << "LM OK" << std::endl;
             return true;
         }
         else
         {
+            std::cout << "LM not OK, calling to interrupt BA" << std::endl;
             mpLocalMapper->InterruptBA();
-            if(mSensor!=System::MONOCULAR  && mSensor!=System::IMU_MONOCULAR)
-            {
-                if(mpLocalMapper->KeyframesInQueue()<3)
-                    return true;
-                else
-                    return false;
-            }
-            else
-            {
-                //std::cout << "NeedNewKeyFrame: localmap is busy" << std::endl;
-                return false;
-            }
+            return false;
         }
     }
     else
         return false;
 }
 
-void Tracking::CreateNewKeyFrame()
+void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLastReloc !!
 {
     if(mpLocalMapper->IsInitializing() && !mpAtlas->isImuInitialized())
         return;

@@ -104,6 +104,7 @@ public:
     long unsigned int MapPointsInMap();
     long unsigned int MapPointsInAgentMap(Agent* agent); // multiagent
     long unsigned KeyFramesInMap();
+    long unsigned KeyFramesInMap(Agent* pAgent);
 
     // Method for get data in current map
     std::vector<KeyFrame*> GetAllKeyFrames();

@@ -201,6 +201,12 @@ long unsigned Atlas::KeyFramesInMap()
     return mpCurrentMap->KeyFramesInMap();
 }
 
+long unsigned Atlas::KeyFramesInMap(Agent* pAgent) {
+    unique_lock<mutex> lock(mMutexAtlas);
+    Map* pAgentCurrentMap = pAgent->GetCurrentMap(false);
+    return pAgentCurrentMap->KeyFramesInMap();
+}
+
 std::vector<KeyFrame*> Atlas::GetAllKeyFrames()
 {
     unique_lock<mutex> lock(mMutexAtlas);
