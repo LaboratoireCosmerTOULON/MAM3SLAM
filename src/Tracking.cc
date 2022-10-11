@@ -1610,7 +1610,7 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     lastID = mCurrentFrame.mnId;
     std::cout << "Agent " << mpAgent -> mnId << "'s tracking got new current frame with id : " << lastID << std::endl; // DEBUG
     mnFramesSinceLastReloc ++;
-    mnFramesSinceLastReloc ++;
+    mnFramesSinceLastKF ++;
     Track();
 
     return mCurrentFrame.GetPose();
@@ -2139,9 +2139,10 @@ void Tracking::Track()
 
             // Check if we need to insert a new keyframe
             // if(bNeedKF && bOK)
-            if(bNeedKF && (bOK || (mInsertKFsLost && mState==RECENTLY_LOST &&
-                                   (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD))))
+            if(bNeedKF && bOK) {
+                std::cout << "Trying to create new KF for Agent " << mpAgent->mnId << std::endl;
                 CreateNewKeyFrame();
+            }
 
         #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndNewKF = std::chrono::steady_clock::now();
@@ -2942,7 +2943,7 @@ bool Tracking::TrackLocalMap()
     }
 }
 
-bool Tracking::NeedNewKeyFrame() // semms ok
+bool Tracking::NeedNewKeyFrame() // seems ok
 {
     if(mbOnlyTracking)
         return false;
@@ -2973,6 +2974,7 @@ bool Tracking::NeedNewKeyFrame() // semms ok
 
     // Local Mapping accept keyframes?
     bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
+    std::cout << "bLocalMappingIdle : " << bLocalMappingIdle << ", mMinFrames : " << mMinFrames << ", mnFramesSinceLastKF : " << mnFramesSinceLastKF << std::endl;
 
     // Check how many "close" points are being tracked and how many could be potentially created.
     int nNonTrackedClose = 0;
@@ -3034,16 +3036,17 @@ bool Tracking::NeedNewKeyFrame() // semms ok
 
 void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLastReloc !!
 {
-    if(mpLocalMapper->IsInitializing() && !mpAtlas->isImuInitialized())
+    if(mpLocalMapper->IsInitializing() && !mpAtlas->isImuInitialized()) {
+        std::cout << "LM inititializing : returning" << std::endl;
         return;
+    }
 
-    if(!mpLocalMapper->SetNotStop(true))
+    if(!mpLocalMapper->SetNotStop(true)) {
+        std::cout << "!mpLocalMapper->SetNotStop(true) : returning" << std::endl;
         return;
+    }
 
-    KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
-
-    if(mpAtlas->isImuInitialized()) //  || mpLocalMapper->IsInitializing())
-        pKF->bImu = true;
+    KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
 
     pKF->SetNewBias(mCurrentFrame.mImuBias);
     mpReferenceKF = pKF;
@@ -3057,106 +3060,15 @@ void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLast
     else
         Verbose::PrintMess("No last KF in KF creation!!", Verbose::VERBOSITY_NORMAL);
 
-    // Reset preintegration from last KF (Create new object)
-    if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
-    {
-        mpImuPreintegratedFromLastKF = new IMU::Preintegrated(pKF->GetImuBias(),pKF->mImuCalib);
-    }
-
-    if(mSensor!=System::MONOCULAR && mSensor != System::IMU_MONOCULAR) // TODO check if incluide imu_stereo
-    {
-        mCurrentFrame.UpdatePoseMatrices();
-        // cout << "create new MPs" << endl;
-        // We sort points by the measured depth by the stereo/RGBD sensor.
-        // We create all those MapPoints whose depth < mThDepth.
-        // If there are less than 100 close points we create the 100 closest.
-        int maxPoint = 100;
-        if(mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
-            maxPoint = 100;
-
-        vector<pair<float,int> > vDepthIdx;
-        int N = (mCurrentFrame.Nleft != -1) ? mCurrentFrame.Nleft : mCurrentFrame.N;
-        vDepthIdx.reserve(mCurrentFrame.N);
-        for(int i=0; i<N; i++)
-        {
-            float z = mCurrentFrame.mvDepth[i];
-            if(z>0)
-            {
-                vDepthIdx.push_back(make_pair(z,i));
-            }
-        }
-
-        if(!vDepthIdx.empty())
-        {
-            sort(vDepthIdx.begin(),vDepthIdx.end());
-
-            int nPoints = 0;
-            for(size_t j=0; j<vDepthIdx.size();j++)
-            {
-                int i = vDepthIdx[j].second;
-
-                bool bCreateNew = false;
-
-                MapPoint* pMP = mCurrentFrame.mvpMapPoints[i];
-                if(!pMP)
-                    bCreateNew = true;
-                else if(pMP->Observations()<1)
-                {
-                    bCreateNew = true;
-                    mCurrentFrame.mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
-                }
-
-                if(bCreateNew)
-                {
-                    Eigen::Vector3f x3D;
-
-                    if(mCurrentFrame.Nleft == -1){
-                        mCurrentFrame.UnprojectStereo(i, x3D);
-                    }
-                    else{
-                        x3D = mCurrentFrame.UnprojectStereoFishEye(i);
-                    }
-
-                    MapPoint* pNewMP = new MapPoint(x3D,pKF,mpAtlas->GetCurrentMap());
-                    pNewMP->AddObservation(pKF,i);
-
-                    //Check if it is a stereo observation in order to not
-                    //duplicate mappoints
-                    if(mCurrentFrame.Nleft != -1 && mCurrentFrame.mvLeftToRightMatch[i] >= 0){
-                        mCurrentFrame.mvpMapPoints[mCurrentFrame.Nleft + mCurrentFrame.mvLeftToRightMatch[i]]=pNewMP;
-                        pNewMP->AddObservation(pKF,mCurrentFrame.Nleft + mCurrentFrame.mvLeftToRightMatch[i]);
-                        pKF->AddMapPoint(pNewMP,mCurrentFrame.Nleft + mCurrentFrame.mvLeftToRightMatch[i]);
-                    }
-
-                    pKF->AddMapPoint(pNewMP,i);
-                    pNewMP->ComputeDistinctiveDescriptors();
-                    pNewMP->UpdateNormalAndDepth();
-                    mpAtlas->AddMapPoint(pNewMP);
-
-                    mCurrentFrame.mvpMapPoints[i]=pNewMP;
-                    nPoints++;
-                }
-                else
-                {
-                    nPoints++;
-                }
-
-                if(vDepthIdx[j].first>mThDepth && nPoints>maxPoint)
-                {
-                    break;
-                }
-            }
-            //Verbose::PrintMess("new mps for stereo KF: " + to_string(nPoints), Verbose::VERBOSITY_NORMAL);
-        }
-    }
-
-
     mpLocalMapper->InsertKeyFrame(pKF);
 
     mpLocalMapper->SetNotStop(false);
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;
+
+    mnFramesSinceLastKF = 0; // reset frames since last KF creation counter
+    std::cout << "KF inserted, time for LM" << std::endl;
 }
 
 void Tracking::SearchLocalPoints()
