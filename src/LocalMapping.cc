@@ -79,10 +79,10 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
                 std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
             #endif
-            // cout << "ok-LM-1" << endl;
+            cout << "New KF in map" << endl;
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
-            // cout << "ok-LM-2" << endl;
+            cout << "BoW creation + insertion in map OK" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
 
@@ -102,14 +102,14 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
             // Triangulate new MapPoints
             CreateNewMapPoints();
-            // cout << "ok-LM-4" << endl;
+            cout << "New map pts created" << endl;
             mbAbortBA = false;
 
             if(!CheckNewKeyFrames())
             {
                 // Find more matches in neighbor keyframes and fuse point duplications
                 SearchInNeighbors();
-                // cout << "ok-LM-4bis" << endl;
+                cout << "Neighbors searched" << endl;
             }
             // cout << "ok-LM-5" << endl;
             #ifdef REGISTER_TIMES
@@ -124,52 +124,52 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
             int num_MPs_BA = 0;
             int num_edges_BA = 0;
 
-            if(!CheckNewKeyFrames() && !stopRequested())
-            {
-                // cout << "ok-LM-6" << endl;
-                if(mpAtlas->KeyFramesInMap(mpAgent)>2)
-                {
-                    // cout << "ok-LM-7" << endl;
-                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
-                    b_doneLBA = true;
+            // if(!CheckNewKeyFrames() && !stopRequested()) // FIXME : update/uncomment
+            // {
+            //     // cout << "ok-LM-6" << endl;
+            //     if(mpAtlas->KeyFramesInMap(mpAgent)>2)
+            //     {
+            //         // cout << "ok-LM-7" << endl;
+            //         Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
+            //         b_doneLBA = true;
 
-                    // cout << "ok-LM-8" << endl;
-                }
-                #ifdef REGISTER_TIMES
-                    std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
-                    if(b_doneLBA)
-                    {
-                        timeLBA_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLBA - time_EndMPCreation).count();
-                        vdLBA_ms.push_back(timeLBA_ms);
+            //         // cout << "ok-LM-8" << endl;
+            //     }
+            //     #ifdef REGISTER_TIMES
+            //         std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
+            //         if(b_doneLBA)
+            //         {
+            //             timeLBA_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLBA - time_EndMPCreation).count();
+            //             vdLBA_ms.push_back(timeLBA_ms);
 
-                        nLBA_exec += 1;
-                        if(mbAbortBA)
-                        {
-                            nLBA_abort += 1;
-                        }
-                        vnLBA_edges.push_back(num_edges_BA);
-                        vnLBA_KFopt.push_back(num_OptKF_BA);
-                        vnLBA_KFfixed.push_back(num_FixedKF_BA);
-                        vnLBA_MPs.push_back(num_MPs_BA);
-                    }
-                #endif
+            //             nLBA_exec += 1;
+            //             if(mbAbortBA)
+            //             {
+            //                 nLBA_abort += 1;
+            //             }
+            //             vnLBA_edges.push_back(num_edges_BA);
+            //             vnLBA_KFopt.push_back(num_OptKF_BA);
+            //             vnLBA_KFfixed.push_back(num_FixedKF_BA);
+            //             vnLBA_MPs.push_back(num_MPs_BA);
+            //         }
+            //     #endif
 
-                // Check redundant local Keyframes
-                KeyFrameCulling();
-                // cout << "ok-LM-9" << endl;
-                #ifdef REGISTER_TIMES
-                    std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
+            //     // Check redundant local Keyframes
+            //     KeyFrameCulling();
+            //     // cout << "ok-LM-9" << endl;
+            //     #ifdef REGISTER_TIMES
+            //         std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
 
-                    timeKFCulling_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndKFCulling - time_EndLBA).count();
-                    vdKFCulling_ms.push_back(timeKFCulling_ms);
-                #endif
-            }
+            //         timeKFCulling_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndKFCulling - time_EndLBA).count();
+            //         vdKFCulling_ms.push_back(timeKFCulling_ms);
+            //     #endif
+            // }
 
             #ifdef REGISTER_TIMES
                 vdLBASync_ms.push_back(timeKFCulling_ms);
                 vdKFCullingSync_ms.push_back(timeKFCulling_ms);
             #endif
-            mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
+            // mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
             // cout << "ok-LM-10" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
