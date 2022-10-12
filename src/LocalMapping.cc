@@ -211,7 +211,7 @@ void LocalMapping::InsertKeyFrame(KeyFrame *pKF)
 }
 
 
-bool LocalMapping::CheckNewKeyFrames()
+bool LocalMapping::CheckNewKeyFrames() // OK
 {
     unique_lock<mutex> lock(mMutexNewKFs);
     return(!mlNewKeyFrames.empty());
@@ -255,7 +255,7 @@ void LocalMapping::ProcessNewKeyFrame() // Should be ok
     // Update links in the Covisibility Graph
     mpCurrentKeyFrame->UpdateConnections();
 
-    // Insert Keyframe in Map
+    // Insert Keyframe in Map (the Atlas fct checks KF's correct map, which is set on creation)
     mpAtlas->AddKeyFrame(mpCurrentKeyFrame);
     std::cout << "KF " << mpCurrentKeyFrame->mnId << " added to the Atlas" << std::endl;
 }
@@ -266,7 +266,7 @@ void LocalMapping::EmptyQueue()
         ProcessNewKeyFrame();
 }
 
-void LocalMapping::MapPointCulling()
+void LocalMapping::MapPointCulling() // OK
 {
     // Check Recent Added MapPoints
     list<MapPoint*>::iterator lit = mlpRecentAddedMapPoints.begin();
@@ -614,7 +614,7 @@ void LocalMapping::CreateNewMapPoints()
                 continue;
 
             // Triangulation is succesfull
-            MapPoint* pMP = new MapPoint(x3D, mpCurrentKeyFrame, mpAtlas->GetCurrentMap());
+            MapPoint* pMP = new MapPoint(x3D, mpCurrentKeyFrame, mpAtlas->GetAgentCurrentMap(mpAgent));
             if (bPointStereo)
                 countStereo++;
             
@@ -799,7 +799,7 @@ bool LocalMapping::AcceptKeyFrames()
     return mbAcceptKeyFrames;
 }
 
-void LocalMapping::SetAcceptKeyFrames(bool flag)
+void LocalMapping::SetAcceptKeyFrames(bool flag) // OK
 {
     unique_lock<mutex> lock(mMutexAccept);
     mbAcceptKeyFrames=flag;
@@ -1093,7 +1093,7 @@ bool LocalMapping::isFinished()
     return mbFinished;
 }
 
-void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
+void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) // inertial
 {
     if (mbResetRequested)
         return;
@@ -1349,7 +1349,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
     return;
 }
 
-void LocalMapping::ScaleRefinement()
+void LocalMapping::ScaleRefinement() // never called
 {
     // Minimum number of keyframes to compute a solution
     // Minimum time (seconds) between first and last keyframe to compute a solution. Make the difference between monocular and stereo

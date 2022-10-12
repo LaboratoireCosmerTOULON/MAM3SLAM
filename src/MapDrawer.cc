@@ -150,13 +150,16 @@ void MapDrawer::DrawMapPoints()
     glBegin(GL_POINTS);
     glColor3f(0.0,0.0,0.0);
 
+    int c = 0;
     for(size_t i=0, iend=vpMPs.size(); i<iend;i++)
     {
         if(vpMPs[i]->isBad() || spRefMPs.count(vpMPs[i]))
             continue;
         Eigen::Matrix<float,3,1> pos = vpMPs[i]->GetWorldPos();
         glVertex3f(pos(0),pos(1),pos(2));
+        c++;
     }
+    // std::cout << c << "ref pts not bad" << std::endl;
     glEnd();
 
     glPointSize(mPointSize);

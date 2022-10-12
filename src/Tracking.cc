@@ -2552,7 +2552,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     mLastFrame = Frame(mCurrentFrame);
     std::cout << "mLastFrame ok" << std::endl;
 
-    mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
+    mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints, mpAgent);
     std::cout << "SetReferenceMapPoints ok" << std::endl;
 
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
