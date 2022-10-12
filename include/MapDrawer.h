@@ -21,6 +21,7 @@
 #define MAPDRAWER_H
 
 #include"Atlas.h"
+#include "Agent.h"
 #include"MapPoint.h"
 #include"KeyFrame.h"
 #include "Settings.h"
@@ -32,15 +33,17 @@ namespace ORB_SLAM3
 {
 
 class Settings;
+class Agent;
 
 class MapDrawer
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    MapDrawer(Atlas* pAtlas, const string &strSettingPath, Settings* settings);
+    MapDrawer(Agent* pAgent, Atlas* pAtlas, const string &strSettingPath, Settings* settings);
 
     void newParameterLoader(Settings* settings);
 
+    Agent* mpAgent;
     Atlas* mpAtlas;
 
     void DrawMapPoints();

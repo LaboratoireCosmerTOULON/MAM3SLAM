@@ -3,7 +3,7 @@
 namespace ORB_SLAM3
 {
 
-AgentViewer::AgentViewer(Agent* pAgent, FrameDrawer* pFrameDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings) : mpAgent(pAgent), mpFrameDrawer(pFrameDrawer), mpTracker(pTracking), mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
+AgentViewer::AgentViewer(Agent* pAgent, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings) : mpAgent(pAgent), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpTracker(pTracking), mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
 {
     // Load settings
     if(settings){
@@ -116,18 +116,20 @@ void AgentViewer::UpdateCurrentFrameWindow()
 
 void AgentViewer::Run()
 {
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok1" << std::endl;
     mbFinished = false;
     mbStopped = false;
     // Create window
     pangolin::CreateWindowAndBind(mMapWindowName,1024,768);
-
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok2" << std::endl;
     // 3D Mouse handler requires depth testing to be enabled
     glEnable(GL_DEPTH_TEST);
-    
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok3" << std::endl;
     // Issue specific OpenGl we might need
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok4" << std::endl;
+    usleep(3000);
     pangolin::CreatePanel("menu").SetBounds(0.0,1.0,0.0,pangolin::Attach::Pix(175));
     pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",false,true);
     pangolin::Var<bool> menuCamView("menu.Camera View",false,false);
@@ -143,12 +145,13 @@ void AgentViewer::Run()
     pangolin::Var<bool> menuStepByStep("menu.Step By Step",false,true);  // false, true
     pangolin::Var<bool> menuStep("menu.Step",false,false);
     pangolin::Var<bool> menuShowOptLba("menu.Show LBA opt", false, true);
-
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok5" << std::endl;
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState s_cam(
                 pangolin::ProjectionMatrix(1024,768,mViewpointF,mViewpointF,512,389,0.1,1000),
                 pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
                 );
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok6" << std::endl;
     // cout << "ok-V-5-A-" << mpAgent -> mnId << endl;
     // Add named OpenGL viewport to window and provide 3D Handler
     // pangolin::View& d_cam = pangolin::CreateDisplay()
@@ -157,12 +160,12 @@ void AgentViewer::Run()
     pangolin::View& d_cam = pangolin::Display(mMapWindowName)
             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
             .SetHandler(new pangolin::Handler3D(s_cam));
-    // cout << "ok-V-6-A-" << mpAgent -> mnId << endl;
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok7" << std::endl;
     pangolin::OpenGlMatrix Twc, Twr;
     Twc.SetIdentity();
     pangolin::OpenGlMatrix Ow; // Oriented with g in the z axis
     Ow.SetIdentity();
-    
+    // std::cout << "Agent " << mpAgent->mnId << " viewer ok8" << std::endl;
     bool bFollow = true;
     bool bLocalizationMode = false;
     bool bStepByStep = false;
@@ -170,7 +173,9 @@ void AgentViewer::Run()
     menuShowGraph = true;
     cout << "Starting the Viewer" << endl;
 
-    while(1) {}
+    while(1) {
+
+    }
 }
 
 }

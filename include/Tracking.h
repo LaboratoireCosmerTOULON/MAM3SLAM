@@ -33,7 +33,7 @@
 #include "KeyFrameDatabase.h"
 #include "ORBextractor.h"
 #include "MapDrawer.h"
-#include "System.h"
+#include "MultiAgentSystem.h"
 #include "ImuTypes.h"
 #include "Settings.h"
 

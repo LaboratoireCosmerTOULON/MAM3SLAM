@@ -26,7 +26,7 @@ namespace ORB_SLAM3
 {
 
 
-MapDrawer::MapDrawer(Atlas* pAtlas, const string &strSettingPath, Settings* settings):mpAtlas(pAtlas)
+MapDrawer::MapDrawer(Agent* pAgent, Atlas* pAtlas, const string &strSettingPath, Settings* settings): mpAgent(pAgent), mpAtlas(pAtlas)
 {
     if(settings){
         newParameterLoader(settings);
@@ -134,7 +134,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings)
 
 void MapDrawer::DrawMapPoints()
 {
-    Map* pActiveMap = mpAtlas->GetCurrentMap();
+    Map* pActiveMap = mpAtlas->GetAgentCurrentMap(mpAgent);
     if(!pActiveMap)
         return;
 
@@ -181,7 +181,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
     const float h = w*0.75;
     const float z = w*0.6;
 
-    Map* pActiveMap = mpAtlas->GetCurrentMap();
+    Map* pActiveMap = mpAtlas->GetAgentCurrentMap(mpAgent);
     // DEBUG LBA
     std::set<long unsigned int> sOptKFs = pActiveMap->msOptKFs;
     std::set<long unsigned int> sFixedKFs = pActiveMap->msFixedKFs;
@@ -308,90 +308,6 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
         }
 
         glEnd();
-    }
-
-    if(bDrawInertialGraph && pActiveMap->isImuInitialized())
-    {
-        glLineWidth(mGraphLineWidth);
-        glColor4f(1.0f,0.0f,0.0f,0.6f);
-        glBegin(GL_LINES);
-
-        //Draw inertial links
-        for(size_t i=0; i<vpKFs.size(); i++)
-        {
-            KeyFrame* pKFi = vpKFs[i];
-            Eigen::Vector3f Ow = pKFi->GetCameraCenter();
-            KeyFrame* pNext = pKFi->mNextKF;
-            if(pNext)
-            {
-                Eigen::Vector3f Owp = pNext->GetCameraCenter();
-                glVertex3f(Ow(0),Ow(1),Ow(2));
-                glVertex3f(Owp(0),Owp(1),Owp(2));
-            }
-        }
-
-        glEnd();
-    }
-
-    vector<Map*> vpMaps = mpAtlas->GetAllMaps();
-
-    if(bDrawKF)
-    {
-        for(Map* pMap : vpMaps)
-        {
-            if(pMap == pActiveMap)
-                continue;
-
-            vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
-
-            for(size_t i=0; i<vpKFs.size(); i++)
-            {
-                KeyFrame* pKF = vpKFs[i];
-                Eigen::Matrix4f Twc = pKF->GetPoseInverse().matrix();
-                unsigned int index_color = pKF->mnOriginMapId;
-
-                glPushMatrix();
-
-                glMultMatrixf((GLfloat*)Twc.data());
-
-                if(!vpKFs[i]->GetParent()) // It is the first KF in the map
-                {
-                    glLineWidth(mKeyFrameLineWidth*5);
-                    glColor3f(1.0f,0.0f,0.0f);
-                    glBegin(GL_LINES);
-                }
-                else
-                {
-                    glLineWidth(mKeyFrameLineWidth);
-                    glColor3f(mfFrameColors[index_color][0],mfFrameColors[index_color][1],mfFrameColors[index_color][2]);
-                    glBegin(GL_LINES);
-                }
-
-                glVertex3f(0,0,0);
-                glVertex3f(w,h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(w,-h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(-w,-h,z);
-                glVertex3f(0,0,0);
-                glVertex3f(-w,h,z);
-
-                glVertex3f(w,h,z);
-                glVertex3f(w,-h,z);
-
-                glVertex3f(-w,h,z);
-                glVertex3f(-w,-h,z);
-
-                glVertex3f(-w,h,z);
-                glVertex3f(w,h,z);
-
-                glVertex3f(-w,-h,z);
-                glVertex3f(w,-h,z);
-                glEnd();
-
-                glPopMatrix();
-            }
-        }
     }
 }
 

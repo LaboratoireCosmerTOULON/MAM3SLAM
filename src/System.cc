@@ -18,7 +18,7 @@
 
 
 
-#include "System.h"
+#include "MultiAgentSystem.h"
 #include "Converter.h"
 #include <thread>
 #include <pangolin/pangolin.h>

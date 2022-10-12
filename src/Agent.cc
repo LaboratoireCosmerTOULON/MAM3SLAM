@@ -33,7 +33,9 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
 
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(pAtlas);
-    mpMapDrawer = new MapDrawer(pAtlas, strSettingsFile, settings_);
+    // std::cout << "Agent " << mnId << " just before map drawer instantiation" << std::endl;
+    mpMapDrawer = new MapDrawer(this, pAtlas, strSettingsFile, settings_);
+    // std::cout << "Agent " << mnId << " just after map drawer instantiation" << std::endl;
 
     //Initialize the Tracking thread
     cout << "Seq. Name: " << strSequence << endl;
@@ -68,17 +70,13 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(pLoopCloser);
 
-    // //Initialize the Viewer thread and launch
-    // mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
-    // // TO-DO : make sure it is working
-    // mptViewer = new thread(&Viewer::Run, mpViewer);
-    // mpTracker->SetViewer(mpViewer);
-    // // mpLoopCloser->mpViewer = mpViewer;
-    // mpViewer->both = mpFrameDrawer->both;
-
     // AgentViewer
-    mpAgentViewer = new AgentViewer(this, mpFrameDrawer,mpTracker,strSettingsFile,settings_);
+    // std::cout << "Agent " << mnId << " just before agent viewer instantiation" << std::endl;
+    mpAgentViewer = new AgentViewer(this, mpFrameDrawer, mpMapDrawer, mpTracker,strSettingsFile,settings_);
+    // std::cout << "Agent " << mnId << " just after agent viewer instantiation" << std::endl;
     mptAgentViewer = new thread(&AgentViewer::Run, mpAgentViewer);
+    // std::cout << "Agent " << mnId << " just after agent viewer thread setting" << std::endl;
+
 
 }
 

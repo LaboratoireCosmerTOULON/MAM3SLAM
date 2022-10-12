@@ -59,7 +59,7 @@ ${Pangolin_INCLUDE_DIRS}
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 add_library(${PROJECT_NAME} SHARED
-src/System.cc
+# src/System.cc
 src/Tracking.cc
 src/LocalMapping.cc
 src/LoopClosing.cc
@@ -91,7 +91,7 @@ src/MultiAgentSystem.cc
 src/Agent.cc
 src/MultiAgentViewer.cc
 src/AgentViewer.cc
-include/System.h
+# include/System.h
 include/Tracking.h
 include/LocalMapping.h
 include/LoopClosing.h

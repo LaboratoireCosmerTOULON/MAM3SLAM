@@ -3,6 +3,8 @@
 namespace ORB_SLAM3
 {
 
+Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
+
 MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false) {
 
     mStrVocabularyFilePath = strVocFile;
@@ -48,10 +50,12 @@ MultiAgentSystem::~MultiAgentSystem() {
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
     Agent* pNewAgent = new Agent(strSettingsFile, this);
     mvpAgents.push_back(pNewAgent);
+    usleep(3000);
 }
 
 void MultiAgentSystem::addAgent(Agent* pNewAgent) {
     mvpAgents.push_back(pNewAgent);
+    usleep(3000);
 }
 
 bool MultiAgentSystem::MapChanged() {
