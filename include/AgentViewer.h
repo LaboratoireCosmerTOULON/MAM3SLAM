@@ -32,9 +32,13 @@ public:
 
     void Run();
 
+    bool isStopped();
+
 private:
 
     bool ParseViewerParamFile(cv::FileStorage &fSettings);
+
+    bool Stop();
 
     Agent* mpAgent;
     FrameDrawer* mpFrameDrawer;
