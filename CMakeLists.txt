@@ -148,3 +148,7 @@ target_link_libraries(testMultiAgentSystem ${PROJECT_NAME})
 add_executable(testAgent
         test/testAgent.cc)
 target_link_libraries(testAgent ${PROJECT_NAME})
+
+add_executable(testPangolin
+         test/testPangolin.cc)
+target_link_libraries(testPangolin ${PROJECT_NAME})

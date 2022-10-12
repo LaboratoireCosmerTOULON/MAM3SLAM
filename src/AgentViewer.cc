@@ -30,7 +30,8 @@ AgentViewer::AgentViewer(Agent* pAgent, FrameDrawer* pFrameDrawer, Tracking *pTr
     }
     mbStopTrack = false;
 
-    // OpenCV window params
+    // Window params
+    mMapWindowName = "ORB-SLAM3: Map Viewer - Agent " + to_string(mpAgent -> mnId);
     mCurrentFrameWindowName = "ORB-SLAM3: Current Frame - Agent " + to_string(mpAgent -> mnId);
     mtrackedImageScale = mpTracker->GetImageScale();
 }
@@ -49,6 +50,10 @@ void AgentViewer::newParameterLoader(Settings *settings)
     mImageWidth = imSize.width;
 
     mImageViewerScale = settings->imageViewerScale();
+    mViewpointX = settings->viewPointX();
+    mViewpointY = settings->viewPointY();
+    mViewpointZ = settings->viewPointZ();
+    mViewpointF = settings->viewPointF();
 
 }
 
@@ -93,11 +98,11 @@ bool AgentViewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     return !b_miss_params;
 }
 
-void AgentViewer::CreateWindow() {
+void AgentViewer::CreateFrameWindow() {
     cv::namedWindow(mCurrentFrameWindowName);
 }
 
-void AgentViewer::Update()
+void AgentViewer::UpdateCurrentFrameWindow()
 {
     cv::Mat toShow = mpFrameDrawer->DrawFrame(mtrackedImageScale);
     if(mImageViewerScale != 1.f)
@@ -107,6 +112,65 @@ void AgentViewer::Update()
         cv::resize(toShow, toShow, cv::Size(width, height));
     }
     cv::imshow(mCurrentFrameWindowName,toShow);
+}
+
+void AgentViewer::Run()
+{
+    mbFinished = false;
+    mbStopped = false;
+    // Create window
+    pangolin::CreateWindowAndBind(mMapWindowName,1024,768);
+
+    // 3D Mouse handler requires depth testing to be enabled
+    glEnable(GL_DEPTH_TEST);
+    
+    // Issue specific OpenGl we might need
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    pangolin::CreatePanel("menu").SetBounds(0.0,1.0,0.0,pangolin::Attach::Pix(175));
+    pangolin::Var<bool> menuFollowCamera("menu.Follow Camera",false,true);
+    pangolin::Var<bool> menuCamView("menu.Camera View",false,false);
+    pangolin::Var<bool> menuTopView("menu.Top View",false,false);
+    // pangolin::Var<bool> menuSideView("menu.Side View",false,false);
+    pangolin::Var<bool> menuShowPoints("menu.Show Points",true,true);
+    pangolin::Var<bool> menuShowKeyFrames("menu.Show KeyFrames",true,true);
+    pangolin::Var<bool> menuShowGraph("menu.Show Graph",false,true);
+    pangolin::Var<bool> menuShowInertialGraph("menu.Show Inertial Graph",true,true);
+    pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode",false,true);
+    pangolin::Var<bool> menuReset("menu.Reset",false,false);
+    pangolin::Var<bool> menuStop("menu.Stop",false,false);
+    pangolin::Var<bool> menuStepByStep("menu.Step By Step",false,true);  // false, true
+    pangolin::Var<bool> menuStep("menu.Step",false,false);
+    pangolin::Var<bool> menuShowOptLba("menu.Show LBA opt", false, true);
+
+    // Define Camera Render Object (for view / scene browsing)
+    pangolin::OpenGlRenderState s_cam(
+                pangolin::ProjectionMatrix(1024,768,mViewpointF,mViewpointF,512,389,0.1,1000),
+                pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
+                );
+    // cout << "ok-V-5-A-" << mpAgent -> mnId << endl;
+    // Add named OpenGL viewport to window and provide 3D Handler
+    // pangolin::View& d_cam = pangolin::CreateDisplay()
+    //         .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
+    //         .SetHandler(new pangolin::Handler3D(s_cam));
+    pangolin::View& d_cam = pangolin::Display(mMapWindowName)
+            .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f/768.0f)
+            .SetHandler(new pangolin::Handler3D(s_cam));
+    // cout << "ok-V-6-A-" << mpAgent -> mnId << endl;
+    pangolin::OpenGlMatrix Twc, Twr;
+    Twc.SetIdentity();
+    pangolin::OpenGlMatrix Ow; // Oriented with g in the z axis
+    Ow.SetIdentity();
+    
+    bool bFollow = true;
+    bool bLocalizationMode = false;
+    bool bStepByStep = false;
+    bool bCameraView = true;
+    menuShowGraph = true;
+    cout << "Starting the Viewer" << endl;
+
+    while(1) {}
 }
 
 }

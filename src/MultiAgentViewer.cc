@@ -9,15 +9,17 @@ void MultiAgentViewer::AddAgentViewer(AgentViewer* pNewAgentViewer) {
 
 void MultiAgentViewer::Run()
 {
+    // Create tracking windows for all agents
     for (int i = 0 ; i < mvpAgentViewers.size() ; i++)
         {
-            mvpAgentViewers[i] -> CreateWindow();
+            mvpAgentViewers[i] -> CreateFrameWindow();
         }
     while(1)
     {
+        // Update tracking windows for all agents
         for (int i = 0 ; i < mvpAgentViewers.size() ; i++)
         {
-            mvpAgentViewers[i] -> Update();
+            mvpAgentViewers[i] -> UpdateCurrentFrameWindow();
             cv::waitKey(1);
         }
     }

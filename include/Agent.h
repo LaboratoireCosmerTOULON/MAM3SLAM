@@ -105,6 +105,7 @@ private:
     // System threads: Local Mapping, Tracking, Viewer.
     std::thread* mptLocalMapping;
     std::thread* mptTracking;
+    std::thread* mptAgentViewer;
     // std::thread* mptViewer;
 
     // Reset flag

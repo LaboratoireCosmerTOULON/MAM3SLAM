@@ -24,9 +24,11 @@ public:
 
     void newParameterLoader(Settings* settings);
 
-    void CreateWindow();
+    void CreateFrameWindow();
 
-    void Update();
+    void UpdateCurrentFrameWindow();
+
+    void Run();
 
 private:
 
@@ -40,6 +42,8 @@ private:
     double mT;
     float mImageWidth, mImageHeight;
     float mImageViewerScale;
+
+    float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
 
     bool CheckFinish();
     void SetFinish();

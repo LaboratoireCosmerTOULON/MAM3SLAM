@@ -78,6 +78,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
 
     // AgentViewer
     mpAgentViewer = new AgentViewer(this, mpFrameDrawer,mpTracker,strSettingsFile,settings_);
+    mptAgentViewer = new thread(&AgentViewer::Run, mpAgentViewer);
 
 }
 
