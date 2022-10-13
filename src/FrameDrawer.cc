@@ -27,7 +27,7 @@
 namespace ORB_SLAM3
 {
 
-FrameDrawer::FrameDrawer(Atlas* pAtlas):both(false),mpAtlas(pAtlas)
+FrameDrawer::FrameDrawer(Agent* pAgent, Atlas* pAtlas):both(false),mpAtlas(pAtlas), mpAgent(pAgent)
 {
     mState=Tracking::SYSTEM_NOT_READY;
     mIm = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
@@ -392,8 +392,8 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
         else
             s << "LOCALIZATION | ";
         int nMaps = mpAtlas->CountMaps();
-        int nKFs = mpAtlas->KeyFramesInMap();
-        int nMPs = mpAtlas->MapPointsInMap();
+        int nKFs = mpAtlas->KeyFramesInMap(mpAgent);
+        int nMPs = mpAtlas->MapPointsInAgentMap(mpAgent);
         s << "Maps: " << nMaps << ", KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
         if(mnTrackedVO>0)
             s << ", + VO matches: " << mnTrackedVO;

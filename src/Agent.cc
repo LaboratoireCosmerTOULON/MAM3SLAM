@@ -32,7 +32,7 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     KeyFrameDatabase* pKFDB = mpMultiAgentSystem -> getKeyFrameDatabase();
 
     //Create Drawers. These are used by the Viewer
-    mpFrameDrawer = new FrameDrawer(pAtlas);
+    mpFrameDrawer = new FrameDrawer(this, pAtlas);
     // std::cout << "Agent " << mnId << " just before map drawer instantiation" << std::endl;
     mpMapDrawer = new MapDrawer(this, pAtlas, strSettingsFile, settings_);
     // std::cout << "Agent " << mnId << " just after map drawer instantiation" << std::endl;

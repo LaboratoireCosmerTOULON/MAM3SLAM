@@ -23,6 +23,7 @@
 #include "Tracking.h"
 #include "MapPoint.h"
 #include "Atlas.h"
+#include "Agent.h"
 
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
@@ -35,13 +36,13 @@ namespace ORB_SLAM3
 {
 
 class Tracking;
-class Viewer;
+class Agent;
 
 class FrameDrawer
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    FrameDrawer(Atlas* pAtlas);
+    FrameDrawer(Agent* pAgent, Atlas* pAtlas);
 
     // Update info from the last processed frame.
     void Update(Tracking *pTracker);
@@ -70,6 +71,7 @@ protected:
     float mThDepth;
 
     Atlas* mpAtlas;
+    Agent* mpAgent;
 
     std::mutex mMutex;
     vector<pair<cv::Point2f, cv::Point2f> > mvTracks;
