@@ -170,7 +170,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
                 vdKFCullingSync_ms.push_back(timeKFCulling_ms);
             #endif
             // mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
-            // cout << "ok-LM-10" << endl;
+            // std::cout << "Calling loop closing for insertion" << std::endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
 

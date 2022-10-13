@@ -62,7 +62,7 @@ class MultiAgentSystem
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    MultiAgentSystem(const string &strVocFile);
+    MultiAgentSystem(const string &strVocFile, bool bActiveLC = true);
     ~MultiAgentSystem();
     void addAgent(const string &strSettingsFile);
     void addAgent(Agent* pNewAgent);

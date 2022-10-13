@@ -5,7 +5,7 @@ namespace ORB_SLAM3
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
-MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false) {
+MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC) : mbShutDown(false) {
 
     mStrVocabularyFilePath = strVocFile;
 
@@ -31,8 +31,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile) : mbShutDown(false)
 
     //Initialize the Loop Closing thread and launch
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
-    bool activeLC = false;
-    mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, true, activeLC);
+    mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, true, bActiveLC);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
     // // Fix verbosity
