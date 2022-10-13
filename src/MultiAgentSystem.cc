@@ -27,7 +27,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC) : m
 
     //Create the Atlas
     cout << "Initialization of Atlas from scratch " << endl;
-    mpAtlas = new Atlas(0);
+    mpAtlas = new Atlas();
 
     //Initialize the Loop Closing thread and launch
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR

@@ -80,11 +80,13 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
 
 }
 
-Agent::~Agent() {
+Agent::~Agent()
+{
     Shutdown();
 }
 
-void Agent::Run() {
+void Agent::Run()
+{
     // std::cout << "Agent " << mnId << " is starting running" << std::endl;
     // std:: cout << "mbShutDown : " << mbShutDown << std::endl;
     while(!mbShutDown) {
@@ -100,7 +102,8 @@ void Agent::Run() {
     }
 }
 
-bool Agent::CheckNewFrame() {
+bool Agent::CheckNewFrame()
+{
     unique_lock<mutex> lock(mMutexNewFrame);
     return mGotNewFrame;
 }
@@ -145,25 +148,30 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
     return Tcw;
 }
 
-void Agent::ResetActiveMap() {
+void Agent::ResetActiveMap()
+{
     std::cout << "Warning : agent::ResetActiveMap() called but not implemented" << std::endl;
 } // TODO ?
 
-int Agent::GetTrackingState() {
+int Agent::GetTrackingState()
+{
     return 0;
 }
 
-std::vector<MapPoint*> Agent::GetTrackedMapPoints() {
+std::vector<MapPoint*> Agent::GetTrackedMapPoints()
+{
     std::vector<MapPoint*> foo;
     return foo;
 }
 
-std::vector<cv::KeyPoint> Agent::GetTrackedKeyPointsUn() {
+std::vector<cv::KeyPoint> Agent::GetTrackedKeyPointsUn()
+{
     std::vector<cv::KeyPoint> foo;
     return foo;
 }
 
-void Agent::Shutdown() {
+void Agent::Shutdown()
+{
     {
         unique_lock<mutex> lock(mMutexReset);
         mbShutDown = true;
@@ -173,16 +181,19 @@ void Agent::Shutdown() {
     cout << "Shutdown Agent " << mnId << endl;
 }
 
-AgentViewer* Agent::getAgentViewer() {
+AgentViewer* Agent::getAgentViewer()
+{
     return mpAgentViewer;
 }
 
-void Agent::SetCurrentMap(Map* newActiveMap) {
+void Agent::SetCurrentMap(Map* newActiveMap)
+{
     unique_lock<mutex> lock(mMutexMap);
     mpCurrentMap = newActiveMap;
 }
 
-Map* Agent::GetCurrentMap(bool doLock) {
+Map* Agent::GetCurrentMap(bool doLock)
+{
     if (doLock) {
         unique_lock<mutex> lock(mMutexMap);
         return mpCurrentMap;

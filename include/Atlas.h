@@ -109,6 +109,7 @@ public:
     // Method for get data in current map
     std::vector<KeyFrame*> GetAllKeyFrames();
     std::vector<MapPoint*> GetAllMapPoints();
+    std::vector<MapPoint*> GetAllMapPoints(Agent* pAgent);
     std::vector<MapPoint*> GetReferenceMapPoints();
 
     vector<Map*> GetAllMaps();
@@ -161,7 +162,7 @@ protected:
 
     std::vector<GeometricCamera*> mvpCameras;
 
-    unsigned long int mnLastInitKFidMap;
+    unsigned long int mnLastInitKFidMap = 0;
 
     Viewer* mpViewer;
     bool mHasViewer;

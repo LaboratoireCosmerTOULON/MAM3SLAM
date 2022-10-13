@@ -28,6 +28,7 @@ namespace ORB_SLAM3
 
 Atlas::Atlas(){
     mpCurrentMap = static_cast<Map*>(NULL);
+    std::cout << "Atlas::Atlas() : There are " << mspMaps.size() << " maps in the Atlas" << std::endl;
 }
 
 Atlas::Atlas(int initKFid): mnLastInitKFidMap(initKFid), mHasViewer(false)
@@ -57,6 +58,7 @@ Atlas::~Atlas()
 
 void Atlas::CreateNewMap()
 {
+    std::cout << "Atlas::CreateNewMap() -- beinning : There are " << mspMaps.size() << " maps in the Atlas" << std::endl;
     unique_lock<mutex> lock(mMutexAtlas);
     cout << "Creation of new map with id: " << Map::nNextId << endl;
     if(mpCurrentMap){
@@ -74,6 +76,16 @@ void Atlas::CreateNewMap()
     mpCurrentMap = new Map(mnLastInitKFidMap);
     mpCurrentMap->SetCurrentMap();
     mspMaps.insert(mpCurrentMap);
+    std::cout << "Atlas::CreateNewMap() -- end : There are " << mspMaps.size() << " maps in the Atlas" << std::endl;
+}
+
+void Atlas::CreateNewMap(Agent* agent)
+{
+    cout << "Creation of new map with id: " << Map::nNextId  << " for Agent " << agent -> mnId << endl;
+    Map* newMap = new Map(mnLastInitKFidMap);
+    agent -> SetCurrentMap(newMap);
+    unique_lock<mutex> lock(mMutexAtlas);
+    mspMaps.insert(newMap);
 }
 
 void Atlas::ChangeMap(Map* pMap)
@@ -217,6 +229,12 @@ std::vector<MapPoint*> Atlas::GetAllMapPoints()
 {
     unique_lock<mutex> lock(mMutexAtlas);
     return mpCurrentMap->GetAllMapPoints();
+}
+
+std::vector<MapPoint*> Atlas::GetAllMapPoints(Agent* pAgent)
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    return pAgent->GetCurrentMap(false)->GetAllMapPoints();
 }
 
 std::vector<MapPoint*> Atlas::GetReferenceMapPoints()
@@ -446,15 +464,6 @@ Map* Atlas::GetAgentCurrentMap(Agent* agent)
 
 void Atlas::SetAgentCurrentMap(Agent* agent, Map* map) { // the mutex is in agent fct
     agent -> SetCurrentMap(map);
-}
-
-void Atlas::CreateNewMap(Agent* agent)
-{
-    cout << "Creation of new map with id: " << Map::nNextId  << " for Agent " << agent -> mnId << endl;
-    Map* newMap = new Map(mnLastInitKFidMap);
-    agent -> SetCurrentMap(newMap);
-    unique_lock<mutex> lock(mMutexAtlas);
-    mspMaps.insert(newMap);
 }
 
 } //namespace ORB_SLAM3
