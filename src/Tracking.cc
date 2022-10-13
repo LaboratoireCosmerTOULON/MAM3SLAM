@@ -2425,6 +2425,8 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
     std::cout << "Adding KFini with id " << pKFini -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
     std::cout << "Adding pKFcur with id " << pKFcur -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
+    mpAtlas->GetAgentCurrentMap(mpAgent)->SetInitKFid(pKFini -> mnId);
+    std::cout << "ID of initial KF in map set" << std::endl; // DEBUG
 
     if(mSensor == Agent::IMU_MONOCULAR)
         pKFini->mpImuPreintegrated = (IMU::Preintegrated*)(NULL);

@@ -124,54 +124,54 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
             int num_MPs_BA = 0;
             int num_edges_BA = 0;
 
-            std::cout << "There are now " << mpAtlas->KeyFramesInMap(mpAgent) << " KF in Agent " << mpAgent->mnId << "'s map" << std::endl;
+            std::cout << "There are now " << mpAtlas->KeyFramesInMap(mpAgent) << " KF in Agent " << mpAgent->mnId << "'s map" << std::endl; // DEBUG
 
-            // if(!CheckNewKeyFrames() && !stopRequested()) // FIXME : update/uncomment
-            // {
-            //     // cout << "ok-LM-6" << endl;
-            //     if(mpAtlas->KeyFramesInMap(mpAgent)>2)
-            //     {
-            //         // cout << "ok-LM-7" << endl;
-            //         Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
-            //         b_doneLBA = true;
+            if(!CheckNewKeyFrames() && !stopRequested()) // FIXME : update/uncomment
+            {
+                std::cout << "Entering !CheckNewKeyFrames() && !stopRequested() case in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                if(mpAtlas->KeyFramesInMap(mpAgent)>2)
+                {
+                    std::cout << "More thn 2 KF in current map LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
+                    b_doneLBA = true;
 
-            //         // cout << "ok-LM-8" << endl;
-            //     }
-            //     #ifdef REGISTER_TIMES
-            //         std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
-            //         if(b_doneLBA)
-            //         {
-            //             timeLBA_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLBA - time_EndMPCreation).count();
-            //             vdLBA_ms.push_back(timeLBA_ms);
+                    std::cout << "Local BA ok in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                }
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
+                    if(b_doneLBA)
+                    {
+                        timeLBA_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLBA - time_EndMPCreation).count();
+                        vdLBA_ms.push_back(timeLBA_ms);
 
-            //             nLBA_exec += 1;
-            //             if(mbAbortBA)
-            //             {
-            //                 nLBA_abort += 1;
-            //             }
-            //             vnLBA_edges.push_back(num_edges_BA);
-            //             vnLBA_KFopt.push_back(num_OptKF_BA);
-            //             vnLBA_KFfixed.push_back(num_FixedKF_BA);
-            //             vnLBA_MPs.push_back(num_MPs_BA);
-            //         }
-            //     #endif
+                        nLBA_exec += 1;
+                        if(mbAbortBA)
+                        {
+                            nLBA_abort += 1;
+                        }
+                        vnLBA_edges.push_back(num_edges_BA);
+                        vnLBA_KFopt.push_back(num_OptKF_BA);
+                        vnLBA_KFfixed.push_back(num_FixedKF_BA);
+                        vnLBA_MPs.push_back(num_MPs_BA);
+                    }
+                #endif
 
-            //     // Check redundant local Keyframes
-            //     KeyFrameCulling();
-            //     // cout << "ok-LM-9" << endl;
-            //     #ifdef REGISTER_TIMES
-            //         std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
+                // Check redundant local Keyframes
+                KeyFrameCulling();
+                std::cout << "KF culling ok in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
 
-            //         timeKFCulling_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndKFCulling - time_EndLBA).count();
-            //         vdKFCulling_ms.push_back(timeKFCulling_ms);
-            //     #endif
-            // }
+                    timeKFCulling_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndKFCulling - time_EndLBA).count();
+                    vdKFCulling_ms.push_back(timeKFCulling_ms);
+                #endif
+            }
 
             #ifdef REGISTER_TIMES
                 vdLBASync_ms.push_back(timeKFCulling_ms);
                 vdKFCullingSync_ms.push_back(timeKFCulling_ms);
             #endif
-            // mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
+            // mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame); // FIXME : uncomment and fix
             // std::cout << "Calling loop closing for insertion" << std::endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
@@ -842,24 +842,8 @@ void LocalMapping::KeyFrameCulling()
     else
         redundant_th = 0.5;
 
-    const bool bInitImu = false ; //mpAtlas->isImuInitialized();
     int count=0;
-
-    // Compoute last KF from optimizable window:
-    unsigned int last_ID;
-    if (mbInertial)
-    {
-        int count = 0;
-        KeyFrame* aux_KF = mpCurrentKeyFrame;
-        while(count<Nd && aux_KF->mPrevKF)
-        {
-            aux_KF = aux_KF->mPrevKF;
-            count++;
-        }
-        last_ID = aux_KF->mnId;
-    }
-
-
+    int culledKFcounter = 0;
 
     for(vector<KeyFrame*>::iterator vit=vpLocalKeyFrames.begin(), vend=vpLocalKeyFrames.end(); vit!=vend; vit++)
     {
@@ -934,48 +918,15 @@ void LocalMapping::KeyFrameCulling()
 
         if(nRedundantObservations>redundant_th*nMPs)
         {
-            if (mbInertial)
-            {
-                if (mpAtlas->KeyFramesInMap()<=Nd)
-                    continue;
-
-                if(pKF->mnId>(mpCurrentKeyFrame->mnId-2))
-                    continue;
-
-                if(pKF->mPrevKF && pKF->mNextKF)
-                {
-                    const float t = pKF->mNextKF->mTimeStamp-pKF->mPrevKF->mTimeStamp;
-
-                    if((bInitImu && (pKF->mnId<last_ID) && t<3.) || (t<0.5))
-                    {
-                        pKF->mNextKF->mpImuPreintegrated->MergePrevious(pKF->mpImuPreintegrated);
-                        pKF->mNextKF->mPrevKF = pKF->mPrevKF;
-                        pKF->mPrevKF->mNextKF = pKF->mNextKF;
-                        pKF->mNextKF = NULL;
-                        pKF->mPrevKF = NULL;
-                        pKF->SetBadFlag();
-                    }
-                    else if(!mpCurrentKeyFrame->GetMap()->GetIniertialBA2() && ((pKF->GetImuPosition()-pKF->mPrevKF->GetImuPosition()).norm()<0.02) && (t<3))
-                    {
-                        pKF->mNextKF->mpImuPreintegrated->MergePrevious(pKF->mpImuPreintegrated);
-                        pKF->mNextKF->mPrevKF = pKF->mPrevKF;
-                        pKF->mPrevKF->mNextKF = pKF->mNextKF;
-                        pKF->mNextKF = NULL;
-                        pKF->mPrevKF = NULL;
-                        pKF->SetBadFlag();
-                    }
-                }
-            }
-            else
-            {
-                pKF->SetBadFlag();
-            }
+            pKF->SetBadFlag();
+            culledKFcounter++;
         }
         if((count > 20 && mbAbortBA) || count>100)
         {
             break;
         }
     }
+    std::cout << culledKFcounter << " KF should be culled from map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl;
 }
 
 void LocalMapping::RequestReset()
