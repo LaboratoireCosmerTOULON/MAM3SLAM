@@ -185,7 +185,7 @@ protected:
     g2o::Sim3 mg2oScw;
 
     //-------
-    Map* mpLastMap;
+    Map* mpCurrentKFMap;
 
     bool mbLoopDetected;
     int mnLoopNumCoincidences;

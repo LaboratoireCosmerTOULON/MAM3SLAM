@@ -88,7 +88,7 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 
 
 void LoopClosing::Run() // FIXME : uncomment and update when current map / agent linkage ok
-/*{
+{/*
     mbFinished =false;
 
     while(1)
@@ -306,8 +306,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
     }
 
     SetFinish();
-}*/
-{}
+*/}
 
 void LoopClosing::InsertKeyFrame(KeyFrame *pKF)
 {
@@ -336,25 +335,10 @@ bool LoopClosing::NewDetectCommonRegions()
         mpCurrentKF->SetNotErase();
         mpCurrentKF->mbCurrentPlaceRecognition = true;
 
-        mpLastMap = mpCurrentKF->GetMap();
+        mpCurrentKFMap = mpCurrentKF->GetMap();
     }
 
-    if(mpLastMap->IsInertial() && !mpLastMap->GetIniertialBA2())
-    {
-        mpKeyFrameDB->add(mpCurrentKF);
-        mpCurrentKF->SetErase();
-        return false;
-    }
-
-    if(mpTracker->mSensor == Agent::STEREO && mpLastMap->GetAllKeyFrames().size() < 5) //12
-    {
-        // cout << "LoopClousure: Stereo KF inserted without check: " << mpCurrentKF->mnId << endl;
-        mpKeyFrameDB->add(mpCurrentKF);
-        mpCurrentKF->SetErase();
-        return false;
-    }
-
-    if(mpLastMap->GetAllKeyFrames().size() < 12)
+    if(mpCurrentKFMap->GetAllKeyFrames().size() < 12)
     {
         // cout << "LoopClousure: Stereo KF inserted without check, map is small: " << mpCurrentKF->mnId << endl;
         mpKeyFrameDB->add(mpCurrentKF);
