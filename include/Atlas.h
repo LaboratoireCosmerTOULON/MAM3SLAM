@@ -54,23 +54,23 @@ class Atlas
     friend class boost::serialization::access;
 
     template<class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar.template register_type<Pinhole>();
-        ar.template register_type<KannalaBrandt8>();
+    void serialize(Archive &ar, const unsigned int version);
+    // {
+    //     ar.template register_type<Pinhole>();
+    //     ar.template register_type<KannalaBrandt8>();
 
-        // Save/load a set structure, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
-        //ar & mspMaps;
-        ar & mvpBackupMaps;
-        ar & mvpCameras;
-        // Need to save/load the static Id from Frame, KeyFrame, MapPoint and Map
-        ar & Map::nNextId;
-        ar & Frame::nNextId;
-        ar & KeyFrame::nNextId;
-        ar & MapPoint::nNextId;
-        ar & GeometricCamera::nNextId;
-        ar & mnLastInitKFidMap;
-    }
+    //     // Save/load a set structure, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
+    //     //ar & mspMaps;
+    //     ar & mvpBackupMaps;
+    //     ar & mvpCameras;
+    //     // Need to save/load the static Id from Frame, KeyFrame, MapPoint and Map
+    //     ar & Map::nNextId;
+    //     ar & Frame::nNextId;
+    //     ar & KeyFrame::nNextId;
+    //     ar & MapPoint::nNextId;
+    //     ar & GeometricCamera::nNextId;
+    //     ar & mnLastInitKFidMap;
+    // }
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

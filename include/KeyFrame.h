@@ -29,6 +29,8 @@
 #include "KeyFrameDatabase.h"
 #include "ImuTypes.h"
 
+#include "Agent.h"
+
 #include "GeometricCamera.h"
 #include "SerializationUtils.h"
 
@@ -38,7 +40,6 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 
-
 namespace ORB_SLAM3
 {
 
@@ -46,8 +47,9 @@ class Map;
 class MapPoint;
 class Frame;
 class KeyFrameDatabase;
-
 class GeometricCamera;
+
+// class Agent;
 
 class KeyFrame
 {
@@ -305,6 +307,9 @@ public:
 
     bool bImu;
 
+    // Agent
+    // Agent* getAgent();
+
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
 
@@ -500,6 +505,9 @@ protected:
     std::mutex mMutexConnections;
     std::mutex mMutexFeatures;
     std::mutex mMutexMap;
+
+    // Agent
+    // Agent* mpAgent;
 
 public:
     GeometricCamera* mpCamera, *mpCamera2;

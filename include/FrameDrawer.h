@@ -37,6 +37,7 @@ namespace ORB_SLAM3
 
 class Tracking;
 class Agent;
+class Atlas;
 
 class FrameDrawer
 {

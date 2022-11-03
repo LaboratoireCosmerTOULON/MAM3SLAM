@@ -88,225 +88,159 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 
 
 void LoopClosing::Run() // FIXME : uncomment and update when current map / agent linkage ok
-{/*
-    mbFinished =false;
+{
+    mbFinished = false;
 
     while(1)
-    {
+    // {
 
-        //NEW LOOP AND MERGE DETECTION ALGORITHM
-        //----------------------------
-
-
-        if(CheckNewKeyFrames())
-        {
-            if(mpLastCurrentKF)
-            {
-                mpLastCurrentKF->mvpLoopCandKFs.clear();
-                mpLastCurrentKF->mvpMergeCandKFs.clear();
-            }
-            #ifdef REGISTER_TIMES
-                std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
-            #endif
-
-            bool bFindedRegion = NewDetectCommonRegions();
-
-            #ifdef REGISTER_TIMES
-                std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
-
-                double timePRTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
-                vdPRTotal_ms.push_back(timePRTotal);
-            #endif
-            if(bFindedRegion)
-            {
-                if(mbMergeDetected)
-                {
-                    if ((mpTracker->mSensor==Agent::IMU_MONOCULAR || mpTracker->mSensor==Agent::IMU_STEREO || mpTracker->mSensor==Agent::IMU_RGBD) &&
-                        (!mpCurrentKF->GetMap()->isImuInitialized()))
-                    {
-                        cout << "IMU is not initilized, merge is aborted" << endl;
-                    }
-                    else
-                    {
-                        Sophus::SE3d mTmw = mpMergeMatchedKF->GetPose().cast<double>();
-                        g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
-                        Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
-                        g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
-                        g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
-                        g2o::Sim3 gSw1m = mg2oMergeSlw;
-
-                        mSold_new = (gSw2c * gScw1);
+    //     //NEW LOOP AND MERGE DETECTION ALGORITHM
+    //     //----------------------------
 
 
-                        if(mpCurrentKF->GetMap()->IsInertial() && mpMergeMatchedKF->GetMap()->IsInertial())
-                        {
-                            cout << "Merge check transformation with IMU" << endl;
-                            if(mSold_new.scale()<0.90||mSold_new.scale()>1.1){
-                                mpMergeLastCurrentKF->SetErase();
-                                mpMergeMatchedKF->SetErase();
-                                mnMergeNumCoincidences = 0;
-                                mvpMergeMatchedMPs.clear();
-                                mvpMergeMPs.clear();
-                                mnMergeNumNotFound = 0;
-                                mbMergeDetected = false;
-                                Verbose::PrintMess("scale bad estimated. Abort merging", Verbose::VERBOSITY_NORMAL);
-                                continue;
-                            }
-                            // If inertial, force only yaw
-                            if ((mpTracker->mSensor==Agent::IMU_MONOCULAR || mpTracker->mSensor==Agent::IMU_STEREO || mpTracker->mSensor==Agent::IMU_RGBD) &&
-                                   mpCurrentKF->GetMap()->GetIniertialBA1())
-                            {
-                                Eigen::Vector3d phi = LogSO3(mSold_new.rotation().toRotationMatrix());
-                                phi(0)=0;
-                                phi(1)=0;
-                                mSold_new = g2o::Sim3(ExpSO3(phi),mSold_new.translation(),1.0);
-                            }
-                        }
+    //     if(CheckNewKeyFrames())
+    //     {
+    //         if(mpLastCurrentKF)
+    //         {
+    //             mpLastCurrentKF->mvpLoopCandKFs.clear();
+    //             mpLastCurrentKF->mvpMergeCandKFs.clear();
+    //         }
+    //         #ifdef REGISTER_TIMES
+    //             std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
+    //         #endif
 
-                        mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
+    //         bool bFindedRegion = NewDetectCommonRegions();
 
-                        mg2oMergeScw = mg2oMergeSlw;
+    //         #ifdef REGISTER_TIMES
+    //             std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
-                        //mpTracker->SetStepByStep(true);
+    //             double timePRTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
+    //             vdPRTotal_ms.push_back(timePRTotal);
+    //         #endif
+    //         if(bFindedRegion)
+    //         {
+    //             if(mbMergeDetected)
+    //             {
+    //                 Sophus::SE3d mTmw = mpMergeMatchedKF->GetPose().cast<double>();
+    //                 g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
+    //                 Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
+    //                 g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
+    //                 g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
+    //                 g2o::Sim3 gSw1m = mg2oMergeSlw;
 
-                        Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
+    //                 mSold_new = (gSw2c * gScw1);
 
-                        #ifdef REGISTER_TIMES
-                            std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
+    //                 mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
 
-                            nMerges += 1;
-                        #endif
-                        // TODO UNCOMMENT
-                        if (mpTracker->mSensor==Agent::IMU_MONOCULAR ||mpTracker->mSensor==Agent::IMU_STEREO || mpTracker->mSensor==Agent::IMU_RGBD)
-                            MergeLocal2();
-                        else
-                            MergeLocal();
+    //                 mg2oMergeScw = mg2oMergeSlw;
 
-                        #ifdef REGISTER_TIMES
-                            std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
+    //                 //mpTracker->SetStepByStep(true);
 
-                            double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
-                            vdMergeTotal_ms.push_back(timeMergeTotal);
-                        #endif
+    //                 Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
 
-                        Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
-                    }
+    //                 #ifdef REGISTER_TIMES
+    //                     std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
 
-                    vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
-                    vdPR_MatchedTime.push_back(mpMergeMatchedKF->mTimeStamp);
-                    vnPR_TypeRecogn.push_back(1);
+    //                     nMerges += 1;
+    //                 #endif
+    //                 // TODO UNCOMMENT
+    //                 MergeLocal();
 
-                    // Reset all variables
-                    mpMergeLastCurrentKF->SetErase();
-                    mpMergeMatchedKF->SetErase();
-                    mnMergeNumCoincidences = 0;
-                    mvpMergeMatchedMPs.clear();
-                    mvpMergeMPs.clear();
-                    mnMergeNumNotFound = 0;
-                    mbMergeDetected = false;
+    //                 #ifdef REGISTER_TIMES
+    //                     std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
 
-                    if(mbLoopDetected)
-                    {
-                        // Reset Loop variables
-                        mpLoopLastCurrentKF->SetErase();
-                        mpLoopMatchedKF->SetErase();
-                        mnLoopNumCoincidences = 0;
-                        mvpLoopMatchedMPs.clear();
-                        mvpLoopMPs.clear();
-                        mnLoopNumNotFound = 0;
-                        mbLoopDetected = false;
-                    }
+    //                     double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
+    //                     vdMergeTotal_ms.push_back(timeMergeTotal);
+    //                 #endif
 
-                }
+    //                 Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
 
-                if(mbLoopDetected)
-                {
-                    bool bGoodLoop = true;
-                    vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
-                    vdPR_MatchedTime.push_back(mpLoopMatchedKF->mTimeStamp);
-                    vnPR_TypeRecogn.push_back(0);
+    //                 vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
+    //                 vdPR_MatchedTime.push_back(mpMergeMatchedKF->mTimeStamp);
+    //                 vnPR_TypeRecogn.push_back(1);
 
-                    Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
+    //                 // Reset all variables
+    //                 mpMergeLastCurrentKF->SetErase();
+    //                 mpMergeMatchedKF->SetErase();
+    //                 mnMergeNumCoincidences = 0;
+    //                 mvpMergeMatchedMPs.clear();
+    //                 mvpMergeMPs.clear();
+    //                 mnMergeNumNotFound = 0;
+    //                 mbMergeDetected = false;
 
-                    mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
-                    if(mpCurrentKF->GetMap()->IsInertial())
-                    {
-                        Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
-                        g2o::Sim3 g2oTwc(Twc.unit_quaternion(),Twc.translation(),1.0);
-                        g2o::Sim3 g2oSww_new = g2oTwc*mg2oLoopScw;
+    //                 if(mbLoopDetected)
+    //                 {
+    //                     // Reset Loop variables
+    //                     mpLoopLastCurrentKF->SetErase();
+    //                     mpLoopMatchedKF->SetErase();
+    //                     mnLoopNumCoincidences = 0;
+    //                     mvpLoopMatchedMPs.clear();
+    //                     mvpLoopMPs.clear();
+    //                     mnLoopNumNotFound = 0;
+    //                     mbLoopDetected = false;
+    //                 }
 
-                        Eigen::Vector3d phi = LogSO3(g2oSww_new.rotation().toRotationMatrix());
-                        cout << "phi = " << phi.transpose() << endl; 
-                        if (fabs(phi(0))<0.008f && fabs(phi(1))<0.008f && fabs(phi(2))<0.349f)
-                        {
-                            if(mpCurrentKF->GetMap()->IsInertial())
-                            {
-                                // If inertial, force only yaw
-                                if ((mpTracker->mSensor==Agent::IMU_MONOCULAR ||mpTracker->mSensor==Agent::IMU_STEREO || mpTracker->mSensor==Agent::IMU_RGBD) &&
-                                        mpCurrentKF->GetMap()->GetIniertialBA2())
-                                {
-                                    phi(0)=0;
-                                    phi(1)=0;
-                                    g2oSww_new = g2o::Sim3(ExpSO3(phi),g2oSww_new.translation(),1.0);
-                                    mg2oLoopScw = g2oTwc.inverse()*g2oSww_new;
-                                }
-                            }
+    //             }
 
-                        }
-                        else
-                        {
-                            cout << "BAD LOOP!!!" << endl;
-                            bGoodLoop = false;
-                        }
+    //             if(mbLoopDetected)
+    //             {
+    //                 bool bGoodLoop = true;
+    //                 vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
+    //                 vdPR_MatchedTime.push_back(mpLoopMatchedKF->mTimeStamp);
+    //                 vnPR_TypeRecogn.push_back(0);
 
-                    }
+    //                 Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
 
-                    if (bGoodLoop) {
+    //                 mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
 
-                        mvpLoopMapPoints = mvpLoopMPs;
+    //                 if (bGoodLoop) 
+    //                 {
 
-                    #ifdef REGISTER_TIMES
-                        std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
+    //                     mvpLoopMapPoints = mvpLoopMPs;
 
-                        nLoop += 1;
+    //                     #ifdef REGISTER_TIMES
+    //                         std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
 
-                    #endif
-                        CorrectLoop();
-                    #ifdef REGISTER_TIMES
-                        std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
+    //                         nLoop += 1;
 
-                        double timeLoopTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLoop - time_StartLoop).count();
-                        vdLoopTotal_ms.push_back(timeLoopTotal);
-                    #endif
+    //                     #endif
+    //                     CorrectLoop();
+    //                     #ifdef REGISTER_TIMES
+    //                         std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
 
-                        mnNumCorrection += 1;
-                    }
+    //                         double timeLoopTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLoop - time_StartLoop).count();
+    //                         vdLoopTotal_ms.push_back(timeLoopTotal);
+    //                     #endif
 
-                    // Reset all variables
-                    mpLoopLastCurrentKF->SetErase();
-                    mpLoopMatchedKF->SetErase();
-                    mnLoopNumCoincidences = 0;
-                    mvpLoopMatchedMPs.clear();
-                    mvpLoopMPs.clear();
-                    mnLoopNumNotFound = 0;
-                    mbLoopDetected = false;
-                }
+    //                     mnNumCorrection += 1;
+    //                 }
 
-            }
-            mpLastCurrentKF = mpCurrentKF;
-        }
+    //                 // Reset all variables
+    //                 mpLoopLastCurrentKF->SetErase();
+    //                 mpLoopMatchedKF->SetErase();
+    //                 mnLoopNumCoincidences = 0;
+    //                 mvpLoopMatchedMPs.clear();
+    //                 mvpLoopMPs.clear();
+    //                 mnLoopNumNotFound = 0;
+    //                 mbLoopDetected = false;
+    //             }
 
-        ResetIfRequested();
+    //         }
+    //         mpLastCurrentKF = mpCurrentKF;
+    //     }
 
-        if(CheckFinish()){
-            break;
-        }
+    //     ResetIfRequested();
 
-        usleep(5000);
-    }
+    //     if(CheckFinish()){
+    //         break;
+    //     }
+
+    //     usleep(5000);
+    // }
+    {}
 
     SetFinish();
-*/}
+}
 
 void LoopClosing::InsertKeyFrame(KeyFrame *pKF)
 {

@@ -42,6 +42,7 @@ class LocalMapping;
 class KeyFrameDatabase;
 class Map;
 class Viewer;
+class Atlas;
 
 class LoopClosing
 {

@@ -34,6 +34,7 @@ namespace ORB_SLAM3
 
 class Settings;
 class Agent;
+class Atlas;
 
 class MapDrawer
 {
