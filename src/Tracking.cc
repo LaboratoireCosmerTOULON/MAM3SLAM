@@ -2421,8 +2421,8 @@ void Tracking::MonocularInitialization() // OK (no core dumped but is the output
 void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the output good ?)
 {
     // Create KeyFrames
-    KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
-    KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
+    KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB, mpAgent);
+    KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB, mpAgent);
     std::cout << "Adding KFini with id " << pKFini -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
     std::cout << "Adding pKFcur with id " << pKFcur -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
     mpAtlas->GetAgentCurrentMap(mpAgent)->SetInitKFid(pKFini -> mnId);
@@ -3036,7 +3036,7 @@ void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLast
         return;
     }
 
-    KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB);
+    KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB, mpAgent);
 
     pKF->SetNewBias(mCurrentFrame.mImuBias);
     mpReferenceKF = pKF;

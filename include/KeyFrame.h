@@ -196,8 +196,8 @@ class KeyFrame
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    KeyFrame();
-    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+    KeyFrame(Agent* pAgent);
+    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB, Agent* pAgent);
 
     // Pose functions
     void SetPose(const Sophus::SE3f &Tcw);
