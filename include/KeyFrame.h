@@ -49,7 +49,7 @@ class Frame;
 class KeyFrameDatabase;
 class GeometricCamera;
 
-// class Agent;
+class Agent;
 
 class KeyFrame
 {
@@ -507,7 +507,7 @@ protected:
     std::mutex mMutexMap;
 
     // Agent
-    // Agent* mpAgent;
+    Agent* mpAgent;
 
 public:
     GeometricCamera* mpCamera, *mpCamera2;
