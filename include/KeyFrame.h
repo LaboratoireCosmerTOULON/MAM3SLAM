@@ -308,7 +308,7 @@ public:
     bool bImu;
 
     // Agent
-    // Agent* getAgent();
+    Agent* getAgent();
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
