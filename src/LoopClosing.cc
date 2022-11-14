@@ -550,7 +550,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     if(!bLoopDetectedInKF && !vpLoopBowCand.empty())
     {
         std::cout << "!bLoopDetectedInKF && !vpLoopBowCand.empty()" << std::endl; // DEBUG
-        // mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs); // FIXME : make sure no pb with this fct
+        mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs); // FIXME : make sure no pb with this fct
     }
     // Merge candidates
     if(!bMergeDetectedInKF && !vpMergeBowCand.empty())
