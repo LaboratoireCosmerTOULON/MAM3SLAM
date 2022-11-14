@@ -100,25 +100,31 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
 
         if(CheckNewKeyFrames())
         {
+            // Clear mpLastCurrentKF if necessary
+            if(mpLastCurrentKF)
+            {
+                mpLastCurrentKF->mvpLoopCandKFs.clear();
+                mpLastCurrentKF->mvpMergeCandKFs.clear();
+            }
+            #ifdef REGISTER_TIMES
+                std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
+            #endif
+
+            // Retrieve LC/MM status of current KF's origin agent
+
+            // Update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
+
             bool bFindedRegion = NewDetectCommonRegionsMulti();
+            #ifdef REGISTER_TIMES
+                std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
-            // if(mpLastCurrentKF)
-            // {
-            //     mpLastCurrentKF->mvpLoopCandKFs.clear();
-            //     mpLastCurrentKF->mvpMergeCandKFs.clear();
-            // }
-            // #ifdef REGISTER_TIMES
-            //     std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
-            // #endif
+                double timePRTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
+                vdPRTotal_ms.push_back(timePRTotal);
+            #endif
 
-    //         bool bFindedRegion = NewDetectCommonRegions();
+            // Process LC/MM if validated
 
-    //         #ifdef REGISTER_TIMES
-    //             std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
-    //             double timePRTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
-    //             vdPRTotal_ms.push_back(timePRTotal);
-    //         #endif
     //         if(bFindedRegion)
     //         {
     //             if(mbMergeDetected)
@@ -228,7 +234,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
     //             }
 
     //         }
-    //         mpLastCurrentKF = mpCurrentKF;
+            mpLastCurrentKF = mpCurrentKF;
         }
 
         ResetIfRequested();
@@ -460,10 +466,14 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     {
         return false;
     }
-    unique_lock<mutex> lock(mMutexLoopQueue);
-    mpCurrentKF = mlpLoopKeyFrameQueue.front();
-    mlpLoopKeyFrameQueue.pop_front();
-    std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentKF->getAgent()->mnId << std::endl;
+
+    {
+        unique_lock<mutex> lock(mMutexLoopQueue);
+        mpCurrentKF = mlpLoopKeyFrameQueue.front();
+        mlpLoopKeyFrameQueue.pop_front();
+        std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentKF->getAgent()->mnId << std::endl;
+    }
+
     return true;
 }
 

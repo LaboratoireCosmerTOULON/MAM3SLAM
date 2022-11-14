@@ -83,6 +83,28 @@ public:
     void SetCurrentMap(Map* newActiveMap);
     Map* GetCurrentMap(bool doLock = true);
 
+    // loop closure data
+    bool mbLoopDetected;
+    int mnLoopNumCoincidences;
+    int mnLoopNumNotFound;
+    KeyFrame* mpLoopLastCurrentKF;
+    g2o::Sim3 mg2oLoopSlw;
+    g2o::Sim3 mg2oLoopScw;
+    KeyFrame* mpLoopMatchedKF;
+    std::vector<MapPoint*> mvpLoopMPs;
+    std::vector<MapPoint*> mvpLoopMatchedMPs;
+    bool mbMergeDetected;
+    int mnMergeNumCoincidences;
+    int mnMergeNumNotFound;
+    KeyFrame* mpMergeLastCurrentKF;
+    g2o::Sim3 mg2oMergeSlw;
+    g2o::Sim3 mg2oMergeSmw;
+    g2o::Sim3 mg2oMergeScw;
+    KeyFrame* mpMergeMatchedKF;
+    std::vector<MapPoint*> mvpMergeMPs;
+    std::vector<MapPoint*> mvpMergeMatchedMPs;
+    std::vector<KeyFrame*> mvpMergeConnectedKFs;
+
 private:
 
     // Input sensor

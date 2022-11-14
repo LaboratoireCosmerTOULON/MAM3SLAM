@@ -5,7 +5,8 @@ namespace ORB_SLAM3
 
 long unsigned int Agent::nNextId=0;
 
-Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem) 
+Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem), mnLoopNumCoincidences(0), mnLoopNumNotFound(0),
+    mbLoopDetected(false), mbMergeDetected(false), mnMergeNumCoincidences(0), mnMergeNumNotFound(0)
 {
     mnId=nNextId++; // ID
     mpCurrentMap = static_cast<Map*>(NULL); // current map
