@@ -630,9 +630,9 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
     std::cout << "Entering DetectCommonRegionsFromBoW fct" << std::endl; // DEBUG
     int nBoWMatches = 20;
     int nBoWInliers = 15;
-    int nSim3Inliers = 20;
-    int nProjMatches = 50;
-    int nProjOptMatches = 80;
+    int nSim3Inliers = 10; //20; // threshold tuning tries by JD (original ORBSLAM3 is just commented)
+    int nProjMatches = 15; //50;
+    int nProjOptMatches = 50; //80;
 
     set<KeyFrame*> spConnectedKeyFrames = mpCurrentKF->GetConnectedKeyFrames();
     std::cout << "spConnectedKeyFrames OK" << std::endl; // DEBUG
@@ -774,6 +774,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 //std::cout << "Check BoW: SolverSim3 converged" << std::endl;
 
                 //Verbose::PrintMess("BoW guess: Convergende with " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
+                std::cout << "BoW guess: Convergende with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
                 // Match by reprojection
                 vpCovKFi.clear();
                 vpCovKFi = pMostBoWMatchesKF->GetBestCovisibilityKeyFrames(nNumCovisibles);
@@ -827,6 +828,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     bool bFixedScale = mbFixScale;
 
                     int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
+                    std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
 
                     if(numOptMatches >= nSim3Inliers)
                     {
@@ -838,6 +840,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         vector<MapPoint*> vpMatchedMP;
                         vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
                         int numProjOptMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpMatchedMP, 5, 1.0);
+                        std::cout << "numProjOptMatches is " << numProjOptMatches << " after serach by projection. Min. matches nb is " << nProjOptMatches << std::endl;
 
                         if(numProjOptMatches >= nProjOptMatches)
                         {
