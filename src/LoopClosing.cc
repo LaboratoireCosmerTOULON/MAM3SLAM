@@ -110,9 +110,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                 std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
             #endif
 
-            // Retrieve LC/MM status of current KF's origin agent
-
-            // Update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
+            // Retrieve LC/MM status of current KF's origin agent + update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
 
             bool bFindedRegion = NewDetectCommonRegionsMulti();
             #ifdef REGISTER_TIMES
@@ -469,9 +467,17 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
 
     {
         unique_lock<mutex> lock(mMutexLoopQueue);
-        mpCurrentKF = mlpLoopKeyFrameQueue.front();
+        mpCurrentKF = mlpLoopKeyFrameQueue.front(); // Retrieve current KF
         mlpLoopKeyFrameQueue.pop_front();
-        std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentKF->getAgent()->mnId << std::endl;
+
+        mpCurrentAgent = mpCurrentKF->getAgent(); // Retrieve current KF agent
+
+        // Avoid that a keyframe can be erased while it is being process by this thread
+        mpCurrentKF->SetNotErase();
+        mpCurrentKF->mbCurrentPlaceRecognition = true;
+
+        mpCurrentKFMap = mpCurrentKF->GetMap();
+        std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentAgent->mnId << ". Current map is " << mpCurrentKFMap->GetId() << std::endl; // DEBUG
     }
 
     return true;

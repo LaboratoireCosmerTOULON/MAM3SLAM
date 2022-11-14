@@ -1608,7 +1608,7 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     #endif
 
     lastID = mCurrentFrame.mnId;
-    std::cout << "Agent " << mpAgent -> mnId << "'s tracking got new current frame with id : " << lastID << std::endl; // DEBUG
+    // std::cout << "Agent " << mpAgent -> mnId << "'s tracking got new current frame with id : " << lastID << std::endl; // DEBUG
     mnFramesSinceLastReloc ++;
     mnFramesSinceLastKF ++;
     Track();
@@ -1795,9 +1795,9 @@ void Tracking::ResetFrameIMU()
 
 void Tracking::Track()
 {
-    std::cout << "mnFramesSinceLastReloc : " << mnFramesSinceLastReloc << std::endl; // DEBUG
-    std::cout << "mbVelocity : " << mbVelocity << std::endl; // DEBUG
-    std::cout << "Agent " << mpAgent -> mnId << " in track fct" << std::endl; // DEBUG 
+    // std::cout << "mnFramesSinceLastReloc : " << mnFramesSinceLastReloc << std::endl; // DEBUG
+    // std::cout << "mbVelocity : " << mbVelocity << std::endl; // DEBUG
+    // std::cout << "Agent " << mpAgent -> mnId << " in track fct" << std::endl; // DEBUG 
     if (bStepByStep)
     {
         std::cout << "Tracking: Waiting to the next step" << std::endl;
@@ -1808,7 +1808,7 @@ void Tracking::Track()
 
     // Map* pCurrentMap = mpAtlas->GetCurrentMap();
     Map* pCurrentMap = mpAtlas->GetAgentCurrentMap(mpAgent);
-    std::cout << "Agent " << mpAgent -> mnId << " has map " << pCurrentMap -> GetId() << std::endl; // DEBUG
+    // std::cout << "Agent " << mpAgent -> mnId << " has map " << pCurrentMap -> GetId() << std::endl; // DEBUG
 
     if(!pCurrentMap)
     {
@@ -1858,7 +1858,7 @@ void Tracking::Track()
         }
         else
         {
-            std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            // std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
             MonocularInitialization();
         }
 
@@ -1901,18 +1901,18 @@ void Tracking::Track()
 
                 if((!mbVelocity) || mnFramesSinceLastReloc<2) // FIXME : bad condition. Need to set a counter instead of relying on ids when working on reloc
                 {
-                    std::cout << "Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
+                    // std::cout << "Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
                     Verbose::PrintMess("TRACK: Track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
                     bOK = TrackReferenceKeyFrame();
                 }
                 else
                 { // FIXME : TO UNCOMMENT + VALIDATE
-                    std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
+                    // std::cout << "Agent " << mpAgent -> mnId << " tracking with motion model" << std::endl; // DEBUG
                     Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
                     bOK = TrackWithMotionModel();
                     if(!bOK)
                     {
-                        std::cout << "Tracking with motion model failed. Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
+                        // std::cout << "Tracking with motion model failed. Agent " << mpAgent -> mnId << " tracking wrt ref KF of ID " << mpReferenceKF -> mnId << std::endl; // DEBUG
                         bOK = TrackReferenceKeyFrame();
                     } 
                 }
@@ -2058,7 +2058,7 @@ void Tracking::Track()
         {
             if(bOK)
             {
-                std::cout << "Agent " << mpAgent->mnId << " trying to track local map" << std::endl; // DEBUG
+                // std::cout << "Agent " << mpAgent->mnId << " trying to track local map" << std::endl; // DEBUG
                 bOK = TrackLocalMap(); // seems fixed
 
             }
@@ -2140,7 +2140,7 @@ void Tracking::Track()
             // Check if we need to insert a new keyframe
             // if(bNeedKF && bOK)
             if(bNeedKF && bOK) {
-                std::cout << "Trying to create new KF for Agent " << mpAgent->mnId << std::endl; // DEBUG
+                // std::cout << "Trying to create new KF for Agent " << mpAgent->mnId << std::endl; // DEBUG
                 CreateNewKeyFrame();
             }
 
@@ -2335,7 +2335,7 @@ void Tracking::StereoInitialization()
 
 void Tracking::MonocularInitialization() // OK (no core dumped but is the output good ?)
 {
-    std::cout << "Entering initialization for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    // std::cout << "Entering initialization for Agent " << mpAgent -> mnId << std::endl; // DEBUG
     if(!mbReadyToInitializate)
     {
         // Set Reference Frame
@@ -2362,7 +2362,7 @@ void Tracking::MonocularInitialization() // OK (no core dumped but is the output
             }
 
             mbReadyToInitializate = true;
-            std::cout << "Reference frame set for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            // std::cout << "Reference frame set for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
     }
@@ -2371,20 +2371,20 @@ void Tracking::MonocularInitialization() // OK (no core dumped but is the output
         if (((int)mCurrentFrame.mvKeys.size()<=100)||((mSensor == Agent::IMU_MONOCULAR)&&(mLastFrame.mTimeStamp-mInitialFrame.mTimeStamp>1.0)))
         {
             mbReadyToInitializate = false;
-            std::cout << "mCurrentFrame.mvKeys.size()<=100 for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            // std::cout << "mCurrentFrame.mvKeys.size()<=100 for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
 
         // Find correspondences
         ORBmatcher matcher(0.9,true);
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
-        std::cout << nmatches << " matches with ref frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+        // std::cout << nmatches << " matches with ref frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
         // Check if there are enough correspondences
         if(nmatches<100)
         {
             mbReadyToInitializate = false;
-            std::cout << "Not enough matches for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            // std::cout << "Not enough matches for Agent " << mpAgent -> mnId << std::endl; // DEBUG
             return;
         }
 
@@ -2408,10 +2408,10 @@ void Tracking::MonocularInitialization() // OK (no core dumped but is the output
 
             CreateInitialMapMonocular();
 
-            std::cout << "Correctly initialized map for Agent " << mpAgent -> mnId << ". Tcw is : " << Tcw.matrix() << std::endl; // DEBUG
+            // std::cout << "Correctly initialized map for Agent " << mpAgent -> mnId << ". Tcw is : " << Tcw.matrix() << std::endl; // DEBUG
         }
         else {
-            std::cout << "Bad triangulation, failed to initialize for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+            // std::cout << "Bad triangulation, failed to initialize for Agent " << mpAgent -> mnId << std::endl; // DEBUG
         }
     }
 }
@@ -2423,10 +2423,10 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     // Create KeyFrames
     KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB, mpAgent);
     KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetAgentCurrentMap(mpAgent),mpKeyFrameDB, mpAgent);
-    std::cout << "Adding KFini with id " << pKFini -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
-    std::cout << "Adding pKFcur with id " << pKFcur -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
+    // std::cout << "Adding KFini with id " << pKFini -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
+    // std::cout << "Adding pKFcur with id " << pKFcur -> mnId << " to map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << " for Agent " << mpAgent->mnId <<std::endl; // DEBUG
     mpAtlas->GetAgentCurrentMap(mpAgent)->SetInitKFid(pKFini -> mnId);
-    std::cout << "ID of initial KF in map set" << std::endl; // DEBUG
+    // std::cout << "ID of initial KF in map set" << std::endl; // DEBUG
 
     if(mSensor == Agent::IMU_MONOCULAR)
         pKFini->mpImuPreintegrated = (IMU::Preintegrated*)(NULL);
@@ -2477,7 +2477,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     // Bundle Adjustment
     Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInAgentMap(mpAgent)) + " points", Verbose::VERBOSITY_QUIET); // DEBUG
     Optimizer::GlobalBundleAdjustemnt(mpAtlas->GetAgentCurrentMap(mpAgent),20);
-    std::cout << "GlobalBundleAdjustemnt ok" << std::endl; // DEBUG
+    // std::cout << "GlobalBundleAdjustemnt ok" << std::endl; // DEBUG
 
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth;
@@ -2492,7 +2492,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
         mpAgent->ResetActiveMap(); // does nothing yet actually
         return;
     }
-    std::cout << "Median depth ok" << std::endl; // DEBUG
+    // std::cout << "Median depth ok" << std::endl; // DEBUG
 
     // Scale initial baseline
     Sophus::SE3f Tc2w = pKFcur->GetPose();
@@ -2511,7 +2511,7 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
             pMP->UpdateNormalAndDepth();
         }
     }
-    std::cout << "Scale points ok" << std::endl; // DEBUG
+    // std::cout << "Scale points ok" << std::endl; // DEBUG
 
     if (mSensor == Agent::IMU_MONOCULAR)
     {
@@ -2526,20 +2526,20 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
     mpLocalMapper->InsertKeyFrame(pKFini);
     mpLocalMapper->InsertKeyFrame(pKFcur);
     mpLocalMapper->mFirstTs=pKFcur->mTimeStamp;
-    std::cout << "Giving KF to local mapper ok" << std::endl; // DEBUG
+    // std::cout << "Giving KF to local mapper ok" << std::endl; // DEBUG
 
     mCurrentFrame.SetPose(pKFcur->GetPose());
     mnLastKeyFrameId=mCurrentFrame.mnId; // WARNING FIXME why an ID ?
     mpLastKeyFrame = pKFcur;
     //mnLastRelocFrameId = mInitialFrame.mnId;
-    std::cout << "Scale points ok" << std::endl; // DEBUG
+    // std::cout << "Scale points ok" << std::endl; // DEBUG
 
     mvpLocalKeyFrames.push_back(pKFcur);
     mvpLocalKeyFrames.push_back(pKFini);
     mvpLocalMapPoints=mpAtlas->GetAllMapPoints(mpAgent);
     mpReferenceKF = pKFcur;
     mCurrentFrame.mpReferenceKF = pKFcur;
-    std::cout << "Local KF ok" << std::endl;
+    // std::cout << "Local KF ok" << std::endl;
 
     // Compute here initial velocity FIXME!!!!!!!!!!!!!!!!!!!! -> fixed ? -> seems fixed
     // vector<KeyFrame*> vKFs = mpAtlas->GetAllKeyFrames();
@@ -2550,24 +2550,24 @@ void Tracking::CreateInitialMapMonocular() // OK (no core dumped but is the outp
 
     double aux = (mCurrentFrame.mTimeStamp-mLastFrame.mTimeStamp)/(mCurrentFrame.mTimeStamp-mInitialFrame.mTimeStamp);
     phi *= aux;
-    std::cout << "Velocity ok" << std::endl; // DEBUG
+    // std::cout << "Velocity ok" << std::endl; // DEBUG
 
     mLastFrame = Frame(mCurrentFrame);
-    std::cout << "mLastFrame ok" << std::endl; // DEBUG
+    // std::cout << "mLastFrame ok" << std::endl; // DEBUG
 
     mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints, mpAgent);
-    std::cout << "SetReferenceMapPoints ok" << std::endl; // DEBUG
+    // std::cout << "SetReferenceMapPoints ok" << std::endl; // DEBUG
 
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
-    std::cout << "SetCurrentCameraPose ok" << std::endl; // DEBUG
+    // std::cout << "SetCurrentCameraPose ok" << std::endl; // DEBUG
 
     mpAtlas->GetAgentCurrentMap(mpAgent)->mvpKeyFrameOrigins.push_back(pKFini);
-    std::cout << "mvpKeyFrameOrigins ok" << std::endl; // DEBUG
+    // std::cout << "mvpKeyFrameOrigins ok" << std::endl; // DEBUG
 
     mState=OK;
 
     initID = pKFcur->mnId;
-    std::cout << "map initialization ok" << std::endl; // DEBUG
+    // std::cout << "map initialization ok" << std::endl; // DEBUG
 }
 
 void Tracking::CreateMapInAtlas()
@@ -2631,12 +2631,12 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
     ORBmatcher matcher(0.7,true);
     vector<MapPoint*> vpMapPointMatches;
 
-    std::cout << "Current map has id " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl; // DEBUG
-    std::cout << "Current ref KF has id " << mpReferenceKF -> mnId << "and belongs to map " << mpReferenceKF->GetMap()->GetId() << std::endl; // DEBUG
+    // std::cout << "Current map has id " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl; // DEBUG
+    // std::cout << "Current ref KF has id " << mpReferenceKF -> mnId << "and belongs to map " << mpReferenceKF->GetMap()->GetId() << std::endl; // DEBUG
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
-    std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    // std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     // if(nmatches<15) // FIXME : uncomment
     // {
@@ -2649,10 +2649,10 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
 
     //mCurrentFrame.PrintPointDistribution();
 
-    std::cout << "Pose initialized" << std::endl; // DEBUG
+    // std::cout << "Pose initialized" << std::endl; // DEBUG
     // cout << " TrackReferenceKeyFrame mLastFrame.mTcw:  " << mLastFrame.mTcw << endl;
     Optimizer::PoseOptimization(&mCurrentFrame);
-    std::cout << "Pose optimized" << std::endl; // DEBUG
+    // std::cout << "Pose optimized" << std::endl; // DEBUG
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -2682,7 +2682,7 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
         }
     }
 
-    std::cout << nmatchesMap << " matches found for current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    // std::cout << nmatchesMap << " matches found for current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     if (mSensor == Agent::IMU_MONOCULAR || mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
         return true;
@@ -2694,13 +2694,13 @@ void Tracking::UpdateLastFrame() // Concretement, ne fait rien si mono sauf set 
 {
     // Update pose according to reference keyframe
     KeyFrame* pRef = mLastFrame.mpReferenceKF;
-    std::cout << "last ref KF has ID " << pRef->mnId << "and pose " << pRef->GetPose().matrix() << std::endl; // DEBUG
+    // std::cout << "last ref KF has ID " << pRef->mnId << "and pose " << pRef->GetPose().matrix() << std::endl; // DEBUG
     Sophus::SE3f Tlr = mlRelativeFramePoses.back();
-    std::cout << "relative pose is " << Tlr.matrix() << std::endl; // DEBUG
+    // std::cout << "relative pose is " << Tlr.matrix() << std::endl; // DEBUG
     mLastFrame.SetPose(Tlr * pRef->GetPose());
 
     if(mnLastKeyFrameId==mLastFrame.mnId || mSensor==Agent::MONOCULAR || mSensor==Agent::IMU_MONOCULAR || !mbOnlyTracking)
-        std::cout << "returning, as expected" << std::endl;
+        // std::cout << "returning, as expected" << std::endl;
         return;
 
     // Create "visual odometry" MapPoints
@@ -2768,14 +2768,14 @@ void Tracking::UpdateLastFrame() // Concretement, ne fait rien si mono sauf set 
 
 bool Tracking::TrackWithMotionModel()
 {
-    std::cout << "Entering TrackWithMotionModel()" << std::endl; // DEBUG
+    // std::cout << "Entering TrackWithMotionModel()" << std::endl; // DEBUG
     ORBmatcher matcher(0.9,true);
-    std::cout << "ORB matcher initialized" << std::endl; // DEBUG
+    // std::cout << "ORB matcher initialized" << std::endl; // DEBUG
     // Update last frame pose according to its reference keyframe
     // Create "visual odometry" points if in Localization Mode
     UpdateLastFrame();
-    std::cout << "Last frame updated" << std::endl; // DEBUG
-    std::cout << "Initializing current frame pose for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    // std::cout << "Last frame updated" << std::endl; // DEBUG
+    // std::cout << "Initializing current frame pose for Agent " << mpAgent->mnId << std::endl; // DEBUG
     mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL)); // ?? What for ??
@@ -2789,7 +2789,7 @@ bool Tracking::TrackWithMotionModel()
         th=15;
 
     int nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,th,mSensor==Agent::MONOCULAR || mSensor==Agent::IMU_MONOCULAR);
-        std::cout << nmatches << " matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+        // std::cout << nmatches << " matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // If few matches, uses a wider window search
     if(nmatches<20)
@@ -2813,7 +2813,7 @@ bool Tracking::TrackWithMotionModel()
 
     // Optimize frame pose with all matches
     Optimizer::PoseOptimization(&mCurrentFrame);
-    std::cout << "Pose optimized for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    // std::cout << "Pose optimized for Agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -2840,7 +2840,7 @@ bool Tracking::TrackWithMotionModel()
                 nmatchesMap++;
         }
     }
-    std::cout << "Outliers discarded for Agent " << mpAgent->mnId << ". There are " << nmatchesMap << " map matches" << std::endl; // DEBUG
+    // std::cout << "Outliers discarded for Agent " << mpAgent->mnId << ". There are " << nmatchesMap << " map matches" << std::endl; // DEBUG
 
     if(mbOnlyTracking)
     {
@@ -2862,9 +2862,9 @@ bool Tracking::TrackLocalMap()
     mTrackedFr++;
 
     UpdateLocalMap();
-    std::cout << "Local map updated" << std::endl; // DEBUG
+    // std::cout << "Local map updated" << std::endl; // DEBUG
     SearchLocalPoints();
-    std::cout << "Local points searched" << std::endl; // DEBUG
+    // std::cout << "Local points searched" << std::endl; // DEBUG
 
     // TOO check outliers before PO
     int aux1 = 0, aux2=0;
@@ -2917,23 +2917,23 @@ bool Tracking::TrackLocalMap()
     std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
     if(mnFramesSinceLastReloc<mMaxFrames && mnMatchesInliers<50)
     {
-        std::cout << "Local map tracking = failure" << std::endl; // DEBUG
+        // std::cout << "Local map tracking = failure" << std::endl; // DEBUG
         return false;
     }
 
     if((mnMatchesInliers>10)&&(mState==RECENTLY_LOST))
     {    
-        std::cout << "Local map tracking = success" << std::endl; // DEBUG
+        // std::cout << "Local map tracking = success" << std::endl; // DEBUG
         return true;
     }
     if(mnMatchesInliers<30)
     {
-        std::cout << "Local map tracking = failure" << std::endl; // DEBUG
+        // std::cout << "Local map tracking = failure" << std::endl; // DEBUG
         return false;
     }
     else
     {
-        std::cout << "Local map tracking = success" << std::endl; // DEBUG
+        // std::cout << "Local map tracking = success" << std::endl; // DEBUG
         return true;
     }
 }
@@ -2953,7 +2953,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     }
 
     const int nKFs = mpAtlas->KeyFramesInMap(mpAgent);
-    std::cout << nKFs << " KF in current map for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    // std::cout << nKFs << " KF in current map for Agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // Do not insert keyframes if not enough frames have passed from last relocalisation
     if(mnFramesSinceLastReloc<mMaxFrames && nKFs>mMaxFrames)
@@ -2969,7 +2969,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
 
     // Local Mapping accept keyframes?
     bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
-    std::cout << "bLocalMappingIdle : " << bLocalMappingIdle << ", mMinFrames : " << mMinFrames << ", mnFramesSinceLastKF : " << mnFramesSinceLastKF << std::endl; // DEBUG
+    // std::cout << "bLocalMappingIdle : " << bLocalMappingIdle << ", mMinFrames : " << mMinFrames << ", mnFramesSinceLastKF : " << mnFramesSinceLastKF << std::endl; // DEBUG
 
     // Check how many "close" points are being tracked and how many could be potentially created.
     int nNonTrackedClose = 0;
@@ -3002,7 +3002,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = (((mnMatchesInliers<nRefMatches*thRefRatio || bNeedToInsertClose)) && mnMatchesInliers>15);
 
-    std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
+    // std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
     // Temporal condition for Inertial cases
     bool c3 = false;
 
@@ -3010,17 +3010,17 @@ bool Tracking::NeedNewKeyFrame() // seems ok
 
     if(((c1a||c1b||c1c) && c2)||c3 ||c4)
     {
-        std::cout << "Need new KF" << std::endl; // DEBUG
+        // std::cout << "Need new KF" << std::endl; // DEBUG
         // If the mapping accepts keyframes, insert keyframe.
         // Otherwise send a signal to interrupt BA
         if(bLocalMappingIdle || mpLocalMapper->IsInitializing())
         {
-            std::cout << "LM OK" << std::endl; // DEBUG
+            // std::cout << "LM OK" << std::endl; // DEBUG
             return true;
         }
         else
         {
-            std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
+            // std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
             mpLocalMapper->InterruptBA();
             return false;
         }
@@ -3032,7 +3032,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
 void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLastReloc !!
 {
     if(!mpLocalMapper->SetNotStop(true)) {
-        std::cout << "!mpLocalMapper->SetNotStop(true) : returning" << std::endl; // DEBUG
+        // std::cout << "!mpLocalMapper->SetNotStop(true) : returning" << std::endl; // DEBUG
         return;
     }
 
@@ -3058,7 +3058,7 @@ void Tracking::CreateNewKeyFrame() // don't forget to increase mnFramesSinceLast
     mpLastKeyFrame = pKF;
 
     mnFramesSinceLastKF = 0; // reset frames since last KF creation counter
-    std::cout << "KF inserted, time for LM" << std::endl; // DEBUG
+    // std::cout << "KF inserted, time for LM" << std::endl; // DEBUG
 }
 
 void Tracking::SearchLocalPoints()
@@ -3128,7 +3128,7 @@ void Tracking::UpdateLocalMap()
 {
     // This is for visualization
     mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints, mpAgent);
-    std::cout << "Reference map points set for agent " << mpAgent->mnId << std::endl; // DEBUG
+    // std::cout << "Reference map points set for agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // Update
     UpdateLocalKeyFrames();

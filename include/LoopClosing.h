@@ -27,12 +27,13 @@
 #include "Tracking.h"
 
 #include "KeyFrameDatabase.h"
-#include "Viewer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <thread>
 #include <mutex>
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
+
+#include "Agent.h"
 
 namespace ORB_SLAM3
 {
@@ -41,8 +42,8 @@ class Tracking;
 class LocalMapping;
 class KeyFrameDatabase;
 class Map;
-class Viewer;
 class Atlas;
+class Agent;
 
 class LoopClosing
 {
@@ -84,7 +85,6 @@ public:
 
     bool isFinished();
 
-    Viewer* mpViewer;
 
 #ifdef REGISTER_TIMES
 
@@ -210,6 +210,9 @@ protected:
     std::vector<MapPoint*> mvpMergeMPs;
     std::vector<MapPoint*> mvpMergeMatchedMPs;
     std::vector<KeyFrame*> mvpMergeConnectedKFs;
+
+    // Agent version
+    Agent* mpCurrentAgent;
 
     g2o::Sim3 mSold_new;
     //-------

@@ -79,10 +79,10 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
                 std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
             #endif
-            cout << "New KF in map" << endl;
+            cout << "New KF in map" << endl; // DEBUG
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
-            cout << "BoW creation + insertion in map OK" << endl;
+            cout << "BoW creation + insertion in map OK" << endl; // DEBUG
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
 
@@ -92,7 +92,6 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
             // Check recent MapPoints
             MapPointCulling();
-            // cout << "ok-LM-3" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndMPCulling = std::chrono::steady_clock::now();
 
@@ -102,16 +101,15 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
             // Triangulate new MapPoints
             CreateNewMapPoints();
-            cout << "New map pts created" << endl;
+            cout << "New map pts created" << endl; // DEBUG
             mbAbortBA = false;
 
             if(!CheckNewKeyFrames())
             {
                 // Find more matches in neighbor keyframes and fuse point duplications
                 SearchInNeighbors();
-                cout << "Neighbors searched" << endl;
+                cout << "Neighbors searched" << endl; // DEBUG
             }
-            // cout << "ok-LM-5" << endl;
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndMPCreation = std::chrono::steady_clock::now();
                 double timeMPCreation = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCreation - time_EndMPCulling).count();
@@ -201,7 +199,6 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
         usleep(3000);
     }
-    // cout << "ok-LM-14" << endl;
     SetFinish();
 }
 
@@ -259,7 +256,7 @@ void LocalMapping::ProcessNewKeyFrame() // Should be ok
 
     // Insert Keyframe in Map (the Atlas fct checks KF's correct map, which is set on creation)
     mpAtlas->AddKeyFrame(mpCurrentKeyFrame);
-    std::cout << "KF " << mpCurrentKeyFrame->mnId << " added to the Atlas" << std::endl;
+    std::cout << "KF " << mpCurrentKeyFrame->mnId << " added to the Atlas" << std::endl; // DEBUG
 }
 
 void LocalMapping::EmptyQueue()
@@ -920,7 +917,7 @@ void LocalMapping::KeyFrameCulling()
             break;
         }
     }
-    std::cout << culledKFcounter << " KF should be culled from map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl;
+    std::cout << culledKFcounter << " KF should be culled from map " << mpAtlas->GetAgentCurrentMap(mpAgent)->GetId() << std::endl; // DEBUG
 }
 
 void LocalMapping::RequestReset()
