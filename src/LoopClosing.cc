@@ -550,13 +550,15 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     if(!bLoopDetectedInKF && !vpLoopBowCand.empty())
     {
         std::cout << "!bLoopDetectedInKF && !vpLoopBowCand.empty()" << std::endl; // DEBUG
-        mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs); // FIXME : make sure no pb with this fct
+        mpCurrentAgent->mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
+        std::cout << "mpCurrentAgent->mnLoopNumCoincidences : " << mpCurrentAgent->mnLoopNumCoincidences << std::endl;
     }
     // Merge candidates
     if(!bMergeDetectedInKF && !vpMergeBowCand.empty())
     {
         std::cout << "!bMergeDetectedInKF && !vpMergeBowCand.empty()" << std::endl; // DEBUG
-        mbMergeDetected = DetectCommonRegionsFromBoW(vpMergeBowCand, mpCurrentAgent->mpMergeMatchedKF, mpCurrentAgent->mpMergeLastCurrentKF, mpCurrentAgent->mg2oMergeSlw, mpCurrentAgent->mnMergeNumCoincidences, mpCurrentAgent->mvpMergeMPs, mpCurrentAgent->mvpMergeMatchedMPs); // FIXME : make sure no pb with this fct
+        mpCurrentAgent->mbMergeDetected = DetectCommonRegionsFromBoW(vpMergeBowCand, mpCurrentAgent->mpMergeMatchedKF, mpCurrentAgent->mpMergeLastCurrentKF, mpCurrentAgent->mg2oMergeSlw, mpCurrentAgent->mnMergeNumCoincidences, mpCurrentAgent->mvpMergeMPs, mpCurrentAgent->mvpMergeMatchedMPs); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
+        std::cout << "mpCurrentAgent->mnMergeNumCoincidences : " << mpCurrentAgent->mnMergeNumCoincidences << std::endl;
     }
 
     #ifdef REGISTER_TIMES
@@ -569,9 +571,9 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     mpKeyFrameDB->add(mpCurrentKF);
     std::cout << "Current KF added to KFDB" << std::endl; // DEBUG
 
-    if(mbMergeDetected || mbLoopDetected)
+    if(mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected)
     {
-        std::cout << "mbMergeDetected || mbLoopDetected" << std::endl; // DEBUG
+        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected" << std::endl; // DEBUG
         return true;
     }
 
@@ -625,7 +627,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
 }
 
 bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, KeyFrame* &pMatchedKF2, KeyFrame* &pLastCurrentKF, g2o::Sim3 &g2oScw,
-                                             int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs)
+                                             int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs) //-> looks fine, maybe threshold tuning needed
 {
     std::cout << "Entering DetectCommonRegionsFromBoW fct" << std::endl; // DEBUG
     int nBoWMatches = 20;
@@ -680,7 +682,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         bool bAbortByNearKF = false;
         for(int j=0; j<vpCovKFi.size(); ++j)
         {
-            if(spConnectedKeyFrames.find(vpCovKFi[j]) != spConnectedKeyFrames.end())
+            if(spConnectedKeyFrames.find(vpCovKFi[j]) != spConnectedKeyFrames.end()) // means vpCovKFi[j] not found in spConnectedKeyFrames std::set
             {
                 bAbortByNearKF = true;
                 break;
@@ -741,7 +743,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         }
         std::cout << "ok5" << std::endl; // DEBUG
 
-        //pMostBoWMatchesKF = vpCovKFi[pMostBoWMatchesKF];
+        //pMostBoWMatchesKF = vpCovKFi[pMostBoWMatchesKF]; // WHY ???? (ju)
 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
