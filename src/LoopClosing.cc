@@ -497,6 +497,51 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     if(mpCurrentAgent->mnLoopNumCoincidences > 0) // FIXME : fill and test
     {
         std::cout << "mpCurrentAgent->mnLoopNumCoincidences > 0" << std::endl; // DEBUG
+
+        bCheckSpatial = true;
+        // Find from the last KF candidates
+        Sophus::SE3d mTcl = (mpCurrentKF->GetPose() * mpCurrentAgent->mpLoopLastCurrentKF->GetPoseInverse()).cast<double>();
+        g2o::Sim3 gScl(mTcl.unit_quaternion(),mTcl.translation(),1.0);
+        g2o::Sim3 gScw = gScl * mpCurrentAgent->mg2oLoopSlw;
+        int numProjMatches = 0;
+        vector<MapPoint*> vpMatchedMPs;
+        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpLoopMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpLoopMPs, vpMatchedMPs);
+        if(bCommonRegion)
+        {
+
+            bLoopDetectedInKF = true;
+
+            mpCurrentAgent->mnLoopNumCoincidences++;
+            mpCurrentAgent->mpLoopLastCurrentKF->SetErase();
+            mpCurrentAgent->mpLoopLastCurrentKF = mpCurrentKF;
+            mpCurrentAgent->mg2oLoopSlw = gScw;
+            mpCurrentAgent->mvpLoopMatchedMPs = vpMatchedMPs;
+
+
+            mpCurrentAgent->mbLoopDetected = mpCurrentAgent->mnLoopNumCoincidences >= 3;
+            mpCurrentAgent->mnLoopNumNotFound = 0;
+
+            if(!mpCurrentAgent->mbLoopDetected)
+            {
+                cout << "PR: Loop detected with Reffine Sim3" << endl;
+            }
+        }
+        else
+        {
+            bLoopDetectedInKF = false;
+
+            mpCurrentAgent->mnLoopNumNotFound++;
+            if(mpCurrentAgent->mnLoopNumNotFound >= 2)
+            {
+                mpCurrentAgent->mpLoopLastCurrentKF->SetErase();
+                mpCurrentAgent->mpLoopMatchedKF->SetErase();
+                mpCurrentAgent->mnLoopNumCoincidences = 0;
+                mpCurrentAgent->mvpLoopMatchedMPs.clear();
+                mpCurrentAgent->mvpLoopMPs.clear();
+                mpCurrentAgent->mnLoopNumNotFound = 0;
+            }
+
+        }
     }
 
     //Merge candidates
@@ -504,6 +549,45 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     if(mpCurrentAgent->mnMergeNumCoincidences > 0) // FIXME : fill and test
     {
         std::cout << "mpCurrentAgent->mnMergeNumCoincidences > 0" << std::endl; // DEBUG
+
+        // Find from the last KF candidates
+        Sophus::SE3d mTcl = (mpCurrentKF->GetPose() * mpCurrentAgent->mpMergeLastCurrentKF->GetPoseInverse()).cast<double>();
+
+        g2o::Sim3 gScl(mTcl.unit_quaternion(), mTcl.translation(), 1.0);
+        g2o::Sim3 gScw = gScl * mpCurrentAgent->mg2oMergeSlw;
+        int numProjMatches = 0;
+        vector<MapPoint*> vpMatchedMPs;
+        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs);
+        if(bCommonRegion)
+        {
+            bMergeDetectedInKF = true;
+
+            mpCurrentAgent->mnMergeNumCoincidences++;
+            mpCurrentAgent->mpMergeLastCurrentKF->SetErase();
+            mpCurrentAgent->mpMergeLastCurrentKF = mpCurrentKF;
+            mpCurrentAgent->mg2oMergeSlw = gScw;
+            mpCurrentAgent->mvpMergeMatchedMPs = vpMatchedMPs;
+
+            mpCurrentAgent->mbMergeDetected = mnMergeNumCoincidences >= 3;
+        }
+        else
+        {
+            mpCurrentAgent->mbMergeDetected = false;
+            bMergeDetectedInKF = false;
+
+            mpCurrentAgent->mnMergeNumNotFound++;
+            if(mpCurrentAgent->mnMergeNumNotFound >= 2)
+            {
+                mpCurrentAgent->mpMergeLastCurrentKF->SetErase();
+                mpCurrentAgent->mpMergeMatchedKF->SetErase();
+                mpCurrentAgent->mnMergeNumCoincidences = 0;
+                mpCurrentAgent->mvpMergeMatchedMPs.clear();
+                mpCurrentAgent->mvpMergeMPs.clear();
+                mpCurrentAgent->mnMergeNumNotFound = 0;
+            }
+
+
+        }
     }
     #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point time_EndEstSim3_1 = std::chrono::steady_clock::now();
