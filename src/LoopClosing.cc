@@ -552,14 +552,18 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
 
         // Find from the last KF candidates
         Sophus::SE3d mTcl = (mpCurrentKF->GetPose() * mpCurrentAgent->mpMergeLastCurrentKF->GetPoseInverse()).cast<double>();
+        std::cout << "Merge validation : ok1" << std::endl; // DEBUG
 
         g2o::Sim3 gScl(mTcl.unit_quaternion(), mTcl.translation(), 1.0);
         g2o::Sim3 gScw = gScl * mpCurrentAgent->mg2oMergeSlw;
         int numProjMatches = 0;
         vector<MapPoint*> vpMatchedMPs;
+        std::cout << "Merge validation : ok2" << std::endl; // DEBUG
         bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs);
+        std::cout << "Merge validation : ok3" << std::endl; // DEBUG
         if(bCommonRegion)
         {
+            std::cout << "Merge validation : ok4" << std::endl; // DEBUG
             bMergeDetectedInKF = true;
 
             mpCurrentAgent->mnMergeNumCoincidences++;
@@ -569,23 +573,27 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
             mpCurrentAgent->mvpMergeMatchedMPs = vpMatchedMPs;
 
             mpCurrentAgent->mbMergeDetected = mnMergeNumCoincidences >= 3;
+            std::cout << "Merge validation : ok5" << std::endl; // DEBUG
         }
         else
         {
+            std::cout << "Merge validation : ok6" << std::endl; // DEBUG
             mpCurrentAgent->mbMergeDetected = false;
             bMergeDetectedInKF = false;
 
             mpCurrentAgent->mnMergeNumNotFound++;
             if(mpCurrentAgent->mnMergeNumNotFound >= 2)
             {
+                std::cout << "Merge validation : ok7" << std::endl; // DEBUG
                 mpCurrentAgent->mpMergeLastCurrentKF->SetErase();
                 mpCurrentAgent->mpMergeMatchedKF->SetErase();
                 mpCurrentAgent->mnMergeNumCoincidences = 0;
                 mpCurrentAgent->mvpMergeMatchedMPs.clear();
                 mpCurrentAgent->mvpMergeMPs.clear();
                 mpCurrentAgent->mnMergeNumNotFound = 0;
+                std::cout << "Merge validation : ok8" << std::endl; // DEBUG
             }
-
+            std::cout << "Merge validation : ok9" << std::endl; // DEBUG
 
         }
     }
@@ -685,9 +693,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
         g2o::Sim3 gScm = gScw * gSwm;
         Eigen::Matrix<double, 7, 7> mHessian7x7;
 
-        bool bFixedScale = mbFixScale;       // TODO CHECK; Solo para el monocular inertial
-        if(mpTracker->mSensor==Agent::IMU_MONOCULAR && !pCurrentKF->GetMap()->GetIniertialBA2())
-            bFixedScale=false;
+        bool bFixedScale = mbFixScale;
         int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 10, bFixedScale, mHessian7x7, true);
 
         //Verbose::PrintMess("Sim3 reffine: There are " + to_string(numOptMatches) + " matches after of the optimization ", Verbose::VERBOSITY_DEBUG);
