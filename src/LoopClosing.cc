@@ -103,7 +103,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
             // Clear mpLastCurrentKF if necessary
             if(mpLastCurrentKF)
             {
-                mpLastCurrentKF->mvpLoopCandKFs.clear();
+                mpLastCurrentKF->mvpLoopCandKFs.clear(); // FIXME: mpLastCurrentKF is not used
                 mpLastCurrentKF->mvpMergeCandKFs.clear();
             }
             #ifdef REGISTER_TIMES
