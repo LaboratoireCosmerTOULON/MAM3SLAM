@@ -152,3 +152,7 @@ target_link_libraries(testAgent ${PROJECT_NAME})
 add_executable(testPangolin
          test/testPangolin.cc)
 target_link_libraries(testPangolin ${PROJECT_NAME})
+
+add_executable(testFileWriting
+         test/testFileWriting.cc)
+target_link_libraries(testFileWriting ${PROJECT_NAME})

@@ -682,8 +682,9 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
     nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs);
 
     int nProjMatches = 30;
-    int nProjOptMatches = 50;
-    int nProjMatchesRep = 100;
+    int nProjOptMatches = 40; //50;
+    int nProjMatchesRep = 50; //100;
+    std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatches << std::endl;
 
     if(nNumProjMatches >= nProjMatches)
     {
@@ -695,6 +696,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
 
         bool bFixedScale = mbFixScale;
         int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 10, bFixedScale, mHessian7x7, true);
+        std::cout << "numOptMatches: " << numOptMatches << " for min. value " << nProjOptMatches << std::endl;
 
         //Verbose::PrintMess("Sim3 reffine: There are " + to_string(numOptMatches) + " matches after of the optimization ", Verbose::VERBOSITY_DEBUG);
 
@@ -706,6 +708,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
             vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
 
             nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw_estimation, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs);
+            std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatchesRep << std::endl;
             if(nNumProjMatches >= nProjMatchesRep)
             {
                 gScw = gScw_estimation;
@@ -833,24 +836,31 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         }
         std::cout << "ok5" << std::endl; // DEBUG
 
-        //pMostBoWMatchesKF = vpCovKFi[pMostBoWMatchesKF]; // WHY ???? (ju)
+        // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
+
+        // pMostBoWMatchesKF = vpCovKFi[nIndexMostBoWMatchesKF]; // WHY ???? (ju)
 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
+            // WRITE: KF timestamps and Agents -> a candidate has been selected
+            // std::string filename("tmp.txt");
+            // std::ofstream file_out;
+            // file_out.open(filename, std::ios_base::app);
+            // file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
+            // file_out.close();
+
             std::cout << "ok6" << std::endl; // DEBUG
             // Geometric validation
             bool bFixedScale = mbFixScale;
 
             Sim3Solver solver = Sim3Solver(mpCurrentKF, pMostBoWMatchesKF, vpMatchedPoints, bFixedScale, vpKeyFrameMatchedMP);
             solver.SetRansacParameters(0.99, nBoWInliers, 300); // at least 15 inliers
-            // std::cout << "ok6-1" << std::endl; // DEBUG
 
             bool bNoMore = false;
             vector<bool> vbInliers;
             int nInliers;
             bool bConverge = false;
             Eigen::Matrix4f mTcm;
-            // std::cout << "ok6-2" << std::endl; // DEBUG
             while(!bConverge && !bNoMore)
             {
                 // std::cout << "ok6-3 (loop)" << std::endl; // DEBUG
@@ -864,6 +874,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
             {
                 std::cout << "ok8" << std::endl; // DEBUG
                 //std::cout << "Check BoW: SolverSim3 converged" << std::endl;
+
+                // WRITE: Sim3Solver inliers (vpMatchedPoints[vbInliers]/vpKeyFrameMatchedMP[vbInliers])
 
                 //Verbose::PrintMess("BoW guess: Convergende with " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
                 std::cout << "BoW guess: Convergence with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
@@ -911,6 +923,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 cout <<"BoW: " << numProjMatches << " matches between " << vpMapPoints.size() << " points with coarse Sim3" << endl;
                 std::cout << "ok11" << std::endl; // DEBUG
 
+                // WRITE: SearchByProjection matches (ORB descriptor matched to vpMatchedMP, not returned/vpMatchedMP) -> need modif to be displayed. May be got by using KF mvKeys and mDescriptors and adding this output to SearchByProjection
+
                 if(numProjMatches >= nProjMatches)
                 {
                     std::cout << "ok12" << std::endl; // DEBUG
@@ -921,6 +935,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
                     int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
                     std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
+
+                    // WRITE: OptimizeSim3 matches (mpCurrentKF->GetMapPointMatches()/vpMatchedMP) -> the optimizer will remove from vpMatchedMP all matches identified as outliers
 
                     if(numOptMatches >= nSim3Inliers)
                     {
@@ -933,6 +949,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
                         int numProjOptMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpMatchedMP, 5, 1.0);
                         std::cout << "numProjOptMatches is " << numProjOptMatches << " after serach by projection. Min. matches nb is " << nProjOptMatches << std::endl;
+
+                        // WRITE: SearchByProjection matches (vpMapPoints/vpMatchedMP ? to check)
 
                         if(numProjOptMatches >= nProjOptMatches)
                         {
