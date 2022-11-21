@@ -2220,117 +2220,116 @@ void Tracking::Track()
 
 
 void Tracking::StereoInitialization()
-// {
-//     if(mCurrentFrame.N>500)
-//     {
-//         if (mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
-//         {
-//             if (!mCurrentFrame.mpImuPreintegrated || !mLastFrame.mpImuPreintegrated)
-//             {
-//                 cout << "not IMU meas" << endl;
-//                 return;
-//             }
+{
+    // if(mCurrentFrame.N>500)
+    // {
+    //     if (mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
+    //     {
+    //         if (!mCurrentFrame.mpImuPreintegrated || !mLastFrame.mpImuPreintegrated)
+    //         {
+    //             cout << "not IMU meas" << endl;
+    //             return;
+    //         }
 
-//             if (!mFastInit && (mCurrentFrame.mpImuPreintegratedFrame->avgA-mLastFrame.mpImuPreintegratedFrame->avgA).norm()<0.5)
-//             {
-//                 cout << "not enough acceleration" << endl;
-//                 return;
-//             }
+    //         if (!mFastInit && (mCurrentFrame.mpImuPreintegratedFrame->avgA-mLastFrame.mpImuPreintegratedFrame->avgA).norm()<0.5)
+    //         {
+    //             cout << "not enough acceleration" << endl;
+    //             return;
+    //         }
 
-//             if(mpImuPreintegratedFromLastKF)
-//                 delete mpImuPreintegratedFromLastKF;
+    //         if(mpImuPreintegratedFromLastKF)
+    //             delete mpImuPreintegratedFromLastKF;
 
-//             mpImuPreintegratedFromLastKF = new IMU::Preintegrated(IMU::Bias(),*mpImuCalib);
-//             mCurrentFrame.mpImuPreintegrated = mpImuPreintegratedFromLastKF;
-//         }
+    //         mpImuPreintegratedFromLastKF = new IMU::Preintegrated(IMU::Bias(),*mpImuCalib);
+    //         mCurrentFrame.mpImuPreintegrated = mpImuPreintegratedFromLastKF;
+    //     }
 
-//         // Set Frame pose to the origin (In case of inertial SLAM to imu)
-//         if (mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
-//         {
-//             Eigen::Matrix3f Rwb0 = mCurrentFrame.mImuCalib.mTcb.rotationMatrix();
-//             Eigen::Vector3f twb0 = mCurrentFrame.mImuCalib.mTcb.translation();
-//             Eigen::Vector3f Vwb0;
-//             Vwb0.setZero();
-//             mCurrentFrame.SetImuPoseVelocity(Rwb0, twb0, Vwb0);
-//         }
-//         else
-//             mCurrentFrame.SetPose(Sophus::SE3f());
+    //     // Set Frame pose to the origin (In case of inertial SLAM to imu)
+    //     if (mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
+    //     {
+    //         Eigen::Matrix3f Rwb0 = mCurrentFrame.mImuCalib.mTcb.rotationMatrix();
+    //         Eigen::Vector3f twb0 = mCurrentFrame.mImuCalib.mTcb.translation();
+    //         Eigen::Vector3f Vwb0;
+    //         Vwb0.setZero();
+    //         mCurrentFrame.SetImuPoseVelocity(Rwb0, twb0, Vwb0);
+    //     }
+    //     else
+    //         mCurrentFrame.SetPose(Sophus::SE3f());
 
-//         // Create KeyFrame
-//         KeyFrame* pKFini = new KeyFrame(mCurrentFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
+    //     // Create KeyFrame
+    //     KeyFrame* pKFini = new KeyFrame(mCurrentFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
 
-//         // Insert KeyFrame in the map
-//         mpAtlas->AddKeyFrame(pKFini);
+    //     // Insert KeyFrame in the map
+    //     mpAtlas->AddKeyFrame(pKFini);
 
-//         // Create MapPoints and asscoiate to KeyFrame
-//         if(!mpCamera2){
-//             for(int i=0; i<mCurrentFrame.N;i++)
-//             {
-//                 float z = mCurrentFrame.mvDepth[i];
-//                 if(z>0)
-//                 {
-//                     Eigen::Vector3f x3D;
-//                     mCurrentFrame.UnprojectStereo(i, x3D);
-//                     MapPoint* pNewMP = new MapPoint(x3D, pKFini, mpAtlas->GetCurrentMap());
-//                     pNewMP->AddObservation(pKFini,i);
-//                     pKFini->AddMapPoint(pNewMP,i);
-//                     pNewMP->ComputeDistinctiveDescriptors();
-//                     pNewMP->UpdateNormalAndDepth();
-//                     mpAtlas->AddMapPoint(pNewMP);
+    //     // Create MapPoints and asscoiate to KeyFrame
+    //     if(!mpCamera2){
+    //         for(int i=0; i<mCurrentFrame.N;i++)
+    //         {
+    //             float z = mCurrentFrame.mvDepth[i];
+    //             if(z>0)
+    //             {
+    //                 Eigen::Vector3f x3D;
+    //                 mCurrentFrame.UnprojectStereo(i, x3D);
+    //                 MapPoint* pNewMP = new MapPoint(x3D, pKFini, mpAtlas->GetCurrentMap());
+    //                 pNewMP->AddObservation(pKFini,i);
+    //                 pKFini->AddMapPoint(pNewMP,i);
+    //                 pNewMP->ComputeDistinctiveDescriptors();
+    //                 pNewMP->UpdateNormalAndDepth();
+    //                 mpAtlas->AddMapPoint(pNewMP);
 
-//                     mCurrentFrame.mvpMapPoints[i]=pNewMP;
-//                 }
-//             }
-//         } else{
-//             for(int i = 0; i < mCurrentFrame.Nleft; i++){
-//                 int rightIndex = mCurrentFrame.mvLeftToRightMatch[i];
-//                 if(rightIndex != -1){
-//                     Eigen::Vector3f x3D = mCurrentFrame.mvStereo3Dpoints[i];
+    //                 mCurrentFrame.mvpMapPoints[i]=pNewMP;
+    //             }
+    //         }
+    //     } else{
+    //         for(int i = 0; i < mCurrentFrame.Nleft; i++){
+    //             int rightIndex = mCurrentFrame.mvLeftToRightMatch[i];
+    //             if(rightIndex != -1){
+    //                 Eigen::Vector3f x3D = mCurrentFrame.mvStereo3Dpoints[i];
 
-//                     MapPoint* pNewMP = new MapPoint(x3D, pKFini, mpAtlas->GetCurrentMap());
+    //                 MapPoint* pNewMP = new MapPoint(x3D, pKFini, mpAtlas->GetCurrentMap());
 
-//                     pNewMP->AddObservation(pKFini,i);
-//                     pNewMP->AddObservation(pKFini,rightIndex + mCurrentFrame.Nleft);
+    //                 pNewMP->AddObservation(pKFini,i);
+    //                 pNewMP->AddObservation(pKFini,rightIndex + mCurrentFrame.Nleft);
 
-//                     pKFini->AddMapPoint(pNewMP,i);
-//                     pKFini->AddMapPoint(pNewMP,rightIndex + mCurrentFrame.Nleft);
+    //                 pKFini->AddMapPoint(pNewMP,i);
+    //                 pKFini->AddMapPoint(pNewMP,rightIndex + mCurrentFrame.Nleft);
 
-//                     pNewMP->ComputeDistinctiveDescriptors();
-//                     pNewMP->UpdateNormalAndDepth();
-//                     mpAtlas->AddMapPoint(pNewMP);
+    //                 pNewMP->ComputeDistinctiveDescriptors();
+    //                 pNewMP->UpdateNormalAndDepth();
+    //                 mpAtlas->AddMapPoint(pNewMP);
 
-//                     mCurrentFrame.mvpMapPoints[i]=pNewMP;
-//                     mCurrentFrame.mvpMapPoints[rightIndex + mCurrentFrame.Nleft]=pNewMP;
-//                 }
-//             }
-//         }
+    //                 mCurrentFrame.mvpMapPoints[i]=pNewMP;
+    //                 mCurrentFrame.mvpMapPoints[rightIndex + mCurrentFrame.Nleft]=pNewMP;
+    //             }
+    //         }
+    //     }
 
-//         Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInMap()) + " points", Verbose::VERBOSITY_QUIET);
+    //     Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInMap()) + " points", Verbose::VERBOSITY_QUIET);
 
-//         //cout << "Active map: " << mpAtlas->GetCurrentMap()->GetId() << endl;
+    //     //cout << "Active map: " << mpAtlas->GetCurrentMap()->GetId() << endl;
 
-//         mpLocalMapper->InsertKeyFrame(pKFini);
+    //     mpLocalMapper->InsertKeyFrame(pKFini);
 
-//         mLastFrame = Frame(mCurrentFrame);
-//         mnLastKeyFrameId = mCurrentFrame.mnId;
-//         mpLastKeyFrame = pKFini;
-//         //mnLastRelocFrameId = mCurrentFrame.mnId;
+    //     mLastFrame = Frame(mCurrentFrame);
+    //     mnLastKeyFrameId = mCurrentFrame.mnId;
+    //     mpLastKeyFrame = pKFini;
+    //     //mnLastRelocFrameId = mCurrentFrame.mnId;
 
-//         mvpLocalKeyFrames.push_back(pKFini);
-//         mvpLocalMapPoints=mpAtlas->GetAllMapPoints();
-//         mpReferenceKF = pKFini;
-//         mCurrentFrame.mpReferenceKF = pKFini;
+    //     mvpLocalKeyFrames.push_back(pKFini);
+    //     mvpLocalMapPoints=mpAtlas->GetAllMapPoints();
+    //     mpReferenceKF = pKFini;
+    //     mCurrentFrame.mpReferenceKF = pKFini;
 
-//         mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
+    //     mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
 
-//         mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
+    //     mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
 
-//         mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
+    //     mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
 
-//         mState=OK;
-//     }
-// }
-{}
+    //     mState=OK;
+    // }
+}
 
 
 void Tracking::MonocularInitialization() // OK (no core dumped but is the output good ?)

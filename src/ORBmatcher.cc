@@ -849,7 +849,7 @@ namespace ORB_SLAM3
                     {
                         if(static_cast<float>(bestDist1)<mfNNratio*static_cast<float>(bestDist2))
                         {
-                            vpMatches12[idx1]=vpMapPoints2[bestIdx2];
+                            vpMatches12[idx1]=vpMapPoints2[bestIdx2]; // for each MP of KF1 of ID idx1 in vector vpMatches12, element of vpMatches12[idx1] is best matched MP from KF2
                             vbMatched2[bestIdx2]=true;
 
                             if(mbCheckOrientation)

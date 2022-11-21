@@ -754,7 +754,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         if(!pKFi || pKFi->isBad())
             continue;
 
-        std::cout << "KF candidate: " << pKFi->mnId << std::endl; // DEBUG
+        std::cout << "KF candidate: " << pKFi->mnId << ", created by Agent: " << pKFi->getAgent()->mnId << ", with timestamp: " << pKFi->mTimeStamp << std::endl; // DEBUG
         // Current KF against KF with covisibles version
         std::vector<KeyFrame*> vpCovKFi = pKFi->GetBestCovisibilityKeyFrames(nNumCovisibles);
         if(vpCovKFi.empty())
@@ -866,7 +866,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 //std::cout << "Check BoW: SolverSim3 converged" << std::endl;
 
                 //Verbose::PrintMess("BoW guess: Convergende with " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
-                std::cout << "BoW guess: Convergende with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
+                std::cout << "BoW guess: Convergence with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
                 // Match by reprojection
                 vpCovKFi.clear();
                 vpCovKFi = pMostBoWMatchesKF->GetBestCovisibilityKeyFrames(nNumCovisibles);
