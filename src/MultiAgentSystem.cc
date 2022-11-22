@@ -5,7 +5,7 @@ namespace ORB_SLAM3
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
-MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC) : mbShutDown(false) {
+MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, bool bUseViewer) : mbShutDown(false), mbUseViewer(bUseViewer) {
 
     mStrVocabularyFilePath = strVocFile;
 
@@ -48,7 +48,7 @@ MultiAgentSystem::~MultiAgentSystem() {
 }
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
-    Agent* pNewAgent = new Agent(strSettingsFile, this);
+    Agent* pNewAgent = new Agent(strSettingsFile, this, mbUseViewer);
     mvpAgents.push_back(pNewAgent);
     usleep(3000);
 }

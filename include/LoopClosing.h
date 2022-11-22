@@ -160,6 +160,7 @@ protected:
     bool mbFinishRequested;
     bool mbFinished;
     std::mutex mMutexFinish;
+    std::mutex mMutexWrite;
 
     Atlas* mpAtlas;
     Tracking* mpTracker;

@@ -62,7 +62,7 @@ class MultiAgentSystem
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    MultiAgentSystem(const string &strVocFile, bool bActiveLC = true);
+    MultiAgentSystem(const string &strVocFile, bool bActiveLC = true, bool bUseViewer = true);
     ~MultiAgentSystem();
     void addAgent(const string &strSettingsFile);
     void addAgent(Agent* pNewAgent);
@@ -116,7 +116,8 @@ private:
 
     string mStrVocabularyFilePath;
 
-    // MultiAgentViewer anf thread
+    // MultiAgentViewer and thread
+    bool mbUseViewer;
     MultiAgentViewer* mpMultiAgentViewer;
     std::thread* mptMultiAgentViewer;
 };

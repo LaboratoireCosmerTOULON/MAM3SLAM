@@ -45,7 +45,7 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr = 0, const string &strSequence = std::string());
+    Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string());
     ~Agent();
 
     // Main function

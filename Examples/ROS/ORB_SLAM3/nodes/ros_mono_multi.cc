@@ -63,7 +63,8 @@ int main(int argc, char **argv) {
     }
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::MultiAgentSystem mas(argv[1]);
+    bool bUseViewer = true;
+    ORB_SLAM3::MultiAgentSystem mas(argv[1], true, bUseViewer);
     std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
     std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
     // std::string strSettingsFile3("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
@@ -73,7 +74,9 @@ int main(int argc, char **argv) {
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
     // ImageGrabber igb3(mas.getAgent(2), is_img_mono);
-    mas.StartViewer();
+    if (bUseViewer) {
+        mas.StartViewer();
+    } 
 
     ros::NodeHandle nodeHandler;
     ros::Subscriber sub1 = nodeHandler.subscribe("/camera/left00_1/image_raw", 1, &ImageGrabber::GrabImage, &igb1);

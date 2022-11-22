@@ -5,7 +5,7 @@ namespace ORB_SLAM3
 
 long unsigned int Agent::nNextId=0;
 
-Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem), mnLoopNumCoincidences(0), mnLoopNumNotFound(0),
+Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem, bool bUseViewer, const int initFr, const string &strSequence) : mpMultiAgentSystem(pMultiAgentSystem), mnLoopNumCoincidences(0), mnLoopNumNotFound(0),
     mbLoopDetected(false), mbMergeDetected(false), mnMergeNumCoincidences(0), mnMergeNumNotFound(0)
 {
     mnId=nNextId++; // ID
@@ -71,12 +71,15 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(pLoopCloser);
 
-    // AgentViewer
-    // std::cout << "Agent " << mnId << " just before agent viewer instantiation" << std::endl;
-    mpAgentViewer = new AgentViewer(this, mpFrameDrawer, mpMapDrawer, mpTracker,strSettingsFile,settings_);
-    // std::cout << "Agent " << mnId << " just after agent viewer instantiation" << std::endl;
-    mptAgentViewer = new thread(&AgentViewer::Run, mpAgentViewer);
-    // std::cout << "Agent " << mnId << " just after agent viewer thread setting" << std::endl;
+    if (bUseViewer)
+    {
+        // AgentViewer
+        // std::cout << "Agent " << mnId << " just before agent viewer instantiation" << std::endl;
+        mpAgentViewer = new AgentViewer(this, mpFrameDrawer, mpMapDrawer, mpTracker,strSettingsFile,settings_);
+        // std::cout << "Agent " << mnId << " just after agent viewer instantiation" << std::endl;
+        mptAgentViewer = new thread(&AgentViewer::Run, mpAgentViewer);
+        // std::cout << "Agent " << mnId << " just after agent viewer thread setting" << std::endl;
+    }
 
 
 }
