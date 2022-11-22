@@ -836,18 +836,41 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         }
         std::cout << "ok5" << std::endl; // DEBUG
 
-        // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
-
         // pMostBoWMatchesKF = vpCovKFi[nIndexMostBoWMatchesKF]; // WHY ???? (ju)
 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
             // WRITE: KF timestamps and Agents -> a candidate has been selected
-            // std::string filename("tmp.txt");
-            // std::ofstream file_out;
-            // file_out.open(filename, std::ios_base::app);
-            // file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
-            // file_out.close();
+            std::string filename("KF_matches.txt");
+            std::ofstream file_out;
+            file_out.open(filename, std::ios_base::app);
+            file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
+            file_out.close();
+
+            // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
+            std::string strMatchesFileName = std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + "_matches.txt";
+            std::string matchesFilename(strMatchesFileName);
+            std::ofstream matches_file_out;
+            matches_file_out.open(matchesFilename, std::ios_base::app);
+            Eigen::Matrix4f temp_Tcw = mpCurrentKF->GetPose().matrix();
+            matches_file_out << temp_Tcw(0,0) << " " << temp_Tcw(0,1) << " " << temp_Tcw(0,2) << " " << temp_Tcw(0,3) << " " << temp_Tcw(1,0) << " " << temp_Tcw(1,1) << " " << temp_Tcw(1,2) << " " << temp_Tcw(1,3) << " " << temp_Tcw(2,0) << " " << temp_Tcw(2,1) << " " << temp_Tcw(2,2) << " " << temp_Tcw(2,3) << " " << temp_Tcw(3,0) << " " << temp_Tcw(3,1) << " " << temp_Tcw(3,2) << " " << temp_Tcw(3,3) << " " << endl;
+            Eigen::Matrix4f temp_Tlw = pMostBoWMatchesKF->GetPose().matrix();
+            matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << " " << endl;
+            matches_file_out << "###" << endl;
+            for (int j=0; j<vpMatchedPoints.size(); ++j) {
+                if (vpMatchedPoints[j] != NULL) {
+                    Eigen::Vector3f MPc_WorldPose = mpCurrentKF->GetMapPointMatches()[j]->GetWorldPos();
+                    matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
+                }
+            }
+            matches_file_out << endl;
+            for (int j=0; j<vpMatchedPoints.size(); ++j) {
+                if (vpMatchedPoints[j] != NULL) {
+                    Eigen::Vector3f MPl_WorldPose = vpMatchedPoints[j]->GetWorldPos();
+                    matches_file_out << MPl_WorldPose[0] << " " << MPl_WorldPose[1] << " "<< MPl_WorldPose[2] << " " << endl;
+                }
+            }
+            matches_file_out.close();
 
             std::cout << "ok6" << std::endl; // DEBUG
             // Geometric validation
@@ -923,7 +946,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 cout <<"BoW: " << numProjMatches << " matches between " << vpMapPoints.size() << " points with coarse Sim3" << endl;
                 std::cout << "ok11" << std::endl; // DEBUG
 
-                // WRITE: SearchByProjection matches (ORB descriptor matched to vpMatchedMP, not returned/vpMatchedMP) -> need modif to be displayed. May be got by using KF mvKeys and mDescriptors and adding this output to SearchByProjection
+                // WRITE: SearchByProjection matches (ORB descriptor matched to vpMatchedMP, not returned/vpMatchedMP) -> need modif to be displayed. May be got by using KF mvKeys and mDescriptors and adding this output to SearchByProjection ?
 
                 if(numProjMatches >= nProjMatches)
                 {
