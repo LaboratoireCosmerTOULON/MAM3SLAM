@@ -2345,8 +2345,8 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
     else
         nMoreIterations=5;
 
-    if(nCorrespondences-nBad<10)
-        return 0;
+    // if(nCorrespondences-nBad<10) // commented by JD
+    //     return 0;
 
     // Optimize again only with inliers
     optimizer.initializeOptimization();
