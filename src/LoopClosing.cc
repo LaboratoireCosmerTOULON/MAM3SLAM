@@ -559,7 +559,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
         int numProjMatches = 0;
         vector<MapPoint*> vpMatchedMPs;
         std::cout << "Merge validation : ok2" << std::endl; // DEBUG
-        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs);
+        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs, true);
         std::cout << "Merge validation : ok3" << std::endl; // DEBUG
         if(bCommonRegion)
         {
@@ -676,15 +676,63 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
 }
 
 bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3 &gScw, int &nNumProjMatches,
-                                                 std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs)
+                                                 std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs, bool bDoWrite)
 {
     set<MapPoint*> spAlreadyMatchedMPs;
     nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs);
 
     int nProjMatches = 30;
-    int nProjOptMatches = 40; //50;
-    int nProjMatchesRep = 50; //100;
+    int nProjOptMatches = 30; //50;
+    int nProjMatchesRep = 20; //100;
     std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatches << std::endl;
+
+    //WRITE
+    if (bDoWrite)
+    {
+        // WRITE: KF timestamps and Agents -> a candidate has been selected
+        std::string filename("outputs/KF_valid.txt");
+        std::ofstream file_out;
+        file_out.open(filename, std::ios_base::app);
+        file_out << pCurrentKF->getAgent()->mnId << " " << pCurrentKF->mTimeStamp << " " << pMatchedKF->getAgent()->mnId << " " << pMatchedKF->mTimeStamp << endl;
+        file_out.close();
+    }
+
+    //WRITE
+    if (bDoWrite)
+    {
+        unique_lock<mutex> lock(mMutexWrite);
+        std::string strMatchesFileName = "outputs/Proj_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+        std::string matchesFilename(strMatchesFileName);
+        std::ofstream matches_file_out;
+        matches_file_out.open(matchesFilename, std::ios_base::app);
+        if (matches_file_out.is_open())
+        {
+            Eigen::Matrix4f temp_Tcw = pCurrentKF->GetPose().matrix();
+            matches_file_out << temp_Tcw(0,0) << " " << temp_Tcw(0,1) << " " << temp_Tcw(0,2) << " " << temp_Tcw(0,3) << " " << temp_Tcw(1,0) << " " << temp_Tcw(1,1) << " " << temp_Tcw(1,2) << " " << temp_Tcw(1,3) << " " << temp_Tcw(2,0) << " " << temp_Tcw(2,1) << " " << temp_Tcw(2,2) << " " << temp_Tcw(2,3) << " " << temp_Tcw(3,0) << " " << temp_Tcw(3,1) << " " << temp_Tcw(3,2) << " " << temp_Tcw(3,3) << endl;
+            Eigen::Matrix4f temp_Tlw = pMatchedKF->GetPose().matrix();
+            matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
+            matches_file_out << "###" << endl;
+
+            for (int j=0; j<vpMatchedMPs.size(); j++) {
+                if (vpMatchedMPs[j] != NULL) {
+                    cv::KeyPoint KP = pCurrentKF->mvKeys[j];
+                    matches_file_out << KP.pt.x << " " << KP.pt.y << endl;
+                }
+            }
+            matches_file_out << endl;
+            for (int j=0; j<vpMatchedMPs.size(); j++) {
+                if (vpMatchedMPs[j] != NULL) {
+                    Eigen::Vector3f MPc_WorldPose = vpMatchedMPs[j]->GetWorldPos();
+                    matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
+                }
+            }
+            matches_file_out.close();
+        }
+        else
+        {
+            std::cout << "Error opening file" << std::endl;;
+        }
+    }
 
     if(nNumProjMatches >= nProjMatches)
     {
@@ -695,8 +743,46 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
         Eigen::Matrix<double, 7, 7> mHessian7x7;
 
         bool bFixedScale = mbFixScale;
-        int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 10, bFixedScale, mHessian7x7, true);
+        // int numOptMatches = Optimizer::OptimizeSim3(pCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 10, bFixedScale, mHessian7x7, true);
+        int numOptMatches = Optimizer::OptimizeSim3(pCurrentKF, pMatchedKF, vpMatchedMPs, gScm, 30, bFixedScale, mHessian7x7, true);
         std::cout << "numOptMatches: " << numOptMatches << " for min. value " << nProjOptMatches << std::endl;
+
+        //WRITE
+        if (bDoWrite)
+        {
+            unique_lock<mutex> lock(mMutexWrite);
+            std::string strMatchesFileName = "outputs/Sim3_inliers_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+            std::string matchesFilename(strMatchesFileName);
+            std::ofstream matches_file_out;
+            matches_file_out.open(matchesFilename, std::ios_base::app);
+            if (matches_file_out.is_open())
+            {
+                Eigen::Matrix4f temp_Tcw = pCurrentKF->GetPose().matrix();
+                matches_file_out << temp_Tcw(0,0) << " " << temp_Tcw(0,1) << " " << temp_Tcw(0,2) << " " << temp_Tcw(0,3) << " " << temp_Tcw(1,0) << " " << temp_Tcw(1,1) << " " << temp_Tcw(1,2) << " " << temp_Tcw(1,3) << " " << temp_Tcw(2,0) << " " << temp_Tcw(2,1) << " " << temp_Tcw(2,2) << " " << temp_Tcw(2,3) << " " << temp_Tcw(3,0) << " " << temp_Tcw(3,1) << " " << temp_Tcw(3,2) << " " << temp_Tcw(3,3) << endl;
+                Eigen::Matrix4f temp_Tlw = pMatchedKF->GetPose().matrix();
+                matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
+                matches_file_out << "###" << endl;
+
+                for (int j=0; j<vpMatchedMPs.size(); j++) {
+                    if (vpMatchedMPs[j] != NULL) {
+                        cv::KeyPoint KP = pCurrentKF->mvKeys[j];
+                        matches_file_out << KP.pt.x << " " << KP.pt.y << endl;
+                    }
+                }
+                matches_file_out << endl;
+                for (int j=0; j<vpMatchedMPs.size(); j++) {
+                    if (vpMatchedMPs[j] != NULL) {
+                        Eigen::Vector3f MPc_WorldPose = vpMatchedMPs[j]->GetWorldPos();
+                        matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
+                    }
+                }
+                matches_file_out.close();
+            }
+            else
+            {
+                std::cout << "Error opening file" << std::endl;;
+            }
+        }
 
         //Verbose::PrintMess("Sim3 reffine: There are " + to_string(numOptMatches) + " matches after of the optimization ", Verbose::VERBOSITY_DEBUG);
 
@@ -705,10 +791,48 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
             g2o::Sim3 gScw_estimation(gScw.rotation(), gScw.translation(),1.0);
 
             vector<MapPoint*> vpMatchedMP;
-            vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
+            vpMatchedMP.resize(pCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
 
             nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw_estimation, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs);
             std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatchesRep << std::endl;
+
+            // WRITE
+            if (bDoWrite)
+            {
+                unique_lock<mutex> lock(mMutexWrite);
+                std::string strMatchesFileName = "outputs/Proj_valid_2/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+                std::string matchesFilename(strMatchesFileName);
+                std::ofstream matches_file_out;
+                matches_file_out.open(matchesFilename, std::ios_base::app);
+                if (matches_file_out.is_open())
+                {
+                    Eigen::Matrix4f temp_Tcw = pCurrentKF->GetPose().matrix();
+                    matches_file_out << temp_Tcw(0,0) << " " << temp_Tcw(0,1) << " " << temp_Tcw(0,2) << " " << temp_Tcw(0,3) << " " << temp_Tcw(1,0) << " " << temp_Tcw(1,1) << " " << temp_Tcw(1,2) << " " << temp_Tcw(1,3) << " " << temp_Tcw(2,0) << " " << temp_Tcw(2,1) << " " << temp_Tcw(2,2) << " " << temp_Tcw(2,3) << " " << temp_Tcw(3,0) << " " << temp_Tcw(3,1) << " " << temp_Tcw(3,2) << " " << temp_Tcw(3,3) << endl;
+                    Eigen::Matrix4f temp_Tlw = pMatchedKF->GetPose().matrix();
+                    matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
+                    matches_file_out << "###" << endl;
+
+                    for (int j=0; j<vpMatchedMPs.size(); j++) {
+                        if (vpMatchedMPs[j] != NULL) {
+                            cv::KeyPoint KP = pCurrentKF->mvKeys[j];
+                            matches_file_out << KP.pt.x << " " << KP.pt.y << endl;
+                        }
+                    }
+                    matches_file_out << endl;
+                    for (int j=0; j<vpMatchedMPs.size(); j++) {
+                        if (vpMatchedMPs[j] != NULL) {
+                            Eigen::Vector3f MPc_WorldPose = vpMatchedMPs[j]->GetWorldPos();
+                            matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
+                        }
+                    }
+                    matches_file_out.close();
+                }
+                else
+                {
+                    std::cout << "Error opening file" << std::endl;;
+                }
+            }
+
             if(nNumProjMatches >= nProjMatchesRep)
             {
                 gScw = gScw_estimation;
