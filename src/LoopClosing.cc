@@ -842,17 +842,19 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
             {
-                // WRITE: KF timestamps and Agents -> a candidate has been selected
-                std::string filename("outputs/KF_matches.txt");
-                std::ofstream file_out;
-                file_out.open(filename, std::ios_base::app);
-                file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
-                file_out.close();
+                /*{
+                    // WRITE: KF timestamps and Agents -> a candidate has been selected
+                    std::string filename("outputs/KF_matches.txt");
+                    std::ofstream file_out;
+                    file_out.open(filename, std::ios_base::app);
+                    file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
+                    file_out.close();
+                }*/
 
-                {
+                /*{
                     unique_lock<mutex> lock(mMutexWrite);
                     // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
-                    std::string strMatchesFileName = "outputs/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + "_matches.txt";
+                    std::string strMatchesFileName = "outputs/BoW_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                     std::string matchesFilename(strMatchesFileName);
                     std::ofstream matches_file_out;
                     matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -863,8 +865,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         Eigen::Matrix4f temp_Tlw = pMostBoWMatchesKF->GetPose().matrix();
                         matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
                         matches_file_out << "###" << endl;
-                        vector<MapPoint*> vpMapPointsCurrentKF = mpCurrentKF->GetMapPointMatches();
 
+                        vector<MapPoint*> vpMapPointsCurrentKF = mpCurrentKF->GetMapPointMatches();
                         for (int j=0; j<vpMapPointsCurrentKF.size(); j++) {
                             if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL) {
                                 Eigen::Vector3f MPc_WorldPose = vpMapPointsCurrentKF[j]->GetWorldPos();
@@ -872,7 +874,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                             }
                         }
                         matches_file_out << endl;
-                        
+
                         for (int j=0; j<vpMatchedPoints.size(); j++) {
                             if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL) {
                                 Eigen::Vector3f MPl_WorldPose = vpMatchedPoints[j]->GetWorldPos();
@@ -885,7 +887,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     {
                         std::cout << "Error opening file" << std::endl;;
                     }
-                }
+                }*/
             }
 
             std::cout << "ok6" << std::endl; // DEBUG
@@ -915,6 +917,42 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 //std::cout << "Check BoW: SolverSim3 converged" << std::endl;
 
                 // WRITE: Sim3Solver inliers (vpMatchedPoints[vbInliers]/vpKeyFrameMatchedMP[vbInliers])
+                /*{
+                    unique_lock<mutex> lock(mMutexWrite);
+                    std::string strMatchesFileName = "outputs/Sim3_inliers/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                    std::string matchesFilename(strMatchesFileName);
+                    std::ofstream matches_file_out;
+                    matches_file_out.open(matchesFilename, std::ios_base::app);
+                    if (matches_file_out.is_open())
+                    {
+                        Eigen::Matrix4f temp_Tcw = mpCurrentKF->GetPose().matrix();
+                        matches_file_out << temp_Tcw(0,0) << " " << temp_Tcw(0,1) << " " << temp_Tcw(0,2) << " " << temp_Tcw(0,3) << " " << temp_Tcw(1,0) << " " << temp_Tcw(1,1) << " " << temp_Tcw(1,2) << " " << temp_Tcw(1,3) << " " << temp_Tcw(2,0) << " " << temp_Tcw(2,1) << " " << temp_Tcw(2,2) << " " << temp_Tcw(2,3) << " " << temp_Tcw(3,0) << " " << temp_Tcw(3,1) << " " << temp_Tcw(3,2) << " " << temp_Tcw(3,3) << endl;
+                        Eigen::Matrix4f temp_Tlw = pMostBoWMatchesKF->GetPose().matrix();
+                        matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
+                        matches_file_out << "###" << endl;
+
+                        vector<MapPoint*> vpMapPointsCurrentKF = mpCurrentKF->GetMapPointMatches();
+                        for (int j=0; j<vpMapPointsCurrentKF.size(); j++) {
+                            if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL && vbInliers[j] == true) {
+                                Eigen::Vector3f MPc_WorldPose = vpMapPointsCurrentKF[j]->GetWorldPos();
+                                matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
+                            }
+                        }
+                        matches_file_out << endl;
+                        
+                        for (int j=0; j<vpMatchedPoints.size(); j++) {
+                            if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL && vbInliers[j] == true) {
+                                Eigen::Vector3f MPl_WorldPose = vpMatchedPoints[j]->GetWorldPos();
+                                matches_file_out << MPl_WorldPose[0] << " " << MPl_WorldPose[1] << " "<< MPl_WorldPose[2] << " " << endl;
+                            }
+                        }
+                        matches_file_out.close();
+                    }
+                    else
+                    {
+                        std::cout << "Error opening file" << std::endl;;
+                    }
+                }*/
 
                 //Verbose::PrintMess("BoW guess: Convergende with " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
                 std::cout << "BoW guess: Convergence with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
@@ -972,7 +1010,8 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
                     bool bFixedScale = mbFixScale;
 
-                    int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
+                    // int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
+                    int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 30, mbFixScale, mHessian7x7, true);
                     std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
 
                     // WRITE: OptimizeSim3 matches (mpCurrentKF->GetMapPointMatches()/vpMatchedMP) -> the optimizer will remove from vpMatchedMP all matches identified as outliers
