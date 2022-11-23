@@ -755,8 +755,9 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
     for(KeyFrame* pKFi : vpBowCand)
     {
         if(!pKFi || pKFi->isBad())
+        {
             continue;
-
+        }
         std::cout << "KF candidate: " << pKFi->mnId << ", created by Agent: " << pKFi->getAgent()->mnId << ", with timestamp: " << pKFi->mTimeStamp << std::endl; // DEBUG
         // Current KF against KF with covisibles version
         std::vector<KeyFrame*> vpCovKFi = pKFi->GetBestCovisibilityKeyFrames(nNumCovisibles);
@@ -850,7 +851,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
                 {
                     unique_lock<mutex> lock(mMutexWrite);
-                    // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vvpMatchedMPs[0])
+                    // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
                     std::string strMatchesFileName = "outputs/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + "_matches.txt";
                     std::string matchesFilename(strMatchesFileName);
                     std::ofstream matches_file_out;
@@ -863,21 +864,19 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         matches_file_out << temp_Tlw(0,0) << " " << temp_Tlw(0,1) << " " << temp_Tlw(0,2) << " " << temp_Tlw(0,3) << " " << temp_Tlw(1,0) << " " << temp_Tlw(1,1) << " " << temp_Tlw(1,2) << " " << temp_Tlw(1,3) << " " << temp_Tlw(2,0) << " " << temp_Tlw(2,1) << " " << temp_Tlw(2,2) << " " << temp_Tlw(2,3) << " " << temp_Tlw(3,0) << " " << temp_Tlw(3,1) << " " << temp_Tlw(3,2) << " " << temp_Tlw(3,3) << endl;
                         matches_file_out << "###" << endl;
                         vector<MapPoint*> vpMapPointsCurrentKF = mpCurrentKF->GetMapPointMatches();
-                        matches_file_out << vpMapPointsCurrentKF.size() << endl;
+
                         for (int j=0; j<vpMapPointsCurrentKF.size(); j++) {
-                            if (vvpMatchedMPs[0][j] != NULL) {
-                                // Eigen::Vector3f MPc_WorldPose = vpMapPointsCurrentKF[j]->GetWorldPos();
-                                // matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
-                                matches_file_out << "###" << endl;
+                            if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL) {
+                                Eigen::Vector3f MPc_WorldPose = vpMapPointsCurrentKF[j]->GetWorldPos();
+                                matches_file_out << MPc_WorldPose[0] << " " << MPc_WorldPose[1] << " "<< MPc_WorldPose[2] << " " << endl;
                             }
                         }
                         matches_file_out << endl;
-                        matches_file_out << vvpMatchedMPs[0].size() << endl;
+                        
                         for (int j=0; j<vpMatchedPoints.size(); j++) {
-                            if (vvpMatchedMPs[0][j] != NULL) {
-                                Eigen::Vector3f MPl_WorldPose = vvpMatchedMPs[0][j]->GetWorldPos();
+                            if (vpMatchedPoints[j] != NULL && vpMapPointsCurrentKF[j] != NULL) {
+                                Eigen::Vector3f MPl_WorldPose = vpMatchedPoints[j]->GetWorldPos();
                                 matches_file_out << MPl_WorldPose[0] << " " << MPl_WorldPose[1] << " "<< MPl_WorldPose[2] << " " << endl;
-                                // matches_file_out << "###" << endl;
                             }
                         }
                         matches_file_out.close();
