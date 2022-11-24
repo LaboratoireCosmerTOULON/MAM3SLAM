@@ -133,43 +133,44 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                     std::cout << "MERGE DETECTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                     std::cout << "..." << std::endl;
                     std::cout << "..." << std::endl;
-                    // Sophus::SE3d mTmw = mpMergeMatchedKF->GetPose().cast<double>();
-                    // g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
-                    // Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
-                    // g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
-                    // g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
-                    // g2o::Sim3 gSw1m = mg2oMergeSlw;
+                    Sophus::SE3d mTmw = mpCurrentAgent->mpMergeMatchedKF->GetPose().cast<double>();
+                    g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
+                    Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
+                    g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
+                    g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
+                    g2o::Sim3 gSw1m = mg2oMergeSlw;
 
-                    // mSold_new = (gSw2c * gScw1);
+                    mSold_new = (gSw2c * gScw1);
 
-                    // mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
+                    mpCurrentAgent->mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
 
-                    // mg2oMergeScw = mg2oMergeSlw;
+                    mpCurrentAgent->mg2oMergeScw = mg2oMergeSlw;
 
-                    // //mpTracker->SetStepByStep(true);
+                    //mpTracker->SetStepByStep(true);
 
-                    // Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
+                    Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
 
-                    // #ifdef REGISTER_TIMES
-                    //     std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
+                    #ifdef REGISTER_TIMES
+                        std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
 
-                    //     nMerges += 1;
-                    // #endif
-                    // // TODO UNCOMMENT
+                        nMerges += 1;
+                    #endif
+                    // TODO UNCOMMENT
                     // MergeLocal();
 
-                    // #ifdef REGISTER_TIMES
-                    //     std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
+                    #ifdef REGISTER_TIMES
+                        std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
 
-                    //     double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
-                    //     vdMergeTotal_ms.push_back(timeMergeTotal);
-                    // #endif
+                        double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
+                        vdMergeTotal_ms.push_back(timeMergeTotal);
+                    #endif
 
-                    // Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
+                    Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
 
-                    // vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
-                    // vdPR_MatchedTime.push_back(mpMergeMatchedKF->mTimeStamp);
-                    // vnPR_TypeRecogn.push_back(1);
+                    // FIXME JD : seems to save LC data. Maybe need to add agent ID later for saving ?
+                    vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
+                    vdPR_MatchedTime.push_back(mpCurrentAgent->mpMergeMatchedKF->mTimeStamp);
+                    vnPR_TypeRecogn.push_back(1);
 
                     // Reset all variables
                     mpCurrentAgent->mpMergeLastCurrentKF->SetErase();
