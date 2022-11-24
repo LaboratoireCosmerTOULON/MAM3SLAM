@@ -1777,35 +1777,7 @@ void LoopClosing::MergeLocal()
     set<KeyFrame*> spLocalWindowKFs;
     //Get MPs in the welding area from the current map
     set<MapPoint*> spLocalWindowMPs;
-    if(pCurrentMap->IsInertial() && pMergeMap->IsInertial()) //TODO Check the correct initialization
-    {
-        KeyFrame* pKFi = mpCurrentKF;
-        int nInserted = 0;
-        while(pKFi && nInserted < numTemporalKFs)
-        {
-            spLocalWindowKFs.insert(pKFi);
-            pKFi = mpCurrentKF->mPrevKF;
-            nInserted++;
-
-            set<MapPoint*> spMPi = pKFi->GetMapPoints();
-            spLocalWindowMPs.insert(spMPi.begin(), spMPi.end());
-        }
-
-        pKFi = mpCurrentKF->mNextKF;
-        while(pKFi)
-        {
-            spLocalWindowKFs.insert(pKFi);
-
-            set<MapPoint*> spMPi = pKFi->GetMapPoints();
-            spLocalWindowMPs.insert(spMPi.begin(), spMPi.end());
-
-            pKFi = mpCurrentKF->mNextKF;
-        }
-    }
-    else
-    {
-        spLocalWindowKFs.insert(mpCurrentKF);
-    }
+    spLocalWindowKFs.insert(mpCurrentKF);
 
     vector<KeyFrame*> vpCovisibleKFs = mpCurrentKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
     spLocalWindowKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
@@ -1845,28 +1817,8 @@ void LoopClosing::MergeLocal()
     //std::cout << "[Merge]: Ma = " << to_string(pCurrentMap->GetId()) << "; #KFs = " << to_string(spLocalWindowKFs.size()) << "; #MPs = " << to_string(spLocalWindowMPs.size()) << std::endl;
 
     set<KeyFrame*> spMergeConnectedKFs;
-    if(pCurrentMap->IsInertial() && pMergeMap->IsInertial()) //TODO Check the correct initialization
-    {
-        KeyFrame* pKFi = mpMergeMatchedKF;
-        int nInserted = 0;
-        while(pKFi && nInserted < numTemporalKFs/2)
-        {
-            spMergeConnectedKFs.insert(pKFi);
-            pKFi = mpCurrentKF->mPrevKF;
-            nInserted++;
-        }
+    spMergeConnectedKFs.insert(mpMergeMatchedKF);
 
-        pKFi = mpMergeMatchedKF->mNextKF;
-        while(pKFi && nInserted < numTemporalKFs)
-        {
-            spMergeConnectedKFs.insert(pKFi);
-            pKFi = mpCurrentKF->mNextKF;
-        }
-    }
-    else
-    {
-        spMergeConnectedKFs.insert(mpMergeMatchedKF);
-    }
     vpCovisibleKFs = mpMergeMatchedKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
     spMergeConnectedKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
     spMergeConnectedKFs.insert(mpMergeMatchedKF);
@@ -1957,12 +1909,6 @@ void LoopClosing::MergeLocal()
         Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(), g2oCorrectedSiw.translation() / s);
 
         pKFi->mTcwMerge = correctedTiw.cast<float>();
-
-        if(pCurrentMap->isImuInitialized())
-        {
-            Eigen::Quaternionf Rcor = (g2oCorrectedSiw.rotation().inverse() * vNonCorrectedSim3[pKFi].rotation()).cast<float>();
-            pKFi->mVwbMerge = Rcor * pKFi->GetVelocity();
-        }
 
         //TODO DEBUG to know which are the KFs that had been moved to the other map
     }
@@ -2121,14 +2067,7 @@ void LoopClosing::MergeLocal()
     vpMergeConnectedKFs.clear();
     std::copy(spLocalWindowKFs.begin(), spLocalWindowKFs.end(), std::back_inserter(vpLocalCurrentWindowKFs));
     std::copy(spMergeConnectedKFs.begin(), spMergeConnectedKFs.end(), std::back_inserter(vpMergeConnectedKFs));
-    if (mpTracker->mSensor==Agent::IMU_MONOCULAR || mpTracker->mSensor==Agent::IMU_STEREO || mpTracker->mSensor==Agent::IMU_RGBD)
-    {
-        Optimizer::MergeInertialBA(mpCurrentKF,mpMergeMatchedKF,&bStop, pCurrentMap,vCorrectedSim3);
-    }
-    else
-    {
-        Optimizer::LocalBundleAdjustment(mpCurrentKF, vpLocalCurrentWindowKFs, vpMergeConnectedKFs,&bStop);
-    }
+    Optimizer::LocalBundleAdjustment(mpCurrentKF, vpLocalCurrentWindowKFs, vpMergeConnectedKFs,&bStop);
 
     #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point time_EndWeldingBA = std::chrono::steady_clock::now();
@@ -2182,12 +2121,6 @@ void LoopClosing::MergeLocal()
 
                 pKFi->SetPose(correctedTiw.cast<float>());
 
-                if(pCurrentMap->isImuInitialized())
-                {
-                    Eigen::Quaternionf Rcor = (g2oCorrectedSiw.rotation().inverse() * vNonCorrectedSim3[pKFi].rotation()).cast<float>();
-                    pKFi->SetVelocity(Rcor * pKFi->GetVelocity()); // TODO: should add here scale s
-                }
-
             }
             for(MapPoint* pMPi : vpCurrentMapMPs)
             {
@@ -2213,13 +2146,6 @@ void LoopClosing::MergeLocal()
         {
             usleep(1000);
         }
-
-        // Optimize graph (and update the loop position for each element form the begining to the end)
-        if(mpTracker->mSensor != Agent::MONOCULAR)
-        {
-            Optimizer::OptimizeEssentialGraph(mpCurrentKF, vpMergeConnectedKFs, vpLocalCurrentWindowKFs, vpCurrentMapKFs, vpCurrentMapMPs);
-        }
-
 
         {
             // Get Merge Map Mutex
@@ -2263,7 +2189,7 @@ void LoopClosing::MergeLocal()
 
     mpLocalMapper->Release();
 
-    if(bRelaunchBA && (!pCurrentMap->isImuInitialized() || (pCurrentMap->KeyFramesInMap()<200 && mpAtlas->CountMaps()==1)))
+    if(bRelaunchBA || (pCurrentMap->KeyFramesInMap()<200 && mpAtlas->CountMaps()==1))
     {
         // Launch a new thread to perform Global Bundle Adjustment
         mbRunningGBA = true;
