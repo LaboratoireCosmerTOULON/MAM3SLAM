@@ -793,7 +793,8 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
             vector<MapPoint*> vpMatchedMP;
             vpMatchedMP.resize(pCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
 
-            nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw_estimation, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs);
+            nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs); // test
+            // nNumProjMatches = FindMatchesByProjection(pCurrentKF, pMatchedKF, gScw_estimation, spAlreadyMatchedMPs, vpMPs, vpMatchedMPs); // original
             std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatchesRep << std::endl;
 
             // WRITE
