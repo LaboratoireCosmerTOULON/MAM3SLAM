@@ -112,7 +112,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
 
             // Retrieve LC/MM status of current KF's origin agent + update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
 
-            bool bFindedRegion = NewDetectCommonRegionsMulti();
+            bool bFindedRegion = NewDetectCommonRegionsMulti(true);
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
@@ -123,115 +123,121 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
             // Process LC/MM if validated
 
 
-    //         if(bFindedRegion)
-    //         {
-    //             if(mbMergeDetected)
-    //             {
-    //                 Sophus::SE3d mTmw = mpMergeMatchedKF->GetPose().cast<double>();
-    //                 g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
-    //                 Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
-    //                 g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
-    //                 g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
-    //                 g2o::Sim3 gSw1m = mg2oMergeSlw;
+            if(bFindedRegion)
+            {
+                std::cout << "NewDetectCommonRegionsMulti() return is true" << std::endl;
+                if(mpCurrentAgent->mbMergeDetected)
+                {
+                    std::cout << "..." << std::endl;
+                    std::cout << "..." << std::endl;
+                    std::cout << "MERGE DETECTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                    std::cout << "..." << std::endl;
+                    std::cout << "..." << std::endl;
+                    // Sophus::SE3d mTmw = mpMergeMatchedKF->GetPose().cast<double>();
+                    // g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
+                    // Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
+                    // g2o::Sim3 gScw1(mTcw.unit_quaternion(), mTcw.translation(), 1.0);
+                    // g2o::Sim3 gSw2c = mg2oMergeSlw.inverse();
+                    // g2o::Sim3 gSw1m = mg2oMergeSlw;
 
-    //                 mSold_new = (gSw2c * gScw1);
+                    // mSold_new = (gSw2c * gScw1);
 
-    //                 mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
+                    // mg2oMergeSmw = gSmw2 * gSw2c * gScw1;
 
-    //                 mg2oMergeScw = mg2oMergeSlw;
+                    // mg2oMergeScw = mg2oMergeSlw;
 
-    //                 //mpTracker->SetStepByStep(true);
+                    // //mpTracker->SetStepByStep(true);
 
-    //                 Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
+                    // Verbose::PrintMess("*Merge detected", Verbose::VERBOSITY_QUIET);
 
-    //                 #ifdef REGISTER_TIMES
-    //                     std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
+                    // #ifdef REGISTER_TIMES
+                    //     std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
 
-    //                     nMerges += 1;
-    //                 #endif
-    //                 // TODO UNCOMMENT
-    //                 MergeLocal();
+                    //     nMerges += 1;
+                    // #endif
+                    // // TODO UNCOMMENT
+                    // MergeLocal();
 
-    //                 #ifdef REGISTER_TIMES
-    //                     std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
+                    // #ifdef REGISTER_TIMES
+                    //     std::chrono::steady_clock::time_point time_EndMerge = std::chrono::steady_clock::now();
 
-    //                     double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
-    //                     vdMergeTotal_ms.push_back(timeMergeTotal);
-    //                 #endif
+                    //     double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
+                    //     vdMergeTotal_ms.push_back(timeMergeTotal);
+                    // #endif
 
-    //                 Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
+                    // Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
 
-    //                 vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
-    //                 vdPR_MatchedTime.push_back(mpMergeMatchedKF->mTimeStamp);
-    //                 vnPR_TypeRecogn.push_back(1);
+                    // vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
+                    // vdPR_MatchedTime.push_back(mpMergeMatchedKF->mTimeStamp);
+                    // vnPR_TypeRecogn.push_back(1);
 
-    //                 // Reset all variables
-    //                 mpMergeLastCurrentKF->SetErase();
-    //                 mpMergeMatchedKF->SetErase();
-    //                 mnMergeNumCoincidences = 0;
-    //                 mvpMergeMatchedMPs.clear();
-    //                 mvpMergeMPs.clear();
-    //                 mnMergeNumNotFound = 0;
-    //                 mbMergeDetected = false;
+                    // Reset all variables
+                    mpCurrentAgent->mpMergeLastCurrentKF->SetErase();
+                    mpCurrentAgent->mpMergeMatchedKF->SetErase();
+                    mpCurrentAgent->mnMergeNumCoincidences = 0;
+                    mpCurrentAgent->mvpMergeMatchedMPs.clear();
+                    mpCurrentAgent->mvpMergeMPs.clear();
+                    mpCurrentAgent->mnMergeNumNotFound = 0;
+                    mpCurrentAgent->mbMergeDetected = false;
 
-    //                 if(mbLoopDetected)
-    //                 {
-    //                     // Reset Loop variables
-    //                     mpLoopLastCurrentKF->SetErase();
-    //                     mpLoopMatchedKF->SetErase();
-    //                     mnLoopNumCoincidences = 0;
-    //                     mvpLoopMatchedMPs.clear();
-    //                     mvpLoopMPs.clear();
-    //                     mnLoopNumNotFound = 0;
-    //                     mbLoopDetected = false;
-    //                 }
+                    if(mpCurrentAgent->mbLoopDetected)
+                    {
+                        // Reset Loop variables
+                        mpCurrentAgent->mpLoopLastCurrentKF->SetErase();
+                        mpCurrentAgent->mpLoopMatchedKF->SetErase();
+                        mpCurrentAgent->mnLoopNumCoincidences = 0;
+                        mpCurrentAgent->mvpLoopMatchedMPs.clear();
+                        mpCurrentAgent->mvpLoopMPs.clear();
+                        mpCurrentAgent->mnLoopNumNotFound = 0;
+                        mpCurrentAgent->mbLoopDetected = false;
+                    }
 
-    //             }
+                }
 
-    //             if(mbLoopDetected)
-    //             {
-    //                 bool bGoodLoop = true;
-    //                 vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
-    //                 vdPR_MatchedTime.push_back(mpLoopMatchedKF->mTimeStamp);
-    //                 vnPR_TypeRecogn.push_back(0);
+                if(mpCurrentAgent->mbLoopDetected)
+                {
+                    // bool bGoodLoop = true;
+                    // vdPR_CurrentTime.push_back(mpCurrentKF->mTimeStamp);
+                    // vdPR_MatchedTime.push_back(mpLoopMatchedKF->mTimeStamp);
+                    // vnPR_TypeRecogn.push_back(0);
 
-    //                 Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
+                    // Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
 
-    //                 mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
+                    // mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
 
-    //                 if (bGoodLoop) 
-    //                 {
+                    // if (bGoodLoop) 
+                    // {
 
-    //                     mvpLoopMapPoints = mvpLoopMPs;
+                    //     mvpLoopMapPoints = mvpLoopMPs;
 
-    //                     #ifdef REGISTER_TIMES
-    //                         std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
+                    //     #ifdef REGISTER_TIMES
+                    //         std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
 
-    //                         nLoop += 1;
+                    //         nLoop += 1;
 
-    //                     #endif
-    //                     CorrectLoop();
-    //                     #ifdef REGISTER_TIMES
-    //                         std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
+                    //     #endif
+                    //     CorrectLoop();
+                    //     #ifdef REGISTER_TIMES
+                    //         std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
 
-    //                         double timeLoopTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLoop - time_StartLoop).count();
-    //                         vdLoopTotal_ms.push_back(timeLoopTotal);
-    //                     #endif
+                    //         double timeLoopTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLoop - time_StartLoop).count();
+                    //         vdLoopTotal_ms.push_back(timeLoopTotal);
+                    //     #endif
 
-    //                     mnNumCorrection += 1;
-    //                 }
+                    //     mnNumCorrection += 1;
+                    // }
 
-    //                 // Reset all variables
-    //                 mpLoopLastCurrentKF->SetErase();
-    //                 mpLoopMatchedKF->SetErase();
-    //                 mnLoopNumCoincidences = 0;
-    //                 mvpLoopMatchedMPs.clear();
-    //                 mvpLoopMPs.clear();
-    //                 mnLoopNumNotFound = 0;
-    //                 mbLoopDetected = false;
-    //             }
+                    // Reset all variables
+                    mpCurrentAgent->mpLoopLastCurrentKF->SetErase();
+                    mpCurrentAgent->mpLoopMatchedKF->SetErase();
+                    mpCurrentAgent->mnLoopNumCoincidences = 0;
+                    mpCurrentAgent->mvpLoopMatchedMPs.clear();
+                    mpCurrentAgent->mvpLoopMPs.clear();
+                    mpCurrentAgent->mnLoopNumNotFound = 0;
+                    mpCurrentAgent->mbLoopDetected = false;
+                }
 
-    //         }
+            }
             mpLastCurrentKF = mpCurrentKF;
         }
 
@@ -457,7 +463,7 @@ bool LoopClosing::NewDetectCommonRegions()
     return false;
 }
 
-bool LoopClosing::NewDetectCommonRegionsMulti()
+bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
 {
     // To deactivate placerecognition. No loopclosing nor merging will be performed
     if(!mbActiveLC)
@@ -559,7 +565,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
         int numProjMatches = 0;
         vector<MapPoint*> vpMatchedMPs;
         std::cout << "Merge validation : ok2" << std::endl; // DEBUG
-        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs, true);
+        bool bCommonRegion = DetectAndReffineSim3FromLastKF(mpCurrentKF, mpCurrentAgent->mpMergeMatchedKF, gScw, numProjMatches, mpCurrentAgent->mvpMergeMPs, vpMatchedMPs, bDoWrite);
         std::cout << "Merge validation : ok3" << std::endl; // DEBUG
         if(bCommonRegion)
         {
@@ -572,7 +578,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
             mpCurrentAgent->mg2oMergeSlw = gScw;
             mpCurrentAgent->mvpMergeMatchedMPs = vpMatchedMPs;
 
-            mpCurrentAgent->mbMergeDetected = mnMergeNumCoincidences >= 3;
+            mpCurrentAgent->mbMergeDetected = mpCurrentAgent->mnMergeNumCoincidences >= 3;
             std::cout << "Merge validation : ok5" << std::endl; // DEBUG
         }
         else
@@ -608,7 +614,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
             vdEstSim3_ms.push_back(timeEstSim3);
         #endif
         mpKeyFrameDB->add(mpCurrentKF);
-        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected" << std::endl; // DEBUG
+        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
         return true;
     }
 
@@ -642,14 +648,14 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
     if(!bLoopDetectedInKF && !vpLoopBowCand.empty())
     {
         std::cout << "!bLoopDetectedInKF && !vpLoopBowCand.empty()" << std::endl; // DEBUG
-        mpCurrentAgent->mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
+        mpCurrentAgent->mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs, bDoWrite); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
         std::cout << "mpCurrentAgent->mnLoopNumCoincidences : " << mpCurrentAgent->mnLoopNumCoincidences << std::endl;
     }
     // Merge candidates
     if(!bMergeDetectedInKF && !vpMergeBowCand.empty())
     {
         std::cout << "!bMergeDetectedInKF && !vpMergeBowCand.empty()" << std::endl; // DEBUG
-        mpCurrentAgent->mbMergeDetected = DetectCommonRegionsFromBoW(vpMergeBowCand, mpCurrentAgent->mpMergeMatchedKF, mpCurrentAgent->mpMergeLastCurrentKF, mpCurrentAgent->mg2oMergeSlw, mpCurrentAgent->mnMergeNumCoincidences, mpCurrentAgent->mvpMergeMPs, mpCurrentAgent->mvpMergeMatchedMPs); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
+        mpCurrentAgent->mbMergeDetected = DetectCommonRegionsFromBoW(vpMergeBowCand, mpCurrentAgent->mpMergeMatchedKF, mpCurrentAgent->mpMergeLastCurrentKF, mpCurrentAgent->mg2oMergeSlw, mpCurrentAgent->mnMergeNumCoincidences, mpCurrentAgent->mvpMergeMPs, mpCurrentAgent->mvpMergeMatchedMPs, bDoWrite); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
         std::cout << "mpCurrentAgent->mnMergeNumCoincidences : " << mpCurrentAgent->mnMergeNumCoincidences << std::endl;
     }
 
@@ -665,7 +671,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti()
 
     if(mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected)
     {
-        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected" << std::endl; // DEBUG
+        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
         return true;
     }
 
@@ -845,7 +851,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
 }
 
 bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, KeyFrame* &pMatchedKF2, KeyFrame* &pLastCurrentKF, g2o::Sim3 &g2oScw,
-                                             int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs) //-> looks fine, maybe threshold tuning needed
+                                             int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs, bool bDoWrite) //-> looks fine, maybe threshold tuning needed
 {
     std::cout << "Entering DetectCommonRegionsFromBoW fct" << std::endl; // DEBUG
     int nBoWMatches = 20;
@@ -967,6 +973,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
             {
+                if (bDoWrite)
                 {
                     // WRITE: KF timestamps and Agents -> a candidate has been selected
                     std::string filename("outputs/KF_matches.txt");
@@ -976,6 +983,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     file_out.close();
                 }
 
+                if (bDoWrite)
                 {
                     unique_lock<mutex> lock(mMutexWrite);
                     // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
@@ -1042,6 +1050,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 //std::cout << "Check BoW: SolverSim3 converged" << std::endl;
 
                 // WRITE: Sim3Solver inliers (vpMatchedPoints[vbInliers]/vpKeyFrameMatchedMP[vbInliers])
+                if (bDoWrite)
                 {
                     unique_lock<mutex> lock(mMutexWrite);
                     std::string strMatchesFileName = "outputs/Sim3_inliers/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
@@ -1126,6 +1135,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 std::cout << "ok11" << std::endl; // DEBUG
 
                 // WRITE: SearchByProjection matches (ORB descriptor matched to vpMatchedMP, not returned/vpMatchedMP) -> need modif to be displayed. May be got by using KF mvKeys and mDescriptors and adding this output to SearchByProjection ?
+                if (bDoWrite)
                 {
                     unique_lock<mutex> lock(mMutexWrite);
                     std::string strMatchesFileName = "outputs/ORB_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
@@ -1174,6 +1184,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
 
                     // WRITE: OptimizeSim3 matches (mpCurrentKF->GetMapPointMatches()/vpMatchedMP) -> the optimizer will remove from vpMatchedMP all matches identified as outliers
+                    if (bDoWrite)
                     {
                         unique_lock<mutex> lock(mMutexWrite);
                         std::string strMatchesFileName = "outputs/Optim_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
@@ -1222,6 +1233,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         std::cout << "numProjOptMatches is " << numProjOptMatches << " after serach by projection. Min. matches nb is " << nProjOptMatches << std::endl;
 
                         // WRITE: SearchByProjection matches
+                        if (bDoWrite)
                         {
                             unique_lock<mutex> lock(mMutexWrite);
                             std::string strMatchesFileName = "outputs/ORB_matches_2/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";

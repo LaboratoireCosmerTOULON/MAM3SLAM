@@ -129,7 +129,7 @@ protected:
     bool DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3 &gScw, int &nNumProjMatches,
                                         std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs, bool bDoWrite=false);
     bool DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, KeyFrame* &pMatchedKF, KeyFrame* &pLastCurrentKF, g2o::Sim3 &g2oScw,
-                                     int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs);
+                                     int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs, bool bDoWrite=false);
     bool DetectCommonRegionsFromLastKF(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3 &gScw, int &nNumProjMatches,
                                             std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs);
     int FindMatchesByProjection(KeyFrame* pCurrentKF, KeyFrame* pMatchedKFw, g2o::Sim3 &g2oScw,
@@ -137,7 +137,7 @@ protected:
                                 vector<MapPoint*> &vpMatchedMapPoints);
 
     // Place recognition methods adapted for multi agent case
-    bool NewDetectCommonRegionsMulti();
+    bool NewDetectCommonRegionsMulti(bool bDoWrite=false);
 
     void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, vector<MapPoint*> &vpMapPoints);
     void SearchAndFuse(const vector<KeyFrame*> &vConectedKFs, vector<MapPoint*> &vpMapPoints);
