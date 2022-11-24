@@ -112,7 +112,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
 
             // Retrieve LC/MM status of current KF's origin agent + update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
 
-            bool bFindedRegion = NewDetectCommonRegionsMulti(true);
+            bool bFindedRegion = NewDetectCommonRegionsMulti();
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
