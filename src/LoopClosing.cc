@@ -1977,11 +1977,6 @@ void LoopClosing::MergeLocal()
             pKFi->mnMergeCorrectedForKF = mpCurrentKF->mnId;
             pMergeMap->AddKeyFrame(pKFi);
             pCurrentMap->EraseKeyFrame(pKFi);
-
-            if(pCurrentMap->isImuInitialized())
-            {
-                pKFi->SetVelocity(pKFi->mVwbMerge);
-            }
         }
 
         for(MapPoint* pMPi : spLocalWindowMPs)

@@ -155,6 +155,9 @@ public:
     std::set<long unsigned int> msOptKFs;
     std::set<long unsigned int> msFixedKFs;
 
+    // muti agent on map
+    std::mutex mMutexLocalMap;
+
 protected:
 
     long unsigned int mnId;

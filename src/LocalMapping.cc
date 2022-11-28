@@ -79,6 +79,9 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
                 std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
             #endif
+
+            unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
+
             // cout << "New KF in map" << endl; // DEBUG
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
@@ -124,7 +127,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
             // std::cout << "There are now " << mpAtlas->KeyFramesInMap(mpAgent) << " KF in Agent " << mpAgent->mnId << "'s map" << std::endl; // DEBUG
 
-            if(!CheckNewKeyFrames() && !stopRequested()) // FIXME : update/uncomment
+            if(!CheckNewKeyFrames() && !stopRequested())
             {
                 // std::cout << "Entering !CheckNewKeyFrames() && !stopRequested() case in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
                 if(mpAtlas->KeyFramesInMap(mpAgent)>2)

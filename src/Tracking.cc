@@ -2913,7 +2913,7 @@ bool Tracking::TrackLocalMap()
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     mpLocalMapper->mnMatchesInliers=mnMatchesInliers;
-    std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    // std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
     if(mnFramesSinceLastReloc<mMaxFrames && mnMatchesInliers<50)
     {
         // std::cout << "Local map tracking = failure" << std::endl; // DEBUG
