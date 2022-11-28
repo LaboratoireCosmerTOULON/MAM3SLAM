@@ -2419,44 +2419,44 @@ void LoopClosing::MergeLocalMulti()
         //TODO DEBUG to know which are the KFs that had been moved to the other map
     }
 
-    // int numPointsWithCorrection = 0;
+    int numPointsWithCorrection = 0;
 
-    // //for(MapPoint* pMPi : spLocalWindowMPs)
-    // set<MapPoint*>::iterator itMP = spLocalWindowMPs.begin();
-    // while(itMP != spLocalWindowMPs.end())
-    // {
-    //     MapPoint* pMPi = *itMP;
-    //     if(!pMPi || pMPi->isBad())
-    //     {
-    //         itMP = spLocalWindowMPs.erase(itMP);
-    //         continue;
-    //     }
+    //for(MapPoint* pMPi : spLocalWindowMPs)
+    set<MapPoint*>::iterator itMP = spLocalWindowMPs.begin();
+    while(itMP != spLocalWindowMPs.end())
+    {
+        MapPoint* pMPi = *itMP;
+        if(!pMPi || pMPi->isBad())
+        {
+            itMP = spLocalWindowMPs.erase(itMP);
+            continue;
+        }
 
-    //     KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
-    //     if(vCorrectedSim3.find(pKFref) == vCorrectedSim3.end())
-    //     {
-    //         itMP = spLocalWindowMPs.erase(itMP);
-    //         numPointsWithCorrection++;
-    //         continue;
-    //     }
-    //     g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
-    //     g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
+        KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
+        if(vCorrectedSim3.find(pKFref) == vCorrectedSim3.end())
+        {
+            itMP = spLocalWindowMPs.erase(itMP);
+            numPointsWithCorrection++;
+            continue;
+        }
+        g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
+        g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
 
-    //     // Project with non-corrected pose and project back with corrected pose
-    //     Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
-    //     Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
-    //     Eigen::Quaterniond Rcor = g2oCorrectedSwi.rotation() * g2oNonCorrectedSiw.rotation();
+        // Project with non-corrected pose and project back with corrected pose
+        Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
+        Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
+        Eigen::Quaterniond Rcor = g2oCorrectedSwi.rotation() * g2oNonCorrectedSiw.rotation();
 
-    //     pMPi->mPosMerge = eigCorrectedP3Dw.cast<float>();
-    //     pMPi->mNormalVectorMerge = Rcor.cast<float>() * pMPi->GetNormal();
+        pMPi->mPosMerge = eigCorrectedP3Dw.cast<float>();
+        pMPi->mNormalVectorMerge = Rcor.cast<float>() * pMPi->GetNormal();
 
-    //     itMP++;
-    // }
-    // /*if(numPointsWithCorrection>0)
-    // {
-    //     std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection) << " points removed from Ma due to its reference KF is not in welding area" << std::endl;
-    //     std::cout << "[Merge]: Ma has " << std::to_string(spLocalWindowMPs.size()) << " points" << std::endl;
-    // }*/
+        itMP++;
+    }
+    /*if(numPointsWithCorrection>0)
+    {
+        std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection) << " points removed from Ma due to its reference KF is not in welding area" << std::endl;
+        std::cout << "[Merge]: Ma has " << std::to_string(spLocalWindowMPs.size()) << " points" << std::endl;
+    }*/
 
     // {
     //     unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
