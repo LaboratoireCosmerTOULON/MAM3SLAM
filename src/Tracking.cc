@@ -3104,7 +3104,7 @@ void Tracking::SearchLocalPoints()
             mCurrentFrame.mmProjectPoints[pMP->mnId] = cv::Point2f(pMP->mTrackProjX, pMP->mTrackProjY);
         }
     }
-    std::cout << nToMatch << " points to match for Agent " << mpAgent-> mnId << std::endl;
+    // std::cout << nToMatch << " points to match for Agent " << mpAgent-> mnId << std::endl; // DEBUG
 
     if(nToMatch>0)
     {
@@ -3119,7 +3119,7 @@ void Tracking::SearchLocalPoints()
             th=15; // 15
 
         int matches = matcher.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th, mpLocalMapper->mbFarPoints, mpLocalMapper->mThFarPoints);
-        std::cout << matches << " matches found for Agent " << mpAgent-> mnId << std::endl;
+        // std::cout << matches << " matches found for Agent " << mpAgent-> mnId << std::endl; // DEBUG
     }
 }
 
@@ -3297,7 +3297,7 @@ void Tracking::UpdateLocalKeyFrames()
         mpReferenceKF = pKFmax;
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
     }
-    std::cout << mvpLocalKeyFrames.size() << " local KF found for Agent " << mpAgent->mnId << std::endl;
+    // std::cout << mvpLocalKeyFrames.size() << " local KF found for Agent " << mpAgent->mnId << std::endl; // DEBUG
 }
 
 bool Tracking::Relocalization()

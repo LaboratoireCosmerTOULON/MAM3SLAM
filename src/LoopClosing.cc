@@ -2324,43 +2324,43 @@ void LoopClosing::MergeLocalMulti()
 
     //std::cout << "[Merge]: Ma = " << to_string(pCurrentMap->GetId()) << "; #KFs = " << to_string(spLocalWindowKFs.size()) << "; #MPs = " << to_string(spLocalWindowMPs.size()) << std::endl;
 
-    // set<KeyFrame*> spMergeConnectedKFs;
-    // spMergeConnectedKFs.insert(mpMergeMatchedKF);
+    set<KeyFrame*> spMergeConnectedKFs;
+    spMergeConnectedKFs.insert(mpCurrentAgent->mpMergeMatchedKF);
 
-    // vpCovisibleKFs = mpMergeMatchedKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
-    // spMergeConnectedKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
-    // spMergeConnectedKFs.insert(mpMergeMatchedKF);
-    // nNumTries = 0;
-    // while(spMergeConnectedKFs.size() < numTemporalKFs && nNumTries < nMaxTries)
-    // {
-    //     vector<KeyFrame*> vpNewCovKFs;
-    //     for(KeyFrame* pKFi : spMergeConnectedKFs)
-    //     {
-    //         vector<KeyFrame*> vpKFiCov = pKFi->GetBestCovisibilityKeyFrames(numTemporalKFs/2);
-    //         for(KeyFrame* pKFcov : vpKFiCov)
-    //         {
-    //             if(pKFcov && !pKFcov->isBad() && spMergeConnectedKFs.find(pKFcov) == spMergeConnectedKFs.end())
-    //             {
-    //                 vpNewCovKFs.push_back(pKFcov);
-    //             }
+    vpCovisibleKFs = mpCurrentAgent->mpMergeMatchedKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
+    spMergeConnectedKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
+    spMergeConnectedKFs.insert(mpCurrentAgent->mpMergeMatchedKF);
+    nNumTries = 0;
+    while(spMergeConnectedKFs.size() < numTemporalKFs && nNumTries < nMaxTries)
+    {
+        vector<KeyFrame*> vpNewCovKFs;
+        for(KeyFrame* pKFi : spMergeConnectedKFs)
+        {
+            vector<KeyFrame*> vpKFiCov = pKFi->GetBestCovisibilityKeyFrames(numTemporalKFs/2);
+            for(KeyFrame* pKFcov : vpKFiCov)
+            {
+                if(pKFcov && !pKFcov->isBad() && spMergeConnectedKFs.find(pKFcov) == spMergeConnectedKFs.end())
+                {
+                    vpNewCovKFs.push_back(pKFcov);
+                }
 
-    //         }
-    //     }
+            }
+        }
 
-    //     spMergeConnectedKFs.insert(vpNewCovKFs.begin(), vpNewCovKFs.end());
-    //     nNumTries++;
-    // }
+        spMergeConnectedKFs.insert(vpNewCovKFs.begin(), vpNewCovKFs.end());
+        nNumTries++;
+    }
 
-    // set<MapPoint*> spMapPointMerge;
-    // for(KeyFrame* pKFi : spMergeConnectedKFs)
-    // {
-    //     set<MapPoint*> vpMPs = pKFi->GetMapPoints();
-    //     spMapPointMerge.insert(vpMPs.begin(),vpMPs.end());
-    // }
+    set<MapPoint*> spMapPointMerge;
+    for(KeyFrame* pKFi : spMergeConnectedKFs)
+    {
+        set<MapPoint*> vpMPs = pKFi->GetMapPoints();
+        spMapPointMerge.insert(vpMPs.begin(),vpMPs.end());
+    }
 
-    // vector<MapPoint*> vpCheckFuseMapPoint;
-    // vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
-    // std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
+    vector<MapPoint*> vpCheckFuseMapPoint;
+    vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
+    std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
 
     // //std::cout << "[Merge]: Mm = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl;
 
