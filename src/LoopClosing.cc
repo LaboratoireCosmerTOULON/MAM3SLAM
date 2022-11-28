@@ -2236,19 +2236,35 @@ void LoopClosing::MergeLocalMulti()
 
     //Verbose::PrintMess("MERGE-VISUAL: Request Stop Local Mapping", Verbose::VERBOSITY_DEBUG);
     //cout << "Request Stop Local Mapping" << endl;
-    
+
     // Get all Agents in current and matched map and request local mapping stop
     std::vector<Agent*> vpAgentsInCurrentMap = mpMultiAgentSystem->GetAgentsInMap(mpCurrentKF->GetMap()->GetId());
-    std::vector<Agent*> vpAgentsInMergeMatchedMap = mpMultiAgentSystem->GetAgentsInMap(mpCurrentAgent->GetCurrentMap()->GetId());
-    // mpLocalMapper->RequestStop();
-    // // Wait until Local Mapping has effectively stopped
-    // while(!mpLocalMapper->isStopped())
-    // {
-    //     usleep(1000);
-    // }
-    // //cout << "Local Map stopped" << endl;
+    std::vector<Agent*> vpAgentsInMergeMatchedMap = mpMultiAgentSystem->GetAgentsInMap(mpCurrentAgent->mpMergeMatchedKF->GetMap()->GetId());
+    for(Agent* pAgent : vpAgentsInCurrentMap)
+    {
+        pAgent->mpLocalMapper->RequestStop();
+        // Wait until Local Mapping has effectively stopped
+        while(!pAgent->mpLocalMapper->isStopped())
+        {
+            usleep(1000);
+        }
+        //cout << "Local Map stopped" << endl;
+        pAgent->mpLocalMapper->EmptyQueue();
+        std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
 
-    // mpLocalMapper->EmptyQueue();
+    }
+    for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+    {
+        pAgent->mpLocalMapper->RequestStop();
+        // Wait until Local Mapping has effectively stopped
+        while(!pAgent->mpLocalMapper->isStopped())
+        {
+            usleep(1000);
+        }
+        //cout << "Local Map stopped" << endl;
+        pAgent->mpLocalMapper->EmptyQueue();
+        std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
+    }
 
     // // Merge map will become in the new active map with the local window of KFs and MPs from the current map.
     // // Later, the elements of the current map will be transform to the new active map reference, in order to keep real time tracking
@@ -2673,8 +2689,17 @@ void LoopClosing::MergeLocalMulti()
     //     vdMergeOptEss_ms.push_back(timeOptEss);
     // #endif
 
+    for(Agent* pAgent : vpAgentsInCurrentMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    }
+    for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
 
-    // mpLocalMapper->Release();
+    }
 
     // if(bRelaunchBA || (pCurrentMap->KeyFramesInMap()<200 && mpAtlas->CountMaps()==1))
     // {

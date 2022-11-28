@@ -105,6 +105,9 @@ public:
     std::vector<MapPoint*> mvpMergeMatchedMPs;
     std::vector<KeyFrame*> mvpMergeConnectedKFs;
 
+    // Local Mapper. It manages the local map and performs local bundle adjustment.
+    LocalMapping* mpLocalMapper;
+
 private:
 
     // Input sensor
@@ -114,9 +117,6 @@ private:
     // It also decides when to insert a new keyframe, create some new MapPoints and
     // performs relocalization if tracking fails.
     Tracking* mpTracker;
-
-    // Local Mapper. It manages the local map and performs local bundle adjustment.
-    LocalMapping* mpLocalMapper;
 
     // The viewer draws the map and the current camera pose. It uses Pangolin.
     // Viewer* mpViewer;
