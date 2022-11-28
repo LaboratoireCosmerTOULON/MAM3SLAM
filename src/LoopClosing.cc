@@ -2362,64 +2362,62 @@ void LoopClosing::MergeLocalMulti()
     vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
     std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
 
-    // //std::cout << "[Merge]: Mm = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl;
+    //std::cout << "[Merge]: Mm = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl;
+
+    Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
+    g2o::Sim3 g2oNonCorrectedSwc(Twc.unit_quaternion(),Twc.translation(),1.0);
+    g2o::Sim3 g2oNonCorrectedScw = g2oNonCorrectedSwc.inverse();
+    g2o::Sim3 g2oCorrectedScw = mpCurrentAgent->mg2oMergeScw; //TODO Check the transformation
+
+    KeyFrameAndPose vCorrectedSim3, vNonCorrectedSim3;
+    vCorrectedSim3[mpCurrentKF]=g2oCorrectedScw;
+    vNonCorrectedSim3[mpCurrentKF]=g2oNonCorrectedScw;
 
 
-    // //
-    // Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
-    // g2o::Sim3 g2oNonCorrectedSwc(Twc.unit_quaternion(),Twc.translation(),1.0);
-    // g2o::Sim3 g2oNonCorrectedScw = g2oNonCorrectedSwc.inverse();
-    // g2o::Sim3 g2oCorrectedScw = mg2oMergeScw; //TODO Check the transformation
+    #ifdef REGISTER_TIMES
+        vnMergeKFs.push_back(spLocalWindowKFs.size() + spMergeConnectedKFs.size());
+        vnMergeMPs.push_back(spLocalWindowMPs.size() + spMapPointMerge.size());
+    #endif
+    for(KeyFrame* pKFi : spLocalWindowKFs)
+    {
+        if(!pKFi || pKFi->isBad())
+        {
+            Verbose::PrintMess("Bad KF in correction", Verbose::VERBOSITY_DEBUG);
+            continue;
+        }
 
-    // KeyFrameAndPose vCorrectedSim3, vNonCorrectedSim3;
-    // vCorrectedSim3[mpCurrentKF]=g2oCorrectedScw;
-    // vNonCorrectedSim3[mpCurrentKF]=g2oNonCorrectedScw;
+        if(pKFi->GetMap() != pCurrentMap)
+            Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
 
+        g2o::Sim3 g2oCorrectedSiw;
 
-    // #ifdef REGISTER_TIMES
-    //     vnMergeKFs.push_back(spLocalWindowKFs.size() + spMergeConnectedKFs.size());
-    //     vnMergeMPs.push_back(spLocalWindowMPs.size() + spMapPointMerge.size());
-    // #endif
-    // for(KeyFrame* pKFi : spLocalWindowKFs)
-    // {
-    //     if(!pKFi || pKFi->isBad())
-    //     {
-    //         Verbose::PrintMess("Bad KF in correction", Verbose::VERBOSITY_DEBUG);
-    //         continue;
-    //     }
+        if(pKFi!=mpCurrentKF)
+        {
+            Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
+            g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
+            //Pose without correction
+            vNonCorrectedSim3[pKFi]=g2oSiw;
 
-    //     if(pKFi->GetMap() != pCurrentMap)
-    //         Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
+            Sophus::SE3d Tic = Tiw*Twc;
+            g2o::Sim3 g2oSic(Tic.unit_quaternion(),Tic.translation(),1.0);
+            g2oCorrectedSiw = g2oSic*mpCurrentAgent->mg2oMergeScw;
+            vCorrectedSim3[pKFi]=g2oCorrectedSiw;
+        }
+        else
+        {
+            g2oCorrectedSiw = g2oCorrectedScw;
+        }
+        pKFi->mTcwMerge  = pKFi->GetPose();
 
-    //     g2o::Sim3 g2oCorrectedSiw;
+        // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
+        double s = g2oCorrectedSiw.scale();
+        pKFi->mfScale = s;
+        Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(), g2oCorrectedSiw.translation() / s);
 
-    //     if(pKFi!=mpCurrentKF)
-    //     {
-    //         Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
-    //         g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
-    //         //Pose without correction
-    //         vNonCorrectedSim3[pKFi]=g2oSiw;
+        pKFi->mTcwMerge = correctedTiw.cast<float>();
 
-    //         Sophus::SE3d Tic = Tiw*Twc;
-    //         g2o::Sim3 g2oSic(Tic.unit_quaternion(),Tic.translation(),1.0);
-    //         g2oCorrectedSiw = g2oSic*mg2oMergeScw;
-    //         vCorrectedSim3[pKFi]=g2oCorrectedSiw;
-    //     }
-    //     else
-    //     {
-    //         g2oCorrectedSiw = g2oCorrectedScw;
-    //     }
-    //     pKFi->mTcwMerge  = pKFi->GetPose();
-
-    //     // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
-    //     double s = g2oCorrectedSiw.scale();
-    //     pKFi->mfScale = s;
-    //     Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(), g2oCorrectedSiw.translation() / s);
-
-    //     pKFi->mTcwMerge = correctedTiw.cast<float>();
-
-    //     //TODO DEBUG to know which are the KFs that had been moved to the other map
-    // }
+        //TODO DEBUG to know which are the KFs that had been moved to the other map
+    }
 
     // int numPointsWithCorrection = 0;
 
