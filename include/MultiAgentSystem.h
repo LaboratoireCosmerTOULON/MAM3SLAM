@@ -87,6 +87,9 @@ public:
 
     void StartViewer(); // WARNING : adding new agents after starting viewer may lead to core dumped
 
+    // Agents on a map
+    std::vector<Agent*> GetAgentsInMap(long unsigned int nMapId);
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;

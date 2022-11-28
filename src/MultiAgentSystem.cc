@@ -33,6 +33,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, boo
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
     bool bFixScale = false;
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, bFixScale, bActiveLC);
+    mpLoopCloser->SetMultiAgentSystem(this);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
     // // Fix verbosity
@@ -112,6 +113,19 @@ void MultiAgentSystem::StartViewer() {
         mpMultiAgentViewer -> AddAgentViewer(mvpAgents[i] -> getAgentViewer());
     }
     mptMultiAgentViewer = new thread(&ORB_SLAM3::MultiAgentViewer::Run, mpMultiAgentViewer);
+}
+
+std::vector<Agent*> MultiAgentSystem::GetAgentsInMap(long unsigned int nMapId)
+{
+    std::vector<Agent*> vpAgentsInMap;
+    for(Agent* pAgent : mvpAgents)
+    {
+        if (pAgent->GetCurrentMap()->GetId() == nMapId)
+        {
+            vpAgentsInMap.push_back(pAgent);
+        }
+    }
+    return vpAgentsInMap;
 }
 
 }

@@ -35,6 +35,7 @@
 #include <fstream>
 
 #include "Agent.h"
+#include "MultiAgentSystem.h"
 
 namespace ORB_SLAM3
 {
@@ -45,6 +46,7 @@ class KeyFrameDatabase;
 class Map;
 class Atlas;
 class Agent;
+class MultiAgentSystem;
 
 class LoopClosing
 {
@@ -85,6 +87,9 @@ public:
     void RequestFinish();
 
     bool isFinished();
+
+    // Multiagent system
+    void SetMultiAgentSystem(MultiAgentSystem* pMultiAgentSystem);
 
 
 #ifdef REGISTER_TIMES
@@ -145,6 +150,7 @@ protected:
     void CorrectLoop();
 
     void MergeLocal();
+    void MergeLocalMulti();
     void MergeLocal2();
 
     void CheckObservations(set<KeyFrame*> &spKFsMap1, set<KeyFrame*> &spKFsMap2);
@@ -234,7 +240,8 @@ protected:
 
     bool mnFullBAIdx;
 
-
+    // Multiagent system
+    MultiAgentSystem* mpMultiAgentSystem;
 
     vector<double> vdPR_CurrentTime;
     vector<double> vdPR_MatchedTime;

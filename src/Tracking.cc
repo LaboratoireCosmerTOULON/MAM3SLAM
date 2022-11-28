@@ -3161,7 +3161,7 @@ void Tracking::UpdateLocalPoints()
             }
         }
     }
-    std::cout << mvpLocalMapPoints.size() << " MP found for Agent " << mpAgent->mnId << std::endl;
+    // std::cout << mvpLocalMapPoints.size() << " MP found for Agent " << mpAgent->mnId << std::endl; // DEBUG
 }
 
 
