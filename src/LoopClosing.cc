@@ -2266,63 +2266,63 @@ void LoopClosing::MergeLocalMulti()
         std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
     }
 
-    // // Merge map will become in the new active map with the local window of KFs and MPs from the current map.
-    // // Later, the elements of the current map will be transform to the new active map reference, in order to keep real time tracking
-    // Map* pCurrentMap = mpCurrentKF->GetMap();
-    // Map* pMergeMap = mpMergeMatchedKF->GetMap();
+    // Merge map will become in the new active map with the local window of KFs and MPs from the current map.
+    // Later, the elements of the current map will be transform to the new active map reference, in order to keep real time tracking
+    Map* pCurrentMap = mpCurrentKF->GetMap();
+    Map* pMergeMap = mpCurrentAgent->mpMergeMatchedKF->GetMap();
 
-    // //std::cout << "Merge local, Active map: " << pCurrentMap->GetId() << std::endl;
-    // //std::cout << "Merge local, Non-Active map: " << pMergeMap->GetId() << std::endl;
+    //std::cout << "Merge local, Active map: " << pCurrentMap->GetId() << std::endl;
+    //std::cout << "Merge local, Non-Active map: " << pMergeMap->GetId() << std::endl;
 
-    // #ifdef REGISTER_TIMES
-    //     std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
-    // #endif
+    #ifdef REGISTER_TIMES
+        std::chrono::steady_clock::time_point time_StartMerge = std::chrono::steady_clock::now();
+    #endif
 
-    // // Ensure current keyframe is updated
-    // mpCurrentKF->UpdateConnections();
+    // Ensure current keyframe is updated
+    mpCurrentKF->UpdateConnections();
 
-    // //Get the current KF and its neighbors(visual->covisibles; inertial->temporal+covisibles)
-    // set<KeyFrame*> spLocalWindowKFs;
-    // //Get MPs in the welding area from the current map
-    // set<MapPoint*> spLocalWindowMPs;
-    // spLocalWindowKFs.insert(mpCurrentKF);
+    //Get the current KF and its neighbors(visual->covisibles; inertial->temporal+covisibles)
+    set<KeyFrame*> spLocalWindowKFs;
+    //Get MPs in the welding area from the current map
+    set<MapPoint*> spLocalWindowMPs;
+    spLocalWindowKFs.insert(mpCurrentKF);
 
-    // vector<KeyFrame*> vpCovisibleKFs = mpCurrentKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
-    // spLocalWindowKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
-    // spLocalWindowKFs.insert(mpCurrentKF);
-    // const int nMaxTries = 5;
-    // int nNumTries = 0;
-    // while(spLocalWindowKFs.size() < numTemporalKFs && nNumTries < nMaxTries)
-    // {
-    //     vector<KeyFrame*> vpNewCovKFs;
-    //     vpNewCovKFs.empty();
-    //     for(KeyFrame* pKFi : spLocalWindowKFs)
-    //     {
-    //         vector<KeyFrame*> vpKFiCov = pKFi->GetBestCovisibilityKeyFrames(numTemporalKFs/2);
-    //         for(KeyFrame* pKFcov : vpKFiCov)
-    //         {
-    //             if(pKFcov && !pKFcov->isBad() && spLocalWindowKFs.find(pKFcov) == spLocalWindowKFs.end())
-    //             {
-    //                 vpNewCovKFs.push_back(pKFcov);
-    //             }
+    vector<KeyFrame*> vpCovisibleKFs = mpCurrentKF->GetBestCovisibilityKeyFrames(numTemporalKFs);
+    spLocalWindowKFs.insert(vpCovisibleKFs.begin(), vpCovisibleKFs.end());
+    spLocalWindowKFs.insert(mpCurrentKF);
+    const int nMaxTries = 5;
+    int nNumTries = 0;
+    while(spLocalWindowKFs.size() < numTemporalKFs && nNumTries < nMaxTries)
+    {
+        vector<KeyFrame*> vpNewCovKFs;
+        vpNewCovKFs.empty();
+        for(KeyFrame* pKFi : spLocalWindowKFs)
+        {
+            vector<KeyFrame*> vpKFiCov = pKFi->GetBestCovisibilityKeyFrames(numTemporalKFs/2);
+            for(KeyFrame* pKFcov : vpKFiCov)
+            {
+                if(pKFcov && !pKFcov->isBad() && spLocalWindowKFs.find(pKFcov) == spLocalWindowKFs.end())
+                {
+                    vpNewCovKFs.push_back(pKFcov);
+                }
 
-    //         }
-    //     }
+            }
+        }
 
-    //     spLocalWindowKFs.insert(vpNewCovKFs.begin(), vpNewCovKFs.end());
-    //     nNumTries++;
-    // }
+        spLocalWindowKFs.insert(vpNewCovKFs.begin(), vpNewCovKFs.end());
+        nNumTries++;
+    }
 
-    // for(KeyFrame* pKFi : spLocalWindowKFs)
-    // {
-    //     if(!pKFi || pKFi->isBad())
-    //         continue;
+    for(KeyFrame* pKFi : spLocalWindowKFs)
+    {
+        if(!pKFi || pKFi->isBad())
+            continue;
 
-    //     set<MapPoint*> spMPs = pKFi->GetMapPoints();
-    //     spLocalWindowMPs.insert(spMPs.begin(), spMPs.end());
-    // }
+        set<MapPoint*> spMPs = pKFi->GetMapPoints();
+        spLocalWindowMPs.insert(spMPs.begin(), spMPs.end());
+    }
 
-    // //std::cout << "[Merge]: Ma = " << to_string(pCurrentMap->GetId()) << "; #KFs = " << to_string(spLocalWindowKFs.size()) << "; #MPs = " << to_string(spLocalWindowMPs.size()) << std::endl;
+    //std::cout << "[Merge]: Ma = " << to_string(pCurrentMap->GetId()) << "; #KFs = " << to_string(spLocalWindowKFs.size()) << "; #MPs = " << to_string(spLocalWindowMPs.size()) << std::endl;
 
     // set<KeyFrame*> spMergeConnectedKFs;
     // spMergeConnectedKFs.insert(mpMergeMatchedKF);
