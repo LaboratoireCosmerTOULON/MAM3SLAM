@@ -73,6 +73,8 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames() && !mbBadImu)
         {
+            std::cout << "coucou" << std::endl;
+            std::cout << "Calling LM from agent " << mpAgent->mnId << ". Current map is " << mpAgent->GetCurrentMap()->GetId() << " with " << mpAgent->GetCurrentMap()->KeyFramesInMap() << " KFs." << std::endl;
             #ifdef REGISTER_TIMES
                 double timeLBA_ms = 0;
                 double timeKFCulling_ms = 0;
