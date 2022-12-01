@@ -207,6 +207,9 @@ public:
 
     unsigned int mnOriginMapId;
 
+    bool isJustMerged = false;
+    bool isToBeMerged = false;
+
 protected:    
 
      // Position in absolute coordinates

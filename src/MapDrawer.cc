@@ -176,6 +176,30 @@ void MapDrawer::DrawMapPoints()
     }
 
     glEnd();
+
+    glPointSize(10.0);
+    glBegin(GL_POINTS);
+    glColor3f(0.0,0.0,1.0);
+    for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    {
+        if((*sit)->isBad() || (*sit)->isJustMerged==false)
+            continue;
+        Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
+        glVertex3f(pos(0),pos(1),pos(2));
+    }
+    glEnd();
+
+    glPointSize(10.0);
+    glBegin(GL_POINTS);
+    glColor3f(0.0,1.0,1.0);
+    for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    {
+        if((*sit)->isBad() || (*sit)->isToBeMerged==false)
+            continue;
+        Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
+        glVertex3f(pos(0),pos(1),pos(2));
+    }
+    glEnd();
 }
 
 void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph, const bool bDrawOptLba)

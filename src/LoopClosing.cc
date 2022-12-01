@@ -2363,6 +2363,11 @@ void LoopClosing::MergeLocalMulti()
         spLocalWindowMPs.insert(spMPs.begin(), spMPs.end());
     }
 
+    // DEBUG : set MP to be merged
+    for (MapPoint* pMPi : pCurrentMap->GetAllMapPoints()) {
+        pMPi->isToBeMerged = true;
+    }
+
     std::cout << "[Merge-CurrentKF]: Ma = " << to_string(pCurrentMap->GetId()) << "; #KFs = " << to_string(spLocalWindowKFs.size()) << "; #MPs = " << to_string(spLocalWindowMPs.size()) << std::endl; // DEBUG
 
     set<KeyFrame*> spMergeConnectedKFs;
@@ -2399,249 +2404,254 @@ void LoopClosing::MergeLocalMulti()
         spMapPointMerge.insert(vpMPs.begin(),vpMPs.end());
     }
 
-    std::cout << "[Merge-MergeKF]: Ma = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl; // DEBUG
+    std::cout << "[Merge-MergeKF]: Mm = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl; // DEBUG
 
-    // vector<MapPoint*> vpCheckFuseMapPoint;
-    // vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
-    // std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
+    vector<MapPoint*> vpCheckFuseMapPoint;
+    vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
+    std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
 
-    // std::cout << "[Merge]: Mm = " << to_string(pMergeMap->GetId()) << "; #KFs = " << to_string(spMergeConnectedKFs.size()) << "; #MPs = " << to_string(spMapPointMerge.size()) << std::endl;
-
-    // Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
-    // g2o::Sim3 g2oNonCorrectedSwc(Twc.unit_quaternion(),Twc.translation(),1.0);
-    // g2o::Sim3 g2oNonCorrectedScw = g2oNonCorrectedSwc.inverse();
-    // g2o::Sim3 g2oCorrectedScw = mpCurrentAgent->mg2oMergeScw; //TODO Check the transformation
+    Sophus::SE3d Twc = mpCurrentKF->GetPoseInverse().cast<double>();
+    g2o::Sim3 g2oNonCorrectedSwc(Twc.unit_quaternion(),Twc.translation(),1.0);
+    g2o::Sim3 g2oNonCorrectedScw = g2oNonCorrectedSwc.inverse();
+    g2o::Sim3 g2oCorrectedScw = mpCurrentAgent->mg2oMergeScw; //TODO Check the transformation
     // Sophus::SE3d test_cout(mpCurrentAgent->mg2oMergeScw.rotation(), mpCurrentAgent->mg2oMergeScw.translation() / mpCurrentAgent->mg2oMergeScw.scale());
-    // std::cout << "test_cout : " << test_cout.matrix() << std::endl;
+    // std::cout << "mpCurrentAgent->mg2oMergeTcw : " << test_cout.matrix() << std::endl;
+    // std::cout << "scale : " << mpCurrentAgent->mg2oMergeScw.scale() << std::endl;
     // Sophus::SE3d test_cout2(mpCurrentAgent->mg2oMergeSlw.rotation(), mpCurrentAgent->mg2oMergeSlw.translation() / mpCurrentAgent->mg2oMergeSlw.scale());
     // std::cout << "test_cout2 : " << test_cout2.matrix() << std::endl;
     // Sophus::SE3d test_cout3(mpCurrentAgent->mg2oMergeSmw.rotation(), mpCurrentAgent->mg2oMergeSmw.translation() / mpCurrentAgent->mg2oMergeSmw.scale());
     // std::cout << "test_cout3 : " << test_cout3.matrix() << std::endl;
 
-    // KeyFrameAndPose vCorrectedSim3, vNonCorrectedSim3;
-    // vCorrectedSim3[mpCurrentKF]=g2oCorrectedScw;
-    // vNonCorrectedSim3[mpCurrentKF]=g2oNonCorrectedScw;
+    KeyFrameAndPose vCorrectedSim3, vNonCorrectedSim3;
+    vCorrectedSim3[mpCurrentKF]=g2oCorrectedScw;
+    vNonCorrectedSim3[mpCurrentKF]=g2oNonCorrectedScw;
 
 
-    // #ifdef REGISTER_TIMES
-    //     vnMergeKFs.push_back(spLocalWindowKFs.size() + spMergeConnectedKFs.size());
-    //     vnMergeMPs.push_back(spLocalWindowMPs.size() + spMapPointMerge.size());
-    // #endif
-    // for(KeyFrame* pKFi : spLocalWindowKFs)
-    // {
-    //     if(!pKFi || pKFi->isBad())
-    //     {
-    //         Verbose::PrintMess("Bad KF in correction", Verbose::VERBOSITY_DEBUG);
-    //         continue;
-    //     }
+    #ifdef REGISTER_TIMES
+        vnMergeKFs.push_back(spLocalWindowKFs.size() + spMergeConnectedKFs.size());
+        vnMergeMPs.push_back(spLocalWindowMPs.size() + spMapPointMerge.size());
+    #endif
+    for(KeyFrame* pKFi : spLocalWindowKFs)
+    {
+        if(!pKFi || pKFi->isBad())
+        {
+            Verbose::PrintMess("Bad KF in correction", Verbose::VERBOSITY_DEBUG);
+            continue;
+        }
 
-    //     if(pKFi->GetMap() != pCurrentMap)
-    //         Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
+        if(pKFi->GetMap() != pCurrentMap)
+            Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
 
-    //     g2o::Sim3 g2oCorrectedSiw;
+        g2o::Sim3 g2oCorrectedSiw;
 
-    //     if(pKFi!=mpCurrentKF)
-    //     {
-    //         Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
-    //         g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
-    //         //Pose without correction
-    //         vNonCorrectedSim3[pKFi]=g2oSiw;
+        if(pKFi!=mpCurrentKF)
+        {
+            Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
+            g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
+            //Pose without correction
+            vNonCorrectedSim3[pKFi]=g2oSiw;
 
-    //         Sophus::SE3d Tic = Tiw*Twc;
-    //         g2o::Sim3 g2oSic(Tic.unit_quaternion(),Tic.translation(),1.0);
-    //         g2oCorrectedSiw = g2oSic*mpCurrentAgent->mg2oMergeScw;
-    //         vCorrectedSim3[pKFi]=g2oCorrectedSiw;
-    //     }
-    //     else
-    //     {
-    //         g2oCorrectedSiw = g2oCorrectedScw;
-    //     }
-    //     pKFi->mTcwMerge  = pKFi->GetPose();
+            Sophus::SE3d Tic = Tiw*Twc;
+            g2o::Sim3 g2oSic(Tic.unit_quaternion(),Tic.translation(),1.0);
+            g2oCorrectedSiw = g2oSic*mpCurrentAgent->mg2oMergeScw;
+            vCorrectedSim3[pKFi]=g2oCorrectedSiw;
+        }
+        else
+        {
+            g2oCorrectedSiw = g2oCorrectedScw;
+        }
+        pKFi->mTcwMerge  = pKFi->GetPose();
 
-    //     // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
-    //     double s = g2oCorrectedSiw.scale();
-    //     pKFi->mfScale = s;
-    //     Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(), g2oCorrectedSiw.translation() / s);
+        // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
+        double s = g2oCorrectedSiw.scale();
+        pKFi->mfScale = s;
+        Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(), g2oCorrectedSiw.translation() / s);
 
-    //     pKFi->mTcwMerge = correctedTiw.cast<float>();
+        pKFi->mTcwMerge = correctedTiw.cast<float>();
 
-    //     //TODO DEBUG to know which are the KFs that had been moved to the other map
-    // }
+        //TODO DEBUG to know which are the KFs that had been moved to the other map
+        // std::cout << "Old pose: " << pKFi->GetPose().matrix() << std::endl; // DEBUG
+        // std::cout << "New pose: " << pKFi->mTcwMerge.matrix() << std::endl; // DEBUG
+    }
 
-    // int numPointsWithCorrection = 0;
+    int numPointsWithCorrection = 0;
 
-    // //for(MapPoint* pMPi : spLocalWindowMPs)
-    // set<MapPoint*>::iterator itMP = spLocalWindowMPs.begin();
-    // while(itMP != spLocalWindowMPs.end())
-    // {
-    //     MapPoint* pMPi = *itMP;
-    //     if(!pMPi || pMPi->isBad())
-    //     {
-    //         itMP = spLocalWindowMPs.erase(itMP);
-    //         continue;
-    //     }
+    //for(MapPoint* pMPi : spLocalWindowMPs)
+    set<MapPoint*>::iterator itMP = spLocalWindowMPs.begin();
+    while(itMP != spLocalWindowMPs.end())
+    {
+        MapPoint* pMPi = *itMP;
+        if(!pMPi || pMPi->isBad())
+        {
+            itMP = spLocalWindowMPs.erase(itMP);
+            continue;
+        }
 
-    //     KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
-    //     if(vCorrectedSim3.find(pKFref) == vCorrectedSim3.end())
-    //     {
-    //         itMP = spLocalWindowMPs.erase(itMP);
-    //         numPointsWithCorrection++;
-    //         continue;
-    //     }
-    //     g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
-    //     g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
+        KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
+        if(vCorrectedSim3.find(pKFref) == vCorrectedSim3.end())
+        {
+            itMP = spLocalWindowMPs.erase(itMP);
+            numPointsWithCorrection++;
+            continue;
+        }
+        g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
+        g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
 
-    //     // Project with non-corrected pose and project back with corrected pose
-    //     Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
-    //     Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
-    //     Eigen::Quaterniond Rcor = g2oCorrectedSwi.rotation() * g2oNonCorrectedSiw.rotation();
+        // Project with non-corrected pose and project back with corrected pose
+        Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
+        Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
+        Eigen::Quaterniond Rcor = g2oCorrectedSwi.rotation() * g2oNonCorrectedSiw.rotation();
 
-    //     pMPi->mPosMerge = eigCorrectedP3Dw.cast<float>();
-    //     pMPi->mNormalVectorMerge = Rcor.cast<float>() * pMPi->GetNormal();
+        pMPi->mPosMerge = eigCorrectedP3Dw.cast<float>();
+        pMPi->mNormalVectorMerge = Rcor.cast<float>() * pMPi->GetNormal();
 
-    //     itMP++;
-    // }
-    // /*if(numPointsWithCorrection>0)
-    // {
-    //     std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection) << " points removed from Ma due to its reference KF is not in welding area" << std::endl;
-    //     std::cout << "[Merge]: Ma has " << std::to_string(spLocalWindowMPs.size()) << " points" << std::endl;
-    // }*/
+        // std::cout << "Old coordinates: " << pMPi->GetWorldPos() << std::endl; // DEBUG
+        // std::cout << "New coordinates: " << pMPi->mPosMerge << std::endl; // DEBUG
 
-    // {
-    //     unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
-    //     unique_lock<mutex> mergeLock(pMergeMap->mMutexMapUpdate); // We remove the Kfs and MPs in the merged area from the old map
+        itMP++;
+    }
+    /*if(numPointsWithCorrection>0)
+    {
+        std::cout << "[Merge]: " << std::to_string(numPointsWithCorrection) << " points removed from Ma due to its reference KF is not in welding area" << std::endl;
+        std::cout << "[Merge]: Ma has " << std::to_string(spLocalWindowMPs.size()) << " points" << std::endl;
+    }*/
 
-    //     //std::cout << "Merge local window: " << spLocalWindowKFs.size() << std::endl;
-    //     //std::cout << "[Merge]: init merging maps " << std::endl;
-    //     for(KeyFrame* pKFi : spLocalWindowKFs)
-    //     {
-    //         if(!pKFi || pKFi->isBad())
-    //         {
-    //             //std::cout << "Bad KF in correction" << std::endl;
-    //             continue;
-    //         }
+    {
+        unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
+        unique_lock<mutex> mergeLock(pMergeMap->mMutexMapUpdate); // We remove the Kfs and MPs in the merged area from the old map
 
-    //         //std::cout << "KF id: " << pKFi->mnId << std::endl;
+        std::cout << "Merge local window: " << spLocalWindowKFs.size() << std::endl;
+        std::cout << "[Merge]: init merging maps " << std::endl;
+        for(KeyFrame* pKFi : spLocalWindowKFs)
+        {
+            if(!pKFi || pKFi->isBad())
+            {
+                //std::cout << "Bad KF in correction" << std::endl;
+                continue;
+            }
 
-    //         pKFi->mTcwBefMerge = pKFi->GetPose();
-    //         pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
-    //         pKFi->SetPose(pKFi->mTcwMerge);
+            std::cout << "KF id: " << pKFi->mnId << std::endl;
 
-    //         // Make sure connections are updated
-    //         pKFi->UpdateMap(pMergeMap);
-    //         pKFi->mnMergeCorrectedForKF = mpCurrentKF->mnId;
-    //         pMergeMap->AddKeyFrame(pKFi);
-    //         pCurrentMap->EraseKeyFrame(pKFi);
-    //     }
+            pKFi->mTcwBefMerge = pKFi->GetPose();
+            pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
+            pKFi->SetPose(pKFi->mTcwMerge);
 
-    //     for(MapPoint* pMPi : spLocalWindowMPs)
-    //     {
-    //         if(!pMPi || pMPi->isBad())
-    //             continue;
+            // Make sure connections are updated
+            pKFi->UpdateMap(pMergeMap);
+            pKFi->mnMergeCorrectedForKF = mpCurrentKF->mnId;
+            pMergeMap->AddKeyFrame(pKFi);
+            pCurrentMap->EraseKeyFrame(pKFi);
+        }
 
-    //         pMPi->SetWorldPos(pMPi->mPosMerge);
-    //         pMPi->SetNormalVector(pMPi->mNormalVectorMerge);
-    //         pMPi->UpdateMap(pMergeMap);
-    //         pMergeMap->AddMapPoint(pMPi);
-    //         pCurrentMap->EraseMapPoint(pMPi);
-    //     }
+        for(MapPoint* pMPi : spLocalWindowMPs)
+        {
+            if(!pMPi || pMPi->isBad())
+                continue;
 
-    //     for(Agent* pAgent : vpAgentsInCurrentMap)
-    //     {
-    //         pAgent->SetCurrentMap(pMergeMap);
-    //     }
-    //     mpAtlas->SetMapBad(pCurrentMap);
-    //     pMergeMap->IncreaseChangeIndex();
-    //     //TODO for debug
-    //     pMergeMap->ChangeId(pCurrentMap->GetId());
+            pMPi->SetWorldPos(pMPi->mPosMerge);
+            pMPi->SetNormalVector(pMPi->mNormalVectorMerge);
+            pMPi->UpdateMap(pMergeMap);
+            pMergeMap->AddMapPoint(pMPi);
+            pCurrentMap->EraseMapPoint(pMPi);
+            pMPi->isJustMerged = true;
+        }
 
-    //     //std::cout << "[Merge]: merging maps finished" << std::endl;
-    // }
+        for(Agent* pAgent : vpAgentsInCurrentMap)
+        {
+            pAgent->SetCurrentMap(pMergeMap);
+        }
+        mpAtlas->SetMapBad(pCurrentMap);
+        pMergeMap->IncreaseChangeIndex();
+        //TODO for debug
+        pMergeMap->ChangeId(pCurrentMap->GetId());
 
-    // //Rebuild the essential graph in the local window
-    // pCurrentMap->GetOriginKF()->SetFirstConnection(false);
-    // pNewChild = mpCurrentKF->GetParent(); // Old parent, it will be the new child of this KF
-    // pNewParent = mpCurrentKF; // Old child, now it will be the parent of its own parent(we need eliminate this KF from children list in its old parent)
-    // mpCurrentKF->ChangeParent(mpCurrentAgent->mpMergeMatchedKF);
-    // while(pNewChild)
-    // {
-    //     pNewChild->EraseChild(pNewParent); // We remove the relation between the old parent and the new for avoid loop
-    //     KeyFrame * pOldParent = pNewChild->GetParent();
+        std::cout << "[Merge]: merging maps finished" << std::endl;
+    }
 
-    //     pNewChild->ChangeParent(pNewParent);
+    //Rebuild the essential graph in the local window
+    pCurrentMap->GetOriginKF()->SetFirstConnection(false);
+    pNewChild = mpCurrentKF->GetParent(); // Old parent, it will be the new child of this KF
+    pNewParent = mpCurrentKF; // Old child, now it will be the parent of its own parent(we need eliminate this KF from children list in its old parent)
+    mpCurrentKF->ChangeParent(mpCurrentAgent->mpMergeMatchedKF);
+    while(pNewChild)
+    {
+        pNewChild->EraseChild(pNewParent); // We remove the relation between the old parent and the new for avoid loop
+        KeyFrame * pOldParent = pNewChild->GetParent();
 
-    //     pNewParent = pNewChild;
-    //     pNewChild = pOldParent;
+        pNewChild->ChangeParent(pNewParent);
 
-    // }
+        pNewParent = pNewChild;
+        pNewChild = pOldParent;
 
-    // //Update the connections between the local window
-    // mpCurrentAgent->mpMergeMatchedKF->UpdateConnections();
+    }
 
-    // vpMergeConnectedKFs = mpCurrentAgent->mpMergeMatchedKF->GetVectorCovisibleKeyFrames();
-    // vpMergeConnectedKFs.push_back(mpCurrentAgent->mpMergeMatchedKF);
-    // //vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
-    // //std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
+    //Update the connections between the local window
+    mpCurrentAgent->mpMergeMatchedKF->UpdateConnections();
 
-    // // Project MapPoints observed in the neighborhood of the merge keyframe
-    // // into the current keyframe and neighbors using corrected poses.
-    // // Fuse duplications.
-    // //std::cout << "[Merge]: start fuse points" << std::endl;
-    // SearchAndFuse(vCorrectedSim3, vpCheckFuseMapPoint);
-    // //std::cout << "[Merge]: fuse points finished" << std::endl;
+    vpMergeConnectedKFs = mpCurrentAgent->mpMergeMatchedKF->GetVectorCovisibleKeyFrames();
+    vpMergeConnectedKFs.push_back(mpCurrentAgent->mpMergeMatchedKF);
+    //vpCheckFuseMapPoint.reserve(spMapPointMerge.size());
+    //std::copy(spMapPointMerge.begin(), spMapPointMerge.end(), std::back_inserter(vpCheckFuseMapPoint));
 
-    // // Update connectivity
-    // for(KeyFrame* pKFi : spLocalWindowKFs)
-    // {
-    //     if(!pKFi || pKFi->isBad())
-    //         continue;
+    // Project MapPoints observed in the neighborhood of the merge keyframe
+    // into the current keyframe and neighbors using corrected poses.
+    // Fuse duplications.
+    std::cout << "[Merge]: start fuse points" << std::endl; // DEBUG
+    SearchAndFuse(vCorrectedSim3, vpCheckFuseMapPoint);
+    std::cout << "[Merge]: fuse points finished" << std::endl; // DEBUG
 
-    //     pKFi->UpdateConnections();
-    // }
-    // for(KeyFrame* pKFi : spMergeConnectedKFs)
-    // {
-    //     if(!pKFi || pKFi->isBad())
-    //         continue;
+    // Update connectivity
+    for(KeyFrame* pKFi : spLocalWindowKFs)
+    {
+        if(!pKFi || pKFi->isBad())
+            continue;
 
-    //     pKFi->UpdateConnections();
-    // }
+        pKFi->UpdateConnections();
+    }
+    for(KeyFrame* pKFi : spMergeConnectedKFs)
+    {
+        if(!pKFi || pKFi->isBad())
+            continue;
 
-    // //std::cout << "[Merge]: Start welding bundle adjustment" << std::endl;
+        pKFi->UpdateConnections();
+    }
 
-    // #ifdef REGISTER_TIMES
-    //     std::chrono::steady_clock::time_point time_StartWeldingBA = std::chrono::steady_clock::now();
+    std::cout << "[Merge]: Start welding bundle adjustment" << std::endl; // DEBUG
 
-    //     double timeMergeMaps = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_StartWeldingBA - time_StartMerge).count();
-    //     vdMergeMaps_ms.push_back(timeMergeMaps);
-    // #endif
+    #ifdef REGISTER_TIMES
+        std::chrono::steady_clock::time_point time_StartWeldingBA = std::chrono::steady_clock::now();
 
-    // bool bStop = false;
-    // vpLocalCurrentWindowKFs.clear();
-    // vpMergeConnectedKFs.clear();
-    // std::copy(spLocalWindowKFs.begin(), spLocalWindowKFs.end(), std::back_inserter(vpLocalCurrentWindowKFs));
-    // std::copy(spMergeConnectedKFs.begin(), spMergeConnectedKFs.end(), std::back_inserter(vpMergeConnectedKFs));
-    // Optimizer::LocalBundleAdjustment(mpCurrentKF, vpLocalCurrentWindowKFs, vpMergeConnectedKFs,&bStop);
+        double timeMergeMaps = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_StartWeldingBA - time_StartMerge).count();
+        vdMergeMaps_ms.push_back(timeMergeMaps);
+    #endif
 
-    // #ifdef REGISTER_TIMES
-    //     std::chrono::steady_clock::time_point time_EndWeldingBA = std::chrono::steady_clock::now();
+    bool bStop = false;
+    vpLocalCurrentWindowKFs.clear();
+    vpMergeConnectedKFs.clear();
+    std::copy(spLocalWindowKFs.begin(), spLocalWindowKFs.end(), std::back_inserter(vpLocalCurrentWindowKFs));
+    std::copy(spMergeConnectedKFs.begin(), spMergeConnectedKFs.end(), std::back_inserter(vpMergeConnectedKFs));
+    Optimizer::LocalBundleAdjustment(mpCurrentKF, vpLocalCurrentWindowKFs, vpMergeConnectedKFs,&bStop);
 
-    //     double timeWeldingBA = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndWeldingBA - time_StartWeldingBA).count();
-    //     vdWeldingBA_ms.push_back(timeWeldingBA);
-    // #endif
-    //std::cout << "[Merge]: Welding bundle adjustment finished" << std::endl;
+    #ifdef REGISTER_TIMES
+        std::chrono::steady_clock::time_point time_EndWeldingBA = std::chrono::steady_clock::now();
 
-    // // Loop closed. Release Local Mapping.
-    // for(Agent* pAgent : vpAgentsInCurrentMap)
-    // {
-    //     pAgent->mpLocalMapper->Release();
-    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
-    // }
-    // for(Agent* pAgent : vpAgentsInMergeMatchedMap)
-    // {
-    //     pAgent->mpLocalMapper->Release();
-    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+        double timeWeldingBA = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndWeldingBA - time_StartWeldingBA).count();
+        vdWeldingBA_ms.push_back(timeWeldingBA);
+    #endif
+    std::cout << "[Merge]: Welding bundle adjustment finished" << std::endl;
 
-    // }
+    // Loop closed. Release Local Mapping.
+    for(Agent* pAgent : vpAgentsInCurrentMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    }
+    for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+
+    }
 
     // //Update the non critical area from the current map to the merged map
     // vector<KeyFrame*> vpCurrentMapKFs = pCurrentMap->GetAllKeyFrames();
@@ -2769,16 +2779,16 @@ void LoopClosing::MergeLocalMulti()
     //     vdMergeOptEss_ms.push_back(timeOptEss);
     // #endif
 
-    for(Agent* pAgent : vpAgentsInCurrentMap)
-    {
-        pAgent->mpLocalMapper->Release();
-        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
-    }
-    for(Agent* pAgent : vpAgentsInMergeMatchedMap)
-    {
-        pAgent->mpLocalMapper->Release();
-        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
-    }
+    // for(Agent* pAgent : vpAgentsInCurrentMap)
+    // {
+    //     pAgent->mpLocalMapper->Release();
+    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    // }
+    // for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+    // {
+    //     pAgent->mpLocalMapper->Release();
+    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    // }
 
     // if(bRelaunchBA || (pCurrentMap->KeyFramesInMap()<200 && mpAtlas->CountMaps()==1))
     // {
@@ -3019,9 +3029,9 @@ void LoopClosing::MergeLocal2()
     if(!good)
         cout << "BAD ESSENTIAL GRAPH 2!!" << endl;*/
 
-    //cout << "start SearchAndFuse" << endl;
+    //cout << "start SearchAndFuse" << endl; // DEBUG
     SearchAndFuse(vpCurrentConnectedKFs, vpCheckFuseMapPoint);
-    //cout << "end SearchAndFuse" << endl;
+    //cout << "end SearchAndFuse" << endl; // DEBUG
 
     //cout << "MergeMap init ID: " << pMergeMap->GetInitKFid() << "       CurrMap init ID: " << pCurrentMap->GetInitKFid() << endl;
 
@@ -3138,8 +3148,8 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, vector
 
     int total_replaces = 0;
 
-    //cout << "[FUSE]: Initially there are " << vpMapPoints.size() << " MPs" << endl;
-    //cout << "FUSE: Intially there are " << CorrectedPosesMap.size() << " KFs" << endl;
+    cout << "[FUSE]: Initially there are " << vpMapPoints.size() << " MPs" << endl; // DEBUG
+    cout << "FUSE: Intially there are " << CorrectedPosesMap.size() << " KFs" << endl; // DEBUG
     for(KeyFrameAndPose::const_iterator mit=CorrectedPosesMap.begin(), mend=CorrectedPosesMap.end(); mit!=mend;mit++)
     {
         int num_replaces = 0;
@@ -3160,8 +3170,6 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, vector
             MapPoint* pRep = vpReplacePoints[i];
             if(pRep)
             {
-
-
                 num_replaces += 1;
                 pRep->Replace(vpMapPoints[i]);
 
@@ -3170,7 +3178,7 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, vector
 
         total_replaces += num_replaces;
     }
-    //cout << "[FUSE]: " << total_replaces << " MPs had been fused" << endl;
+    cout << "[FUSE]: " << total_replaces << " MPs had been fused" << endl; // DEBUG
 }
 
 
