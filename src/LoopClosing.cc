@@ -2653,124 +2653,123 @@ void LoopClosing::MergeLocalMulti()
 
     }
 
-    // //Update the non critical area from the current map to the merged map
-    // vector<KeyFrame*> vpCurrentMapKFs = pCurrentMap->GetAllKeyFrames();
-    // vector<MapPoint*> vpCurrentMapMPs = pCurrentMap->GetAllMapPoints();
+    //Update the non critical area from the current map to the merged map
+    vector<KeyFrame*> vpCurrentMapKFs = pCurrentMap->GetAllKeyFrames();
+    vector<MapPoint*> vpCurrentMapMPs = pCurrentMap->GetAllMapPoints();
 
-    // if(vpCurrentMapKFs.size() == 0){}
-    // else 
-    // {
-    //     if(mpTracker->mSensor == Agent::MONOCULAR)
-    //     {
-    //         unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
+    if(vpCurrentMapKFs.size() == 0){}
+    else 
+    {
+        {
+            unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
 
-    //         for(KeyFrame* pKFi : vpCurrentMapKFs)
-    //         {
-    //             if(!pKFi || pKFi->isBad() || pKFi->GetMap() != pCurrentMap)
-    //             {
-    //                 continue;
-    //             }
+            for(KeyFrame* pKFi : vpCurrentMapKFs)
+            {
+                if(!pKFi || pKFi->isBad() || pKFi->GetMap() != pCurrentMap)
+                {
+                    continue;
+                }
 
-    //             g2o::Sim3 g2oCorrectedSiw;
+                g2o::Sim3 g2oCorrectedSiw;
 
-    //             Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
-    //             g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
-    //             //Pose without correction
-    //             vNonCorrectedSim3[pKFi]=g2oSiw;
+                Sophus::SE3d Tiw = (pKFi->GetPose()).cast<double>();
+                g2o::Sim3 g2oSiw(Tiw.unit_quaternion(),Tiw.translation(),1.0);
+                //Pose without correction
+                vNonCorrectedSim3[pKFi]=g2oSiw;
 
-    //             Sophus::SE3d Tic = Tiw*Twc;
-    //             g2o::Sim3 g2oSim(Tic.unit_quaternion(),Tic.translation(),1.0);
-    //             g2oCorrectedSiw = g2oSim*mpCurrentAgent->mg2oMergeScw;
-    //             vCorrectedSim3[pKFi]=g2oCorrectedSiw;
+                Sophus::SE3d Tic = Tiw*Twc;
+                g2o::Sim3 g2oSim(Tic.unit_quaternion(),Tic.translation(),1.0);
+                g2oCorrectedSiw = g2oSim*mpCurrentAgent->mg2oMergeScw;
+                vCorrectedSim3[pKFi]=g2oCorrectedSiw;
 
-    //             // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
-    //             double s = g2oCorrectedSiw.scale();
+                // Update keyframe pose with corrected Sim3. First transform Sim3 to SE3 (scale translation)
+                double s = g2oCorrectedSiw.scale();
 
-    //             pKFi->mfScale = s;
+                pKFi->mfScale = s;
 
-    //             Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(),g2oCorrectedSiw.translation() / s);
+                Sophus::SE3d correctedTiw(g2oCorrectedSiw.rotation(),g2oCorrectedSiw.translation() / s);
 
-    //             pKFi->mTcwBefMerge = pKFi->GetPose();
-    //             pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
+                pKFi->mTcwBefMerge = pKFi->GetPose();
+                pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
 
-    //             pKFi->SetPose(correctedTiw.cast<float>());
+                pKFi->SetPose(correctedTiw.cast<float>());
 
-    //         }
-    //         for(MapPoint* pMPi : vpCurrentMapMPs)
-    //         {
-    //             if(!pMPi || pMPi->isBad()|| pMPi->GetMap() != pCurrentMap)
-    //                 continue;
+            }
+            for(MapPoint* pMPi : vpCurrentMapMPs)
+            {
+                if(!pMPi || pMPi->isBad()|| pMPi->GetMap() != pCurrentMap)
+                    continue;
 
-    //             KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
-    //             g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
-    //             g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
+                KeyFrame* pKFref = pMPi->GetReferenceKeyFrame();
+                g2o::Sim3 g2oCorrectedSwi = vCorrectedSim3[pKFref].inverse();
+                g2o::Sim3 g2oNonCorrectedSiw = vNonCorrectedSim3[pKFref];
 
-    //             // Project with non-corrected pose and project back with corrected pose
-    //             Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
-    //             Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
-    //             pMPi->SetWorldPos(eigCorrectedP3Dw.cast<float>());
+                // Project with non-corrected pose and project back with corrected pose
+                Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
+                Eigen::Vector3d eigCorrectedP3Dw = g2oCorrectedSwi.map(g2oNonCorrectedSiw.map(P3Dw));
+                pMPi->SetWorldPos(eigCorrectedP3Dw.cast<float>());
 
-    //             pMPi->UpdateNormalAndDepth();
-    //         }
-    //     }
+                pMPi->UpdateNormalAndDepth();
+            }
+        }
 
-    //     for(Agent* pAgent : vpAgentsInCurrentMap)
-    //     {
-    //         pAgent->mpLocalMapper->RequestStop();
-    //         // Wait until Local Mapping has effectively stopped
-    //         while(!pAgent->mpLocalMapper->isStopped())
-    //         {
-    //             usleep(1000);
-    //         }
-    //         //cout << "Local Map stopped" << endl;
-    //         pAgent->mpLocalMapper->EmptyQueue();
-    //         std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
-    //     }
+        for(Agent* pAgent : vpAgentsInCurrentMap)
+        {
+            pAgent->mpLocalMapper->RequestStop();
+            // Wait until Local Mapping has effectively stopped
+            while(!pAgent->mpLocalMapper->isStopped())
+            {
+                usleep(1000);
+            }
+            //cout << "Local Map stopped" << endl;
+            pAgent->mpLocalMapper->EmptyQueue();
+            std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
+        }
 
-    //     for(Agent* pAgent : vpAgentsInMergeMatchedMap)
-    //     {
-    //         pAgent->mpLocalMapper->RequestStop();
-    //         // Wait until Local Mapping has effectively stopped
-    //         while(!pAgent->mpLocalMapper->isStopped())
-    //         {
-    //             usleep(1000);
-    //         }
-    //         //cout << "Local Map stopped" << endl;
-    //         pAgent->mpLocalMapper->EmptyQueue();
-    //         std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
-    //     }
+        for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+        {
+            pAgent->mpLocalMapper->RequestStop();
+            // Wait until Local Mapping has effectively stopped
+            while(!pAgent->mpLocalMapper->isStopped())
+            {
+                usleep(1000);
+            }
+            //cout << "Local Map stopped" << endl;
+            pAgent->mpLocalMapper->EmptyQueue();
+            std::cout << "Stopping LM of Agent " << pAgent->mnId << std::endl;
+        }
 
-    //     {
-    //         // Get Merge Map Mutex
-    //         unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
-    //         unique_lock<mutex> mergeLock(pMergeMap->mMutexMapUpdate); // We remove the Kfs and MPs in the merged area from the old map
+        {
+            // Get Merge Map Mutex
+            unique_lock<mutex> currentLock(pCurrentMap->mMutexMapUpdate); // We update the current map with the Merge information
+            unique_lock<mutex> mergeLock(pMergeMap->mMutexMapUpdate); // We remove the Kfs and MPs in the merged area from the old map
 
-    //         //std::cout << "Merge outside KFs: " << vpCurrentMapKFs.size() << std::endl;
-    //         for(KeyFrame* pKFi : vpCurrentMapKFs)
-    //         {
-    //             if(!pKFi || pKFi->isBad() || pKFi->GetMap() != pCurrentMap)
-    //             {
-    //                 continue;
-    //             }
-    //             //std::cout << "KF id: " << pKFi->mnId << std::endl;
+            //std::cout << "Merge outside KFs: " << vpCurrentMapKFs.size() << std::endl;
+            for(KeyFrame* pKFi : vpCurrentMapKFs)
+            {
+                if(!pKFi || pKFi->isBad() || pKFi->GetMap() != pCurrentMap)
+                {
+                    continue;
+                }
+                //std::cout << "KF id: " << pKFi->mnId << std::endl;
 
-    //             // Make sure connections are updated
-    //             pKFi->UpdateMap(pMergeMap);
-    //             pMergeMap->AddKeyFrame(pKFi);
-    //             pCurrentMap->EraseKeyFrame(pKFi);
-    //         }
+                // Make sure connections are updated
+                pKFi->UpdateMap(pMergeMap);
+                pMergeMap->AddKeyFrame(pKFi);
+                pCurrentMap->EraseKeyFrame(pKFi);
+            }
 
-    //         for(MapPoint* pMPi : vpCurrentMapMPs)
-    //         {
-    //             if(!pMPi || pMPi->isBad())
-    //                 continue;
+            for(MapPoint* pMPi : vpCurrentMapMPs)
+            {
+                if(!pMPi || pMPi->isBad())
+                    continue;
 
-    //             pMPi->UpdateMap(pMergeMap);
-    //             pMergeMap->AddMapPoint(pMPi);
-    //             pCurrentMap->EraseMapPoint(pMPi);
-    //         }
-    //     }
-    // }
+                pMPi->UpdateMap(pMergeMap);
+                pMergeMap->AddMapPoint(pMPi);
+                pCurrentMap->EraseMapPoint(pMPi);
+            }
+        }
+    }
 
     // #ifdef REGISTER_TIMES
     //     std::chrono::steady_clock::time_point time_EndOptEss = std::chrono::steady_clock::now();
@@ -2779,16 +2778,16 @@ void LoopClosing::MergeLocalMulti()
     //     vdMergeOptEss_ms.push_back(timeOptEss);
     // #endif
 
-    // for(Agent* pAgent : vpAgentsInCurrentMap)
-    // {
-    //     pAgent->mpLocalMapper->Release();
-    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
-    // }
-    // for(Agent* pAgent : vpAgentsInMergeMatchedMap)
-    // {
-    //     pAgent->mpLocalMapper->Release();
-    //     std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
-    // }
+    for(Agent* pAgent : vpAgentsInCurrentMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    }
+    for(Agent* pAgent : vpAgentsInMergeMatchedMap)
+    {
+        pAgent->mpLocalMapper->Release();
+        std::cout << "Releasing LM of Agent " << pAgent->mnId << std::endl;
+    }
 
     // if(bRelaunchBA || (pCurrentMap->KeyFramesInMap()<200 && mpAtlas->CountMaps()==1))
     // {
