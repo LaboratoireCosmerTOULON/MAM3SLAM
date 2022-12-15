@@ -112,7 +112,7 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
 
             // Retrieve LC/MM status of current KF's origin agent + update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
 
-            bool bFindedRegion = NewDetectCommonRegionsMulti();
+            bool bFindedRegion = NewDetectCommonRegionsMulti(true);
             #ifdef REGISTER_TIMES
                 std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
 
@@ -1203,7 +1203,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
                     // int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
                     int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 30, mbFixScale, mHessian7x7, true); // JD : kernel 30 instead of 10
-                    // std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
+                    std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
                     // ADDWRITE gScm
                     std::cout << "<<<<<<<<<<<<<<<<<< gScm.scale() (optim) : " << gScm.scale() << std::endl;
 

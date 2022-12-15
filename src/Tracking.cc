@@ -1851,16 +1851,8 @@ void Tracking::Track()
 
     if(mState==NOT_INITIALIZED)
     {
-        // std::cout << "Agent " << mpAgent -> mnId << " ok6" << std::endl; // DEBUG
-        if(mSensor==Agent::STEREO || mSensor==Agent::RGBD || mSensor==Agent::IMU_STEREO || mSensor==Agent::IMU_RGBD)
-        {
-    //         StereoInitialization();
-        }
-        else
-        {
-            // std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
-            MonocularInitialization();
-        }
+        // std::cout << "Need to initialize Agent " << mpAgent -> mnId << std::endl; // DEBUG
+        MonocularInitialization();
 
         //mpFrameDrawer->Update(this);
 
@@ -1932,45 +1924,45 @@ void Tracking::Track()
                     }
                 }
             }
-            // else
-            // {
+            else
+            {
 
-            //     if (mState == RECENTLY_LOST)
-            //     {
-            //         Verbose::PrintMess("Lost for a short time", Verbose::VERBOSITY_NORMAL);
-            //         bOK = true;
-            //         // Relocalization
-            //         bOK = Relocalization();
-            //         //std::cout << "mCurrentFrame.mTimeStamp:" << to_string(mCurrentFrame.mTimeStamp) << std::endl;
-            //         //std::cout << "mTimeStampLost:" << to_string(mTimeStampLost) << std::endl;
-            //         if(mCurrentFrame.mTimeStamp-mTimeStampLost>3.0f && !bOK)
-            //         {
-            //             mState = LOST;
-            //             Verbose::PrintMess("Track Lost...", Verbose::VERBOSITY_NORMAL);
-            //             bOK=false;
-            //         }
-            //     }
-            //     else if (mState == LOST)
-            //     {
+                if (mState == RECENTLY_LOST)
+                {
+                    Verbose::PrintMess("Lost for a short time", Verbose::VERBOSITY_NORMAL);
+                    bOK = true;
+                    // Relocalization
+                    bOK = Relocalization();
+                    //std::cout << "mCurrentFrame.mTimeStamp:" << to_string(mCurrentFrame.mTimeStamp) << std::endl;
+                    //std::cout << "mTimeStampLost:" << to_string(mTimeStampLost) << std::endl;
+                    if(mCurrentFrame.mTimeStamp-mTimeStampLost>3.0f && !bOK)
+                    {
+                        mState = LOST;
+                        Verbose::PrintMess("Track Lost...", Verbose::VERBOSITY_NORMAL);
+                        bOK=false;
+                    }
+                }
+                else if (mState == LOST)
+                {
 
-            //         Verbose::PrintMess("A new map is started...", Verbose::VERBOSITY_NORMAL);
+                    Verbose::PrintMess("A new map is started...", Verbose::VERBOSITY_NORMAL);
 
-            //         if (pCurrentMap->KeyFramesInMap()<10)
-            //         {
-            //             mpAgent->ResetActiveMap(); // does nothing yet actually
-            //             Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
-            //         } else {
-            //             // CreateMapInAtlas(); // FIXME : create new map when agent lost
-            //         }
+                    // if (pCurrentMap->KeyFramesInMap()<10)
+                    // {
+                    //     mpAgent->ResetActiveMap(); // does nothing yet actually
+                    //     Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
+                    // } else {
+                    //     // CreateMapInAtlas(); // FIXME : create new map when agent lost
+                    // }
                         
-            //         if(mpLastKeyFrame)
-            //             mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
+                    // if(mpLastKeyFrame)
+                    //     mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
 
-            //         Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
+                    // Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
 
-            //         return;
-            //     }
-            // }
+                    return;
+                }
+            }
 
         }
         // else
@@ -3308,7 +3300,7 @@ bool Tracking::Relocalization()
 
     // Relocalization is performed when tracking is lost
     // Track Lost: Query KeyFrame Database for keyframe candidates for relocalisation
-    vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame, mpAtlas->GetCurrentMap());
+    vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame, mpAtlas->GetAgentCurrentMap(mpAgent));
 
     if(vpCandidateKFs.empty()) {
         Verbose::PrintMess("There are not candidates", Verbose::VERBOSITY_NORMAL);
