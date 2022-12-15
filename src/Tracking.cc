@@ -1947,18 +1947,18 @@ void Tracking::Track()
 
                     Verbose::PrintMess("A new map is started...", Verbose::VERBOSITY_NORMAL);
 
-                    // if (pCurrentMap->KeyFramesInMap()<10)
-                    // {
-                    //     mpAgent->ResetActiveMap(); // does nothing yet actually
-                    //     Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
-                    // } else {
-                    //     // CreateMapInAtlas(); // FIXME : create new map when agent lost
-                    // }
+                    if (pCurrentMap->KeyFramesInMap()<10)
+                    {
+                        mpAgent->ResetActiveMap(); // does nothing yet actually FIXME !!!!!!
+                        Verbose::PrintMess("Reseting current map...", Verbose::VERBOSITY_NORMAL);
+                    } else {
+                        CreateMapInAtlas();
+                    }
                         
-                    // if(mpLastKeyFrame)
-                    //     mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
+                    if(mpLastKeyFrame)
+                        mpLastKeyFrame = static_cast<KeyFrame*>(NULL);
 
-                    // Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
+                    Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
 
                     return;
                 }
@@ -2163,7 +2163,7 @@ void Tracking::Track()
                 return;
             }
 
-            // CreateMapInAtlas(); // FIXME
+            CreateMapInAtlas();
 
             return;
         }
