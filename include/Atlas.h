@@ -99,6 +99,7 @@ public:
     void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
     void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs, Agent* pAgent);
     void InformNewBigChange();
+    void InformNewBigChange(Map* pMap);
     int GetLastBigChangeIdx();
 
     long unsigned int MapPointsInMap();

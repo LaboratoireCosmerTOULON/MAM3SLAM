@@ -65,7 +65,14 @@ rosbuild_add_executable(MonoMulti
 nodes/ros_mono_multi.cc
 # src/AgentROS.cc
 )
-
 target_link_libraries(MonoMulti
+${LIBS}
+)
+
+# test
+rosbuild_add_executable(TestNode
+nodes/test_node_single_agent.cc
+)
+target_link_libraries(TestNode
 ${LIBS}
 )

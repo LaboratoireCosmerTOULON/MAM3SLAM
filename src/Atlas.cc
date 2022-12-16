@@ -208,6 +208,12 @@ void Atlas::InformNewBigChange()
     mpCurrentMap->InformNewBigChange();
 }
 
+void Atlas::InformNewBigChange(Map* pMap)
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    pMap->InformNewBigChange();
+}
+
 int Atlas::GetLastBigChangeIdx()
 {
     unique_lock<mutex> lock(mMutexAtlas);
