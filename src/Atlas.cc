@@ -289,6 +289,12 @@ void Atlas::clearMap()
     mpCurrentMap->clear();
 }
 
+void Atlas::clearMap(Map* pMap)
+{
+    unique_lock<mutex> lock(mMutexAtlas);
+    pMap->clear();
+}
+
 void Atlas::clearAtlas()
 {
     unique_lock<mutex> lock(mMutexAtlas);

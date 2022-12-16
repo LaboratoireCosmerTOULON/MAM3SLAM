@@ -3528,14 +3528,14 @@ void Tracking::Reset(bool bLocMap)
 void Tracking::ResetActiveMap(bool bLocMap) // FIXME
 {
     Verbose::PrintMess("Active map Reseting", Verbose::VERBOSITY_NORMAL);
-    if(mpViewer)
+    if(mpAgent->getAgentViewer())
     {
-        mpViewer->RequestStop();
-        while(!mpViewer->isStopped())
+        mpAgent->getAgentViewer()->RequestStop();
+        while(!mpAgent->getAgentViewer()->isStopped())
             usleep(3000);
     }
 
-    Map* pMap = mpAtlas->GetCurrentMap();
+    Map* pMap = mpAtlas->GetAgentCurrentMap(mpAgent);
 
     if (!bLocMap)
     {
@@ -3555,7 +3555,7 @@ void Tracking::ResetActiveMap(bool bLocMap) // FIXME
     Verbose::PrintMess("done", Verbose::VERBOSITY_NORMAL);
 
     // Clear Map (this erase MapPoints and KeyFrames)
-    mpAtlas->clearMap();
+    mpAtlas->clearMap(pMap);
 
 
     //KeyFrame::nNextId = mpAtlas->GetLastInitKFid();
@@ -3611,8 +3611,8 @@ void Tracking::ResetActiveMap(bool bLocMap) // FIXME
 
     mbVelocity = false;
 
-    if(mpViewer)
-        mpViewer->Release();
+    if(mpAgent->getAgentViewer())
+        mpAgent->getAgentViewer()->Release();
 
     Verbose::PrintMess("   End reseting! ", Verbose::VERBOSITY_NORMAL);
 }

@@ -98,24 +98,6 @@ bool AgentViewer::ParseViewerParamFile(cv::FileStorage &fSettings)
     return !b_miss_params;
 }
 
-bool AgentViewer::Stop()
-{
-    unique_lock<mutex> lock(mMutexStop);
-    unique_lock<mutex> lock2(mMutexFinish);
-
-    if(mbFinishRequested)
-        return false;
-    else if(mbStopRequested)
-    {
-        mbStopped = true;
-        mbStopRequested = false;
-        return true;
-    }
-
-    return false;
-
-}
-
 void AgentViewer::CreateFrameWindow() {
     cv::namedWindow(mCurrentFrameWindowName);
 }
@@ -324,10 +306,41 @@ void AgentViewer::SetFinish()
     mbFinished = true;
 }
 
+void AgentViewer::RequestStop()
+{
+    unique_lock<mutex> lock(mMutexStop);
+    if(!mbStopped)
+        mbStopRequested = true;
+}
+
 bool AgentViewer::isStopped()
 {
     unique_lock<mutex> lock(mMutexStop);
     return mbStopped;
+}
+
+bool AgentViewer::Stop()
+{
+    unique_lock<mutex> lock(mMutexStop);
+    unique_lock<mutex> lock2(mMutexFinish);
+
+    if(mbFinishRequested)
+        return false;
+    else if(mbStopRequested)
+    {
+        mbStopped = true;
+        mbStopRequested = false;
+        return true;
+    }
+
+    return false;
+
+}
+
+void AgentViewer::Release()
+{
+    unique_lock<mutex> lock(mMutexStop);
+    mbStopped = false;
 }
 
 }

@@ -32,7 +32,11 @@ public:
 
     void Run();
 
+    void RequestStop();
+
     bool isStopped();
+
+    void Release();
 
 private:
 

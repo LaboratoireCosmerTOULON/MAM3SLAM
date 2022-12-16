@@ -138,6 +138,18 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
         cv::resize(im,resizedIm,settings_->newImSize());
         imToFeed = resizedIm;
     }
+
+    // Check reset
+    {
+        unique_lock<mutex> lock(mMutexReset);
+        if(mbResetActiveMap)
+        {
+            cout << "AGENT-> Reseting active map in monocular case" << endl;
+            mpTracker->ResetActiveMap(); // FIXME : update fct
+            mbResetActiveMap = false;
+        }
+    }
+
     // cout << "ok5" << endl;
     Sophus::SE3f Tcw = mpTracker->GrabImageMonocular(imToFeed,timestamp,filename);
     // cout << "ok6" << endl;
@@ -155,6 +167,8 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
 void Agent::ResetActiveMap()
 {
     std::cout << "Warning : agent::ResetActiveMap() called but not implemented" << std::endl;
+    unique_lock<mutex> lock(mMutexReset);
+    mbResetActiveMap = true;
 } // TODO ?
 
 int Agent::GetTrackingState()

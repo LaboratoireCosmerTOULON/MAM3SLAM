@@ -117,6 +117,7 @@ public:
     int CountMaps();
 
     void clearMap();
+    void clearMap(Map* pMap);
 
     void clearAtlas();
 
