@@ -49,23 +49,23 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "Mono");
     ros::start();
 
-    if(argc != 3 && argc != 4)
+    if(argc != 4 && argc != 5)
     {
-        cerr << endl << "Usage: rosrun ORB_SLAM3 Mono path_to_vocabulary path_to_settings [is_mono]" << endl;        
+        cerr << endl << "Usage: rosrun ORB_SLAM3 MonoSingle path_to_vocabulary path_to_settings topic [is_mono]" << endl;        
         ros::shutdown();
         return 1;
     }    
 
     bool is_img_mono = false;
-    if (argc == 4) {
-        std::string is_img_mono_str(argv[3]);
+    if (argc == 5) {
+        std::string is_img_mono_str(argv[4]);
         is_img_mono = is_img_mono_str == "true";
     }
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     bool bUseViewer = true;
     ORB_SLAM3::MultiAgentSystem mas(argv[1], true, bUseViewer);
-    std::string strSettingsFile("/home/ju/toremove/cfg/calib_file_ORB_SLAM3_slave1.yaml");
+    std::string strSettingsFile(argv[2]);
     mas.addAgent(strSettingsFile);
     ImageGrabber igb(mas.getAgent(0), is_img_mono);
     // ImageGrabber igb3(mas.getAgent(2), is_img_mono);
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     } 
 
     ros::NodeHandle nodeHandler;
-    ros::Subscriber sub = nodeHandler.subscribe("/slave1/image_raw", 1, &ImageGrabber::GrabImage, &igb);
+    ros::Subscriber sub = nodeHandler.subscribe(argv[3], 1, &ImageGrabber::GrabImage, &igb);
     
     ros::spin();
 

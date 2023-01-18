@@ -2304,80 +2304,87 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
     }
 
     // Optimize!
-    optimizer.initializeOptimization();
-    optimizer.optimize(5);
+    bool isok = optimizer.initializeOptimization();
+    if (isok) {
+        optimizer.optimize(5);
 
-    // Check inliers
-    int nBad=0;
-    int nBadOutKF2 = 0;
-    for(size_t i=0; i<vpEdges12.size();i++)
-    {
-        ORB_SLAM3::EdgeSim3ProjectXYZ* e12 = vpEdges12[i];
-        ORB_SLAM3::EdgeInverseSim3ProjectXYZ* e21 = vpEdges21[i];
-        if(!e12 || !e21)
-            continue;
-
-        if(e12->chi2()>th2 || e21->chi2()>th2)
+        // Check inliers
+        int nBad=0;
+        int nBadOutKF2 = 0;
+        for(size_t i=0; i<vpEdges12.size();i++)
         {
-            size_t idx = vnIndexEdge[i];
-            vpMatches1[idx]=static_cast<MapPoint*>(NULL);
-            optimizer.removeEdge(e12);
-            optimizer.removeEdge(e21);
-            vpEdges12[i]=static_cast<ORB_SLAM3::EdgeSim3ProjectXYZ*>(NULL);
-            vpEdges21[i]=static_cast<ORB_SLAM3::EdgeInverseSim3ProjectXYZ*>(NULL);
-            nBad++;
+            ORB_SLAM3::EdgeSim3ProjectXYZ* e12 = vpEdges12[i];
+            ORB_SLAM3::EdgeInverseSim3ProjectXYZ* e21 = vpEdges21[i];
+            if(!e12 || !e21)
+                continue;
 
-            if(!vbIsInKF2[i])
+            if(e12->chi2()>th2 || e21->chi2()>th2)
             {
-                nBadOutKF2++;
+                size_t idx = vnIndexEdge[i];
+                vpMatches1[idx]=static_cast<MapPoint*>(NULL);
+                optimizer.removeEdge(e12);
+                optimizer.removeEdge(e21);
+                vpEdges12[i]=static_cast<ORB_SLAM3::EdgeSim3ProjectXYZ*>(NULL);
+                vpEdges21[i]=static_cast<ORB_SLAM3::EdgeInverseSim3ProjectXYZ*>(NULL);
+                nBad++;
+
+                if(!vbIsInKF2[i])
+                {
+                    nBadOutKF2++;
+                }
+                continue;
             }
-            continue;
+
+            //Check if remove the robust adjustment improve the result
+            e12->setRobustKernel(0);
+            e21->setRobustKernel(0);
         }
 
-        //Check if remove the robust adjustment improve the result
-        e12->setRobustKernel(0);
-        e21->setRobustKernel(0);
+        int nMoreIterations;
+        if(nBad>0)
+            nMoreIterations=10;
+        else
+            nMoreIterations=5;
+
+        // if(nCorrespondences-nBad<10) // commented by JD
+        //     return 0;
+
+        // Optimize again only with inliers
+        isok = optimizer.initializeOptimization(nMoreIterations);
+        if (isok) {
+            int nIn = 0;
+            mAcumHessian = Eigen::MatrixXd::Zero(7, 7);
+            for(size_t i=0; i<vpEdges12.size();i++)
+            {
+                ORB_SLAM3::EdgeSim3ProjectXYZ* e12 = vpEdges12[i];
+                ORB_SLAM3::EdgeInverseSim3ProjectXYZ* e21 = vpEdges21[i];
+                if(!e12 || !e21)
+                    continue;
+
+                e12->computeError();
+                e21->computeError();
+
+                if(e12->chi2()>th2 || e21->chi2()>th2){
+                    size_t idx = vnIndexEdge[i];
+                    vpMatches1[idx]=static_cast<MapPoint*>(NULL);
+                }
+                else{
+                    nIn++;
+                }
+            }
+
+            // Recover optimized Sim3
+            g2o::VertexSim3Expmap* vSim3_recov = static_cast<g2o::VertexSim3Expmap*>(optimizer.vertex(0));
+            g2oS12= vSim3_recov->estimate();
+
+            return nIn;
+        } else {
+            return -1;
+        }
+    } else {
+        return -1;
     }
-
-    int nMoreIterations;
-    if(nBad>0)
-        nMoreIterations=10;
-    else
-        nMoreIterations=5;
-
-    // if(nCorrespondences-nBad<10) // commented by JD
-    //     return 0;
-
-    // Optimize again only with inliers
-    optimizer.initializeOptimization();
-    optimizer.optimize(nMoreIterations);
-
-    int nIn = 0;
-    mAcumHessian = Eigen::MatrixXd::Zero(7, 7);
-    for(size_t i=0; i<vpEdges12.size();i++)
-    {
-        ORB_SLAM3::EdgeSim3ProjectXYZ* e12 = vpEdges12[i];
-        ORB_SLAM3::EdgeInverseSim3ProjectXYZ* e21 = vpEdges21[i];
-        if(!e12 || !e21)
-            continue;
-
-        e12->computeError();
-        e21->computeError();
-
-        if(e12->chi2()>th2 || e21->chi2()>th2){
-            size_t idx = vnIndexEdge[i];
-            vpMatches1[idx]=static_cast<MapPoint*>(NULL);
-        }
-        else{
-            nIn++;
-        }
-    }
-
-    // Recover optimized Sim3
-    g2o::VertexSim3Expmap* vSim3_recov = static_cast<g2o::VertexSim3Expmap*>(optimizer.vertex(0));
-    g2oS12= vSim3_recov->estimate();
-
-    return nIn;
+    
 }
 
 void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, int& num_fixedKF, int& num_OptKF, int& num_MPs, int& num_edges, bool bLarge, bool bRecInit)

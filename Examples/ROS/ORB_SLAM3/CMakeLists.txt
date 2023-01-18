@@ -76,10 +76,9 @@ target_link_libraries(MonoMulti2
 ${LIBS}
 )
 
-# test
-rosbuild_add_executable(TestNode
-nodes/test_node_single_agent.cc
+rosbuild_add_executable(MonoSingle
+nodes/ros_mono_single_agent.cc
 )
-target_link_libraries(TestNode
+target_link_libraries(MonoSingle
 ${LIBS}
 )

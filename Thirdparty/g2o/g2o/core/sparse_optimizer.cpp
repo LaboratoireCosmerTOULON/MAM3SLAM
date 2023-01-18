@@ -263,7 +263,8 @@ namespace g2o{
       _activeEdges.push_back(*it);
 
     sortVectorContainers();
-    return buildIndexMapping(_activeVertices);
+    buildIndexMapping(_activeVertices);
+    return true;
   }
 
   bool SparseOptimizer::initializeOptimization(HyperGraph::EdgeSet& eset){
