@@ -65,6 +65,12 @@ void Map::AddKeyFrame(KeyFrame *pKF)
         mnInitKFid = pKF->mnId;
         mpKFinitial = pKF;
         mpKFlowerID = pKF;
+        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt");
+        std::ofstream file_out;
+        file_out.open(filename, std::ios_base::app);
+        file_out << fixed;
+        file_out << "Creation of map " << this->mnId << " with first KF ts " << setprecision(6) << pKF->mTimeStamp << " from Agent " << pKF->getAgent()->mnId << endl;
+        file_out.close();
     }
     mspKeyFrames.insert(pKF);
     if(pKF->mnId>mnMaxKFid)

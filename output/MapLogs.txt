@@ -1,0 +1,2 @@
+Creation of map 1 with first KF ts 1403715284.012143from Agent 0
+Creation of map 0 with first KF ts 1403715898.734058from Agent 1

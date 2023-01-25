@@ -5,7 +5,14 @@ namespace ORB_SLAM3
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
-MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, bool bUseViewer) : mbShutDown(false), mbUseViewer(bUseViewer) {
+MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, bool bUseViewer) : mbShutDown(false), mbUseViewer(bUseViewer) 
+{
+    // Clear files
+    std::ofstream ofs;
+    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.close();
+    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.close();
 
     mStrVocabularyFilePath = strVocFile;
 
@@ -46,6 +53,7 @@ MultiAgentSystem::~MultiAgentSystem() {
     for (int i = 0 ; i < mvpAgents.size() ; i++) {
         mvpAgents[i] -> Shutdown();
     }
+    SaveKFTrajectory();
 }
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
@@ -126,6 +134,45 @@ std::vector<Agent*> MultiAgentSystem::GetAgentsInMap(long unsigned int nMapId)
         }
     }
     return vpAgentsInMap;
+}
+
+void MultiAgentSystem::SaveKFTrajectory() {
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/KF_traj.txt");
+    std::cout << "Saving KF trajectory to " << filename << " ..." << std:: endl;
+    
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
+    f << setprecision(6) << "ts" << setprecision(7) << " tx ty tz qx qy qz qw agent map" << endl;
+
+    vector<Map*> vpMaps = mpAtlas->GetAllMaps();
+    for(int j=0; j<vpMaps.size(); j++)
+    {
+        vector<KeyFrame*> vpKFs = vpMaps[j]->GetAllKeyFrames();
+        for(size_t i=0; i<vpKFs.size(); i++)
+        {
+            KeyFrame* pKF = vpKFs[i];
+
+        // pKF->SetPose(pKF->GetPose()*Two);
+
+            if(pKF->isBad())
+                continue;
+
+            Sophus::SE3f Twc = pKF->GetPoseInverse();
+            Eigen::Quaternionf q = Twc.unit_quaternion();
+            Eigen::Vector3f t = Twc.translation();
+            f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t(0) << " " << t(1) << " " << t(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << pKF->getAgent()->mnId << " " << pKF->GetMap()->GetId() << endl;
+
+        }
+    }
+
+    f.close();
+    std::cout << "Trajectory saved!" << std::endl;
+
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        mvpAgents[i] -> SaveTrackingStates();
+    }
 }
 
 }

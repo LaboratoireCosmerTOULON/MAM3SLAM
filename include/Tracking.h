@@ -134,6 +134,9 @@ public:
     eTrackingState mState;
     eTrackingState mLastProcessedState;
 
+    std::map<double,eTrackingState> mPastStates;
+    void SaveStates();
+
     // Input sensor
     int mSensor;
 

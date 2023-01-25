@@ -108,6 +108,8 @@ public:
     // Local Mapper. It manages the local map and performs local bundle adjustment.
     LocalMapping* mpLocalMapper;
 
+    void SaveTrackingStates();
+
 private:
 
     // Input sensor

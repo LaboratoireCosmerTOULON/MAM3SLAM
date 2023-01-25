@@ -220,4 +220,9 @@ Map* Agent::GetCurrentMap(bool doLock)
     }
 }
 
+void Agent::SaveTrackingStates()
+{
+    mpTracker->SaveStates();
+}
+
 }

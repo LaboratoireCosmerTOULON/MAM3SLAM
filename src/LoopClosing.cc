@@ -708,7 +708,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
     if (bDoWrite)
     {
         // WRITE: KF timestamps and Agents -> a candidate has been selected
-        std::string filename("outputs/KF_valid.txt");
+        std::string filename("output/KF_valid.txt");
         std::ofstream file_out;
         file_out.open(filename, std::ios_base::app);
         file_out << pCurrentKF->getAgent()->mnId << " " << pCurrentKF->mTimeStamp << " " << pMatchedKF->getAgent()->mnId << " " << pMatchedKF->mTimeStamp << endl;
@@ -719,7 +719,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
     if (bDoWrite)
     {
         unique_lock<mutex> lock(mMutexWrite);
-        std::string strMatchesFileName = "outputs/Proj_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+        std::string strMatchesFileName = "output/Proj_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
         std::string matchesFilename(strMatchesFileName);
         std::ofstream matches_file_out;
         matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -769,7 +769,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
         if (bDoWrite)
         {
             unique_lock<mutex> lock(mMutexWrite);
-            std::string strMatchesFileName = "outputs/Sim3_inliers_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+            std::string strMatchesFileName = "output/Sim3_inliers_valid/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
             std::string matchesFilename(strMatchesFileName);
             std::ofstream matches_file_out;
             matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -819,7 +819,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
             if (bDoWrite)
             {
                 unique_lock<mutex> lock(mMutexWrite);
-                std::string strMatchesFileName = "outputs/Proj_valid_2/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
+                std::string strMatchesFileName = "output/Proj_valid_2/" + std::to_string(pCurrentKF->mTimeStamp) + "_" + std::to_string(pMatchedKF->mTimeStamp) + ".txt";
                 std::string matchesFilename(strMatchesFileName);
                 std::ofstream matches_file_out;
                 matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -991,7 +991,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 if (bDoWrite)
                 {
                     // WRITE: KF timestamps and Agents -> a candidate has been selected
-                    std::string filename("outputs/KF_matches.txt");
+                    std::string filename("output/KF_matches.txt");
                     std::ofstream file_out;
                     file_out.open(filename, std::ios_base::app);
                     file_out << mpCurrentKF->getAgent()->mnId << " " << mpCurrentKF->mTimeStamp << " " << pMostBoWMatchesKF->getAgent()->mnId << " " << pMostBoWMatchesKF->mTimeStamp << endl;
@@ -1002,7 +1002,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 {
                     unique_lock<mutex> lock(mMutexWrite);
                     // WRITE: KF poses + matched MP after BoW (mpCurrentKF->GetMapPointMatches()/vpMatchedPoints)
-                    std::string strMatchesFileName = "outputs/BoW_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                    std::string strMatchesFileName = "output/BoW_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                     std::string matchesFilename(strMatchesFileName);
                     std::ofstream matches_file_out;
                     matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -1068,7 +1068,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 if (bDoWrite)
                 {
                     unique_lock<mutex> lock(mMutexWrite);
-                    std::string strMatchesFileName = "outputs/Sim3_inliers/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                    std::string strMatchesFileName = "output/Sim3_inliers/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                     std::string matchesFilename(strMatchesFileName);
                     std::ofstream matches_file_out;
                     matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -1154,7 +1154,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 if (bDoWrite)
                 {
                     unique_lock<mutex> lock(mMutexWrite);
-                    std::string strMatchesFileName = "outputs/ORB_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                    std::string strMatchesFileName = "output/ORB_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                     std::string matchesFilename(strMatchesFileName);
                     std::ofstream matches_file_out;
                     matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -1186,7 +1186,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         std::cout << "Error opening file" << std::endl;;
                     }
 
-                    std::string strScmFileName = "outputs/Scm_IG.txt";
+                    std::string strScmFileName = "output/Scm_IG.txt";
                     std::string gScmFilename(strScmFileName);
                     std::ofstream gScm_file_out;
                     gScm_file_out.open(gScmFilename, std::ios_base::app);
@@ -1223,7 +1223,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                     if (bDoWrite)
                     {
                         unique_lock<mutex> lock(mMutexWrite);
-                        std::string strMatchesFileName = "outputs/Optim_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                        std::string strMatchesFileName = "output/Optim_matches/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                         std::string matchesFilename(strMatchesFileName);
                         std::ofstream matches_file_out;
                         matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -1255,7 +1255,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                             std::cout << "Error opening file" << std::endl;;
                         }
 
-                        std::string strScmFileName = "outputs/Scm_optim.txt";
+                        std::string strScmFileName = "output/Scm_optim.txt";
                         std::string gScmFilename(strScmFileName);
                         std::ofstream gScm_file_out;
                         gScm_file_out.open(gScmFilename, std::ios_base::app);
@@ -1290,7 +1290,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         if (bDoWrite)
                         {
                             unique_lock<mutex> lock(mMutexWrite);
-                            std::string strMatchesFileName = "outputs/ORB_matches_2/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
+                            std::string strMatchesFileName = "output/ORB_matches_2/" + std::to_string(mpCurrentKF->mTimeStamp) + "_" + std::to_string(pMostBoWMatchesKF->mTimeStamp) + ".txt";
                             std::string matchesFilename(strMatchesFileName);
                             std::ofstream matches_file_out;
                             matches_file_out.open(matchesFilename, std::ios_base::app);
@@ -2252,6 +2252,13 @@ void LoopClosing::MergeLocal(){}
 
 void LoopClosing::MergeLocalMulti()
 {
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt");
+    std::ofstream file_out;
+    file_out.open(filename, std::ios_base::app);
+    file_out << fixed;
+    file_out << "Merge of map " << mpCurrentKF->GetMap()->GetId() << " into " << mpCurrentAgent->mpMergeMatchedKF->GetMap()->GetId() << " at KF of ts " << setprecision(6) << mpCurrentKF->mTimeStamp << " from Agent " << mpCurrentKF->getAgent()->mnId << endl;
+    file_out.close();
+
     int numTemporalKFs = 25; //Temporal KFs in the local window if the map is inertial.
 
     //Relationship to rebuild the essential graph, it is used two times, first in the local window and later in the rest of the map

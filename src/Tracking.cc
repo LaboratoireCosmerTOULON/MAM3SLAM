@@ -47,6 +47,12 @@ Tracking::Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
     mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL)), mnFramesSinceLastReloc(0), mnFramesSinceLastKF(0)
 {
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt");
+    std::ofstream file_out;
+    file_out.open(filename, std::ios_base::app);
+    file_out << "Reloc_frame_ts Map_before Map_after" << endl;
+    file_out.close();
+
     // Load camera parameters from settings file
     if(settings){
         newParameterLoader(settings);
@@ -1612,6 +1618,7 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
     mnFramesSinceLastReloc ++;
     mnFramesSinceLastKF ++;
     Track();
+    mPastStates[timestamp] = mState;
 
     return mCurrentFrame.GetPose();
 }
@@ -3294,6 +3301,7 @@ void Tracking::UpdateLocalKeyFrames()
 
 bool Tracking::Relocalization()
 {
+    unsigned int mapIdBefore = mpAtlas->GetCurrentMap()->GetId();
     Verbose::PrintMess("Starting relocalization", Verbose::VERBOSITY_NORMAL);
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
@@ -3458,6 +3466,13 @@ bool Tracking::Relocalization()
         mnLastRelocFrameId = mCurrentFrame.mnId; // TO REMOVE
         mnFramesSinceLastReloc = 0;
         cout << "Relocalized!!" << endl;
+        unsigned int mapIdAfter = mpAtlas->GetCurrentMap()->GetId();
+        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt");
+        std::ofstream file_out;
+        file_out.open(filename, std::ios_base::app);
+        file_out << fixed;
+        file_out << mCurrentFrame.mTimeStamp << " " << mapIdBefore << " " << mapIdAfter << endl;
+        file_out.close();
         return true;
     }
 
@@ -3811,5 +3826,25 @@ void Tracking::Release()
     mbStopRequested = false;
 }
 #endif
+
+void Tracking::SaveStates() 
+{
+    std::stringstream ss;
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TrackingStatus_" << mpAgent->mnId << ".txt";
+    std::string filename = ss.str();
+    cout << endl << "Saving tracking status to " << filename << " ..." << endl;
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
+    for(map<double,eTrackingState>::iterator mit=mPastStates.begin(), mend=mPastStates.end(); mit!=mend; mit++)
+    {
+        f << setprecision(6) << mit->first << " " << mit->second << endl;
+    }
+
+    f.close();
+    cout << endl << "tracking status saved!" << endl;
+    
+}
 
 } //namespace ORB_SLAM

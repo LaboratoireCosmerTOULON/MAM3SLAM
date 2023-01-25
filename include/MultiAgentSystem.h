@@ -90,6 +90,8 @@ public:
     // Agents on a map
     std::vector<Agent*> GetAgentsInMap(long unsigned int nMapId);
 
+    void SaveKFTrajectory();
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;
