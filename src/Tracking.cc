@@ -3301,7 +3301,7 @@ void Tracking::UpdateLocalKeyFrames()
 
 bool Tracking::Relocalization()
 {
-    unsigned int mapIdBefore = mpAtlas->GetCurrentMap()->GetId();
+    unsigned int mapIdBefore = mpAtlas->GetAgentCurrentMap(mpAgent)->GetId();
     Verbose::PrintMess("Starting relocalization", Verbose::VERBOSITY_NORMAL);
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
@@ -3466,7 +3466,7 @@ bool Tracking::Relocalization()
         mnLastRelocFrameId = mCurrentFrame.mnId; // TO REMOVE
         mnFramesSinceLastReloc = 0;
         cout << "Relocalized!!" << endl;
-        unsigned int mapIdAfter = mpAtlas->GetCurrentMap()->GetId();
+        unsigned int mapIdAfter = mpAtlas->GetAgentCurrentMap(mpAgent)->GetId();
         std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt");
         std::ofstream file_out;
         file_out.open(filename, std::ios_base::app);
