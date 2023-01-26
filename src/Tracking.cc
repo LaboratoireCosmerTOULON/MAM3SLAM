@@ -1831,22 +1831,19 @@ void Tracking::Track()
             return;
         }
     }
-    // std::cout << "Agent " << mpAgent -> mnId << " ok1" << std::endl; // DEBUG
+
     if(mState==NO_IMAGES_YET)
     {
         mState = NOT_INITIALIZED;
     }
 
     mLastProcessedState=mState;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok2" << std::endl; // DEBUG
 
     mbCreatedMap = false;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok3" << std::endl; // DEBUG
     // Get Map Mutex -> Map cannot be changed
     unique_lock<mutex> lock(pCurrentMap->mMutexMapUpdate);
 
     mbMapUpdated = false;
-    // std::cout << "Agent " << mpAgent -> mnId << " ok4" << std::endl; // DEBUG
     int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
     int nMapChangeIndex = pCurrentMap->GetLastMapChange();
     if(nCurMapChangeIndex>nMapChangeIndex)
@@ -1854,7 +1851,6 @@ void Tracking::Track()
         pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
         mbMapUpdated = true;
     }
-    // std::cout << "Agent " << mpAgent -> mnId << " ok5" << std::endl; // DEBUG
 
     if(mState==NOT_INITIALIZED)
     {

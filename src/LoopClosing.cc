@@ -212,13 +212,13 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                     Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
 
                     mpCurrentAgent->mg2oLoopScw = mpCurrentAgent->mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
-                    std::cout << "LC : ok1" << std::endl;
+                    // std::cout << "LC : ok1" << std::endl;
 
                     if (bGoodLoop) 
                     {
 
                         mvpLoopMapPoints = mpCurrentAgent->mvpLoopMPs;
-                        std::cout << "LC : ok2" << std::endl;
+                        // std::cout << "LC : ok2" << std::endl;
 
                         #ifdef REGISTER_TIMES
                             std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
@@ -226,9 +226,9 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                             nLoop += 1;
 
                         #endif
-                        std::cout << "LC : ok3" << std::endl;
+                        // std::cout << "LC : ok3" << std::endl;
                         CorrectLoop();
-                        std::cout << "LC : ok4" << std::endl;
+                        // std::cout << "LC : ok4" << std::endl;
                         #ifdef REGISTER_TIMES
                             std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
 
@@ -492,14 +492,14 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
         mpCurrentKF->SetNotErase();
         mpCurrentKF->mbCurrentPlaceRecognition = true;
         mpCurrentKFMap = mpCurrentKF->GetMap(); // Current map
-        std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentAgent->mnId << ". Current map is " << mpCurrentKFMap->GetId() << std::endl; // DEBUG
+        // std::cout << "calling NewDetectCommonRegionsMulti() for KF " << mpCurrentKF->mnId << " inserted by Agent " << mpCurrentAgent->mnId << ". Current map is " << mpCurrentKFMap->GetId() << std::endl; // DEBUG
     }
 
     if(mpCurrentKFMap->GetAllKeyFrames().size() < 12)
     {
         mpKeyFrameDB->add(mpCurrentKF);
         mpCurrentKF->SetErase();
-        std::cout << "Not enough KF in map" << std::endl; // DEBUG
+        // std::cout << "Not enough KF in map" << std::endl; // DEBUG
         return false;
     }
 
@@ -514,7 +514,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
 
     if(mpCurrentAgent->mnLoopNumCoincidences > 0) // FIXME : fill and test
     {
-        std::cout << "mpCurrentAgent->mnLoopNumCoincidences > 0" << std::endl; // DEBUG
+        // std::cout << "mpCurrentAgent->mnLoopNumCoincidences > 0" << std::endl; // DEBUG
 
         bCheckSpatial = true;
         // Find from the last KF candidates
@@ -626,7 +626,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
             vdEstSim3_ms.push_back(timeEstSim3);
         #endif
         mpKeyFrameDB->add(mpCurrentKF);
-        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
+        // std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
         return true;
     }
 
@@ -637,7 +637,7 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
     vector<KeyFrame*> vpMergeBowCand, vpLoopBowCand;
     if(!bMergeDetectedInKF || !bLoopDetectedInKF)
     {
-        std::cout << "!bMergeDetectedInKF || !bLoopDetectedInKF, calling mpKeyFrameDB->DetectNBestCandidates" << std::endl; // DEBUG
+        // std::cout << "!bMergeDetectedInKF || !bLoopDetectedInKF, calling mpKeyFrameDB->DetectNBestCandidates" << std::endl; // DEBUG
         // Search in BoW
         #ifdef REGISTER_TIMES
             std::chrono::steady_clock::time_point time_StartQuery = std::chrono::steady_clock::now();
@@ -659,16 +659,16 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
     //Loop candidates
     if(!bLoopDetectedInKF && !vpLoopBowCand.empty())
     {
-        std::cout << "!bLoopDetectedInKF && !vpLoopBowCand.empty()" << std::endl; // DEBUG
+        // std::cout << "!bLoopDetectedInKF && !vpLoopBowCand.empty()" << std::endl; // DEBUG
         mpCurrentAgent->mbLoopDetected = DetectCommonRegionsFromBoW(vpLoopBowCand, mpCurrentAgent->mpLoopMatchedKF, mpCurrentAgent->mpLoopLastCurrentKF, mpCurrentAgent->mg2oLoopSlw, mpCurrentAgent->mnLoopNumCoincidences, mpCurrentAgent->mvpLoopMPs, mpCurrentAgent->mvpLoopMatchedMPs, bDoWrite); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
-        std::cout << "mpCurrentAgent->mnLoopNumCoincidences : " << mpCurrentAgent->mnLoopNumCoincidences << std::endl;
+        // std::cout << "mpCurrentAgent->mnLoopNumCoincidences : " << mpCurrentAgent->mnLoopNumCoincidences << std::endl;
     }
     // Merge candidates
     if(!bMergeDetectedInKF && !vpMergeBowCand.empty())
     {
-        std::cout << "!bMergeDetectedInKF && !vpMergeBowCand.empty()" << std::endl; // DEBUG
+        // std::cout << "!bMergeDetectedInKF && !vpMergeBowCand.empty()" << std::endl; // DEBUG
         mpCurrentAgent->mbMergeDetected = DetectCommonRegionsFromBoW(vpMergeBowCand, mpCurrentAgent->mpMergeMatchedKF, mpCurrentAgent->mpMergeLastCurrentKF, mpCurrentAgent->mg2oMergeSlw, mpCurrentAgent->mnMergeNumCoincidences, mpCurrentAgent->mvpMergeMPs, mpCurrentAgent->mvpMergeMatchedMPs, bDoWrite); // FIXME : make sure no pb with this fct -> looks fine, maybe threshold tuning needed
-        std::cout << "mpCurrentAgent->mnMergeNumCoincidences : " << mpCurrentAgent->mnMergeNumCoincidences << std::endl;
+        // std::cout << "mpCurrentAgent->mnMergeNumCoincidences : " << mpCurrentAgent->mnMergeNumCoincidences << std::endl;
     }
 
     #ifdef REGISTER_TIMES
@@ -679,11 +679,11 @@ bool LoopClosing::NewDetectCommonRegionsMulti(bool bDoWrite)
     #endif
 
     mpKeyFrameDB->add(mpCurrentKF);
-    std::cout << "Current KF added to KFDB" << std::endl; // DEBUG
+    // std::cout << "Current KF added to KFDB" << std::endl; // DEBUG
 
     if(mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected)
     {
-        std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
+        // std::cout << "mpCurrentAgent->mbMergeDetected || mpCurrentAgent->mbLoopDetected : NewDetectCommonRegionsMulti() ready to return true" << std::endl; // DEBUG
         return true;
     }
 
@@ -702,7 +702,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
     int nProjMatches = 30;
     int nProjOptMatches = 50; //30; //50;
     int nProjMatchesRep = 100; //20; //100;
-    std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatches << std::endl;
+    // std::cout << "nNumProjMatches: " << nNumProjMatches << " for min. value " << nProjMatches << std::endl;
 
     //WRITE
     if (bDoWrite)
@@ -865,7 +865,7 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(KeyFrame* pCurrentKF, KeyFrame*
 bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, KeyFrame* &pMatchedKF2, KeyFrame* &pLastCurrentKF, g2o::Sim3 &g2oScw,
                                              int &nNumCoincidences, std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs, bool bDoWrite) //-> looks fine, maybe threshold tuning needed
 {
-    std::cout << "Entering DetectCommonRegionsFromBoW fct" << std::endl; // DEBUG
+    // std::cout << "Entering DetectCommonRegionsFromBoW fct" << std::endl; // DEBUG
     int nBoWMatches = 20;
     int nBoWInliers = 15;
     int nSim3Inliers = 10; //20; // threshold tuning tries by JD (original ORBSLAM3 is just commented)
@@ -873,7 +873,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
     int nProjOptMatches = 50; //80;
 
     set<KeyFrame*> spConnectedKeyFrames = mpCurrentKF->GetConnectedKeyFrames();
-    std::cout << "spConnectedKeyFrames OK" << std::endl; // DEBUG
+    // std::cout << "spConnectedKeyFrames OK" << std::endl; // DEBUG
 
     int nNumCovisibles = 10;
 
@@ -894,19 +894,19 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
     int index = 0;
     //Verbose::PrintMess("BoW candidates: There are " + to_string(vpBowCand.size()) + " possible candidates ", Verbose::VERBOSITY_DEBUG);
-    std::cout << "BoW candidates: There are " << vpBowCand.size() << " possible candidates " << std::endl; // DEBUG
+    // std::cout << "BoW candidates: There are " << vpBowCand.size() << " possible candidates " << std::endl; // DEBUG
     for(KeyFrame* pKFi : vpBowCand)
     {
         if(!pKFi || pKFi->isBad())
         {
             continue;
         }
-        std::cout << "KF candidate: " << pKFi->mnId << ", created by Agent: " << pKFi->getAgent()->mnId << ", with timestamp: " << pKFi->mTimeStamp << std::endl; // DEBUG
+        // std::cout << "KF candidate: " << pKFi->mnId << ", created by Agent: " << pKFi->getAgent()->mnId << ", with timestamp: " << pKFi->mTimeStamp << std::endl; // DEBUG
         // Current KF against KF with covisibles version
         std::vector<KeyFrame*> vpCovKFi = pKFi->GetBestCovisibilityKeyFrames(nNumCovisibles);
         if(vpCovKFi.empty())
         {
-            std::cout << "Covisible list empty" << std::endl;
+            // std::cout << "Covisible list empty" << std::endl;
             vpCovKFi.push_back(pKFi);
         }
         else
@@ -928,7 +928,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         if(bAbortByNearKF)
         {
             //std::cout << "Check BoW aborted because is close to the matched one " << std::endl;
-            std::cout << "Aborting by near KF" << std::endl;
+            // std::cout << "Aborting by near KF" << std::endl;
             continue;
         }
         //std::cout << "Check BoW continue because is far to the matched one " << std::endl;
@@ -983,7 +983,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
         // pMostBoWMatchesKF = vpCovKFi[nIndexMostBoWMatchesKF]; // WHY ???? (ju)
 
-        std::cout << "numBoWMatches: " << numBoWMatches << ", for min. value: " << nBoWMatches << std::endl; // DEBUG
+        // std::cout << "numBoWMatches: " << numBoWMatches << ", for min. value: " << nBoWMatches << std::endl; // DEBUG
 
         if(numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
@@ -1055,7 +1055,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 // std::cout << "ok6-3 (loop)" << std::endl; // DEBUG
                 mTcm = solver.iterate(20,bNoMore, vbInliers, nInliers, bConverge);
                 //Verbose::PrintMess("BoW guess: Solver achieve " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
-                std::cout << "BoW guess: Solver achieve " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
+                // std::cout << "BoW guess: Solver achieve " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
             }
             // std::cout << "ok7" << std::endl; // DEBUG
 
@@ -1104,14 +1104,14 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 }
 
                 //Verbose::PrintMess("BoW guess: Convergende with " + to_string(nInliers) + " geometrical inliers among " + to_string(nBoWInliers) + " BoW matches", Verbose::VERBOSITY_DEBUG);
-                std::cout << "BoW guess: Convergence with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
+                // std::cout << "BoW guess: Convergence with " << nInliers << " geometrical inliers among " << nBoWInliers << " BoW matches" << std::endl;
                 // Match by reprojection
                 vpCovKFi.clear();
                 vpCovKFi = pMostBoWMatchesKF->GetBestCovisibilityKeyFrames(nNumCovisibles);
                 vpCovKFi.push_back(pMostBoWMatchesKF);
                 set<KeyFrame*> spCheckKFs(vpCovKFi.begin(), vpCovKFi.end());
 
-                std::cout << "There are " << vpCovKFi.size() <<" near KFs" << std::endl;
+                // std::cout << "There are " << vpCovKFi.size() <<" near KFs" << std::endl;
                 // std::cout << "ok9" << std::endl; // DEBUG
 
                 set<MapPoint*> spMapPoints;
@@ -1147,7 +1147,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 vector<KeyFrame*> vpMatchedKF;
                 vpMatchedKF.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<KeyFrame*>(NULL));
                 int numProjMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpKeyFrames, vpMatchedMP, vpMatchedKF, 8, 1.5);
-                cout <<"BoW: " << numProjMatches << " matches between " << vpMapPoints.size() << " points with coarse Sim3" << endl;
+                // cout <<"BoW: " << numProjMatches << " matches between " << vpMapPoints.size() << " points with coarse Sim3" << endl;
                 // std::cout << "ok11" << std::endl; // DEBUG
 
                 // WRITE: SearchByProjection matches (ORB descriptor matched to vpMatchedMP, not returned/vpMatchedMP) -> need modif to be displayed. May be got by using KF mvKeys and mDescriptors and adding this output to SearchByProjection ?
@@ -1215,7 +1215,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
 
                     // int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 10, mbFixScale, mHessian7x7, true);
                     int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 30, mbFixScale, mHessian7x7, true); // JD : kernel 30 instead of 10
-                    std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
+                    // std::cout << numOptMatches << " matches found by the optimizer. Min. inlier number is " << nSim3Inliers << std::endl;
                     // ADDWRITE gScm
                     // std::cout << "<<<<<<<<<<<<<<<<<< gScm.scale() (optim) : " << gScm.scale() << std::endl; // DEBUG
 
@@ -1284,7 +1284,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         vector<MapPoint*> vpMatchedMP;
                         vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
                         int numProjOptMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpMatchedMP, 5, 1.0);
-                        std::cout << "numProjOptMatches is " << numProjOptMatches << " after serach by projection. Min. matches nb is " << nProjOptMatches << std::endl;
+                        // std::cout << "numProjOptMatches is " << numProjOptMatches << " after serach by projection. Min. matches nb is " << nProjOptMatches << std::endl;
 
                         // WRITE: SearchByProjection matches
                         if (bDoWrite)
@@ -1418,7 +1418,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         index++;
     }
 
-    std::cout << "BoW candidate checks + pts matching OK" << std::endl; // DEBUG
+    // std::cout << "BoW candidate checks + pts matching OK" << std::endl; // DEBUG
 
     if(nBestMatchesReproj > 0)
     {
@@ -1430,7 +1430,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         vpMPs = vpBestMapPoints;
         vpMatchedMPs = vpBestMatchedMapPoints;
 
-        std::cout << "nBestMatchesReproj > 0" << std::endl; // DEBUG
+        // std::cout << "nBestMatchesReproj > 0" << std::endl; // DEBUG
         return nNumCoincidences >= 3;
     }
     else
@@ -1447,7 +1447,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
             }
         }
     }
-    std::cout << "Ready to return false" << std::endl; // DEBUG
+    // std::cout << "Ready to return false" << std::endl; // DEBUG
     return false;
 }
 
