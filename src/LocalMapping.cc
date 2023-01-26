@@ -275,6 +275,7 @@ void LocalMapping::MapPointCulling() // OK
     // Check Recent Added MapPoints
     list<MapPoint*>::iterator lit = mlpRecentAddedMapPoints.begin();
     const unsigned long int nCurrentKFid = mpCurrentKeyFrame->mnId;
+    const unsigned long int nCurrentKFagentLevelId = mpCurrentKeyFrame->mnAgentLevelId;
 
     int nThObs;
     if(mbMonocular)
@@ -297,13 +298,15 @@ void LocalMapping::MapPointCulling() // OK
             lit = mlpRecentAddedMapPoints.erase(lit);
         }
         // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=2 && pMP->Observations()<=cnThObs)
-        else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=5 && pMP->Observations()<=cnThObs)
+        // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=5 && pMP->Observations()<=cnThObs)
+        else if(((int)mpAgent->mnId==(int)pMP->mnFirstKFAgentId) && ((int)nCurrentKFagentLevelId-(int)pMP->mnFirstKFagentLevelId)>=2 && pMP->Observations()<=cnThObs)
         {
             pMP->SetBadFlag();
             lit = mlpRecentAddedMapPoints.erase(lit);
         }
         // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=3)
-        else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=6)
+        // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=6)
+        else if(((int)mpAgent->mnId==(int)pMP->mnFirstKFAgentId) && ((int)nCurrentKFagentLevelId-(int)pMP->mnFirstKFAgentId)>=3)
             lit = mlpRecentAddedMapPoints.erase(lit);
         else
         {

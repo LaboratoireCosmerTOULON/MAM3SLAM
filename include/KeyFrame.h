@@ -196,8 +196,8 @@ class KeyFrame
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    KeyFrame(Agent* pAgent);
-    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB, Agent* pAgent);
+    KeyFrame(Agent* pAgent, long unsigned int nAgentLevelKFid);
+    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB, Agent* pAgent, long unsigned int nAgentLevelKFid);
 
     // Pose functions
     void SetPose(const Sophus::SE3f &Tcw);
@@ -316,6 +316,8 @@ public:
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;
+
+    long unsigned int mnAgentLevelId;
 
     const double mTimeStamp;
 

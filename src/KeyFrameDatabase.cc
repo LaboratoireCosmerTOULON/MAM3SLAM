@@ -831,8 +831,8 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F, Map
         if(si>minScoreToRetain)
         {
             KeyFrame* pKFi = it->second;
-            if (pKFi->GetMap() != pMap)
-                continue;
+            // if (pKFi->GetMap() != pMap)
+            //     continue;
             if(!spAlreadyAddedKF.count(pKFi))
             {
                 vpRelocCandidates.push_back(pKFi);

@@ -177,6 +177,7 @@ public:
     double t0IMU; // time-stamp of IMU initialization
     bool mFastInit = false;
 
+    long unsigned int mnNextAgentLevelKFid = 0;
 
     vector<MapPoint*> GetLocalMapMPS();
 

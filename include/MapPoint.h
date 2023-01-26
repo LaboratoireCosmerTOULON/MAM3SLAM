@@ -167,6 +167,10 @@ public:
     long int mnFirstFrame;
     int nObs;
 
+    // Multi-agent
+    long int mnFirstKFagentLevelId;
+    long int mnFirstKFAgentId;
+
     // Variables used by the tracking
     float mTrackProjX;
     float mTrackProjY;
