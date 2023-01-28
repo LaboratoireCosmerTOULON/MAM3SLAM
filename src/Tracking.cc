@@ -2619,6 +2619,7 @@ void Tracking::CheckReplacedInLastFrame()
 
 bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem good but is the output good ?)
 {
+    std::cout << "TrackReferenceKeyFrame()" << std::endl;
     // Compute Bag of Words vector
     mCurrentFrame.ComputeBoW();
 
@@ -2632,7 +2633,7 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
-    // std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    std::cout << nmatches << " matches found between ref KF and current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     // if(nmatches<15) // FIXME : uncomment
     // {
@@ -2678,7 +2679,7 @@ bool Tracking::TrackReferenceKeyFrame() // OK (no core dumped + maps and KF seem
         }
     }
 
-    // std::cout << nmatchesMap << " matches found for current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
+    std::cout << nmatchesMap << " matches found for current frame for Agent " << mpAgent -> mnId << std::endl; // DEBUG
 
     if (mSensor == Agent::IMU_MONOCULAR || mSensor == Agent::IMU_STEREO || mSensor == Agent::IMU_RGBD)
         return true;
@@ -2764,7 +2765,7 @@ void Tracking::UpdateLastFrame() // Concretement, ne fait rien si mono sauf set 
 
 bool Tracking::TrackWithMotionModel()
 {
-    // std::cout << "Entering TrackWithMotionModel()" << std::endl; // DEBUG
+    std::cout << "TrackWithMotionModel()" << std::endl; // DEBUG
     ORBmatcher matcher(0.9,true);
     // std::cout << "ORB matcher initialized" << std::endl; // DEBUG
     // Update last frame pose according to its reference keyframe
@@ -2773,6 +2774,10 @@ bool Tracking::TrackWithMotionModel()
     // std::cout << "Last frame updated" << std::endl; // DEBUG
     // std::cout << "Initializing current frame pose for Agent " << mpAgent->mnId << std::endl; // DEBUG
     mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
+    std::cout << "mLastFrame" << std::endl;
+    std::cout << mLastFrame.N << std::endl;
+    std::cout << mLastFrame.mpReferenceKF->mnId << std::endl;
+    std::cout << mLastFrame.mpReferenceKF->isBad() << std::endl;
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL)); // ?? What for ??
 
@@ -2785,7 +2790,7 @@ bool Tracking::TrackWithMotionModel()
         th=15;
 
     int nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,th,mSensor==Agent::MONOCULAR || mSensor==Agent::IMU_MONOCULAR);
-        // std::cout << nmatches << " matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    std::cout << nmatches << " matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // If few matches, uses a wider window search
     if(nmatches<20)
@@ -2809,7 +2814,7 @@ bool Tracking::TrackWithMotionModel()
 
     // Optimize frame pose with all matches
     Optimizer::PoseOptimization(&mCurrentFrame);
-    // std::cout << "Pose optimized for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    std::cout << "Pose optimized for Agent " << mpAgent->mnId << std::endl; // DEBUG
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -2836,7 +2841,7 @@ bool Tracking::TrackWithMotionModel()
                 nmatchesMap++;
         }
     }
-    // std::cout << "Outliers discarded for Agent " << mpAgent->mnId << ". There are " << nmatchesMap << " map matches" << std::endl; // DEBUG
+    std::cout << "Outliers discarded for Agent " << mpAgent->mnId << ". There are " << nmatchesMap << " map matches" << std::endl; // DEBUG
 
     if(mbOnlyTracking)
     {
@@ -2910,7 +2915,7 @@ bool Tracking::TrackLocalMap()
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     mpLocalMapper->mnMatchesInliers=mnMatchesInliers;
-    // std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    std::cout << mnMatchesInliers << " inlier matches found for Agent " << mpAgent->mnId << std::endl; // DEBUG
     if(mnFramesSinceLastReloc<mMaxFrames && mnMatchesInliers<50)
     {
         // std::cout << "Local map tracking = failure" << std::endl; // DEBUG
@@ -2965,7 +2970,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
 
     // Local Mapping accept keyframes?
     bool bLocalMappingIdle = mpLocalMapper->AcceptKeyFrames();
-    // std::cout << "bLocalMappingIdle : " << bLocalMappingIdle << ", mMinFrames : " << mMinFrames << ", mnFramesSinceLastKF : " << mnFramesSinceLastKF << std::endl; // DEBUG
+    std::cout << "bLocalMappingIdle : " << bLocalMappingIdle << ", mMinFrames : " << mMinFrames << ", mnFramesSinceLastKF : " << mnFramesSinceLastKF << std::endl; // DEBUG
 
     // Check how many "close" points are being tracked and how many could be potentially created.
     int nNonTrackedClose = 0;
@@ -2998,7 +3003,9 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = (((mnMatchesInliers<nRefMatches*thRefRatio || bNeedToInsertClose)) && mnMatchesInliers>15);
 
-    // std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
+    std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
+    std::cout << "nRefMatches*thRefRatio : " << nRefMatches*thRefRatio << std::endl;
+    std::cout << "Next agent level KF ID is : " << mnNextAgentLevelKFid << std::endl;
     // Temporal condition for Inertial cases
     bool c3 = false;
 
@@ -3011,12 +3018,12 @@ bool Tracking::NeedNewKeyFrame() // seems ok
         // Otherwise send a signal to interrupt BA
         if(bLocalMappingIdle || mpLocalMapper->IsInitializing())
         {
-            // std::cout << "LM OK" << std::endl; // DEBUG
+            std::cout << "LM OK" << std::endl; // DEBUG
             return true;
         }
         else
         {
-            // std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
+            std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
             mpLocalMapper->InterruptBA();
             return false;
         }
@@ -3102,7 +3109,7 @@ void Tracking::SearchLocalPoints()
             mCurrentFrame.mmProjectPoints[pMP->mnId] = cv::Point2f(pMP->mTrackProjX, pMP->mTrackProjY);
         }
     }
-    // std::cout << nToMatch << " points to match for Agent " << mpAgent-> mnId << std::endl; // DEBUG
+    std::cout << nToMatch << " points to match for  Agent " << mpAgent-> mnId << std::endl; // DEBUG
 
     if(nToMatch>0)
     {
@@ -3117,7 +3124,7 @@ void Tracking::SearchLocalPoints()
             th=15; // 15
 
         int matches = matcher.SearchByProjection(mCurrentFrame, mvpLocalMapPoints, th, mpLocalMapper->mbFarPoints, mpLocalMapper->mThFarPoints);
-        // std::cout << matches << " matches found for Agent " << mpAgent-> mnId << std::endl; // DEBUG
+        std::cout << matches << " matches found for Agent " << mpAgent-> mnId << std::endl; // DEBUG
     }
 }
 
@@ -3295,7 +3302,8 @@ void Tracking::UpdateLocalKeyFrames()
         mpReferenceKF = pKFmax;
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
     }
-    // std::cout << mvpLocalKeyFrames.size() << " local KF found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    std::cout << mvpLocalKeyFrames.size() << " local KF found for Agent " << mpAgent->mnId << std::endl; // DEBUG
+    std::cout << "mpReferenceKF is from agent " << mpReferenceKF->getAgent()->mnId << " for Agent " << mpAgent->mnId << std::endl; // DEBUG
 }
 
 bool Tracking::Relocalization()

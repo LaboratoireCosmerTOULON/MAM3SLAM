@@ -1,10 +1,6 @@
-Creation of map 0 with first KF ts 1403715886.584058 from Agent 0
-Creation of map 1 with first KF ts 1403715273.262143 from Agent 1
-Creation of map 1 with first KF ts 1403715278.962143 from Agent 1
-Creation of map 0 with first KF ts 1403715893.534058 from Agent 0
-Creation of map 0 with first KF ts 1403715894.234058 from Agent 0
-Creation of map 0 with first KF ts 1403715894.684058 from Agent 0
-Creation of map 0 with first KF ts 1403715894.884058 from Agent 0
-Creation of map 1 with first KF ts 1403715279.262143 from Agent 1
-Creation of map 1 with first KF ts 1403715280.412143 from Agent 1
-Creation of map 0 with first KF ts 1403715896.534058 from Agent 0
+Creation of map 0 with first KF ts 1403715273.262143 from Agent 0
+Creation of map 1 with first KF ts 1403715886.584058 from Agent 1
+Merge of map 1 into 0 at KF of ts 1403715894.784058 from Agent 1
+Creation of map 2 with first KF ts 1403715909.234058 from Agent 1
+Merge of map 1 into 2 at KF of ts 1403715294.562143 from Agent 0
+Creation of map 3 with first KF ts 1403715916.384058 from Agent 1

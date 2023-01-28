@@ -204,6 +204,147 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
         usleep(3000);
     }
+    /*{
+        // Tracking will see that Local Mapping is busy
+        SetAcceptKeyFrames(false);
+
+        // Check if there are keyframes in the queue
+        if(CheckNewKeyFrames() && !mbBadImu)
+        {
+            unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
+            while (CheckNewKeyFrames())
+            {
+                // std::cout << "coucou" << std::endl;
+                // std::cout << "Calling LM from agent " << mpAgent->mnId << ". Current map is " << mpAgent->GetCurrentMap()->GetId() << " with " << mpAgent->GetCurrentMap()->KeyFramesInMap() << " KFs." << std::endl;
+                #ifdef REGISTER_TIMES
+                    double timeLBA_ms = 0;
+                    double timeKFCulling_ms = 0;
+
+                    std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
+                #endif
+
+                // cout << "New KF in map" << endl; // DEBUG
+                // BoW conversion and insertion in Map
+                ProcessNewKeyFrame();
+                // cout << "BoW creation + insertion in map OK" << endl; // DEBUG
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
+
+                    double timeProcessKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndProcessKF - time_StartProcessKF).count();
+                    vdKFInsert_ms.push_back(timeProcessKF);
+                #endif
+
+                // unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
+
+                // Check recent MapPoints
+                MapPointCulling();
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndMPCulling = std::chrono::steady_clock::now();
+
+                    double timeMPCulling = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCulling - time_EndProcessKF).count();
+                    vdMPCulling_ms.push_back(timeMPCulling);
+                #endif
+
+                // Triangulate new MapPoints
+                CreateNewMapPoints();
+                // cout << "New map pts created" << endl; // DEBUG
+                mbAbortBA = false;
+            }
+            if(!CheckNewKeyFrames())
+            {
+                // Find more matches in neighbor keyframes and fuse point duplications
+                SearchInNeighbors();
+                // cout << "Neighbors searched" << endl; // DEBUG
+            }
+            #ifdef REGISTER_TIMES
+                std::chrono::steady_clock::time_point time_EndMPCreation = std::chrono::steady_clock::now();
+                double timeMPCreation = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCreation - time_EndMPCulling).count();
+                vdMPCreation_ms.push_back(timeMPCreation);
+            #endif
+
+            bool b_doneLBA = false;
+            int num_FixedKF_BA = 0;
+            int num_OptKF_BA = 0;
+            int num_MPs_BA = 0;
+            int num_edges_BA = 0;
+
+            // std::cout << "There are now " << mpAtlas->KeyFramesInMap(mpAgent) << " KF in Agent " << mpAgent->mnId << "'s map" << std::endl; // DEBUG
+
+            if(!CheckNewKeyFrames() && !stopRequested())
+            {
+                // std::cout << "Entering !CheckNewKeyFrames() && !stopRequested() case in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                if(mpAtlas->KeyFramesInMap(mpAgent)>2)
+                {
+                    // std::cout << "More thn 2 KF in current map LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
+                    b_doneLBA = true;
+
+                    // std::cout << "Local BA ok in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                }
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndLBA = std::chrono::steady_clock::now();
+                    if(b_doneLBA)
+                    {
+                        timeLBA_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLBA - time_EndMPCreation).count();
+                        vdLBA_ms.push_back(timeLBA_ms);
+
+                        nLBA_exec += 1;
+                        if(mbAbortBA)
+                        {
+                            nLBA_abort += 1;
+                        }
+                        vnLBA_edges.push_back(num_edges_BA);
+                        vnLBA_KFopt.push_back(num_OptKF_BA);
+                        vnLBA_KFfixed.push_back(num_FixedKF_BA);
+                        vnLBA_MPs.push_back(num_MPs_BA);
+                    }
+                #endif
+
+                // Check redundant local Keyframes
+                KeyFrameCulling();
+                // std::cout << "KF culling ok in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndKFCulling = std::chrono::steady_clock::now();
+
+                    timeKFCulling_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndKFCulling - time_EndLBA).count();
+                    vdKFCulling_ms.push_back(timeKFCulling_ms);
+                #endif
+
+                #ifdef REGISTER_TIMES
+                    vdLBASync_ms.push_back(timeKFCulling_ms);
+                    vdKFCullingSync_ms.push_back(timeKFCulling_ms);
+                #endif
+                mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame); // FIXME : uncomment and fix
+                // std::cout << "Calling loop closing for insertion" << std::endl;
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndLocalMap = std::chrono::steady_clock::now();
+
+                    double timeLocalMap = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLocalMap - time_StartProcessKF).count();
+                    vdLMTotal_ms.push_back(timeLocalMap);
+                #endif
+            }
+        }
+        else if(Stop() && !mbBadImu)
+        {
+            // Safe area to stop
+            while(isStopped() && !CheckFinish())
+            {
+                usleep(3000);
+            }
+            if(CheckFinish())
+                break;
+        }
+
+        ResetIfRequested();
+
+        // Tracking will see that Local Mapping is busy
+        SetAcceptKeyFrames(true);
+
+        if(CheckFinish())
+            break;
+
+        usleep(3000);
+    }*/
     SetFinish();
 }
 
@@ -227,6 +368,8 @@ void LocalMapping::ProcessNewKeyFrame() // Should be ok
         unique_lock<mutex> lock(mMutexNewKFs);
         mpCurrentKeyFrame = mlNewKeyFrames.front();
         mlNewKeyFrames.pop_front();
+        std::cout << "LM from agent  " << mpAgent->mnId << " processing KF with agent level id " << mpCurrentKeyFrame->mnAgentLevelId << std::endl;
+        std::cout << "There are " << mlNewKeyFrames.size() << " still waiting to be processed" << std::endl;
     }
 
     // Compute Bags of Words structures
@@ -306,7 +449,7 @@ void LocalMapping::MapPointCulling() // OK
         }
         // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=3)
         // else if(((int)nCurrentKFid-(int)pMP->mnFirstKFid)>=6)
-        else if(((int)mpAgent->mnId==(int)pMP->mnFirstKFAgentId) && ((int)nCurrentKFagentLevelId-(int)pMP->mnFirstKFAgentId)>=3)
+        else if(((int)mpAgent->mnId==(int)pMP->mnFirstKFAgentId) && ((int)nCurrentKFagentLevelId-(int)pMP->mnFirstKFagentLevelId)>=3)
             lit = mlpRecentAddedMapPoints.erase(lit);
         else
         {
