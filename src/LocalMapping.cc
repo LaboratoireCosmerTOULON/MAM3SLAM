@@ -84,30 +84,35 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
             unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
 
-            // cout << "New KF in map" << endl; // DEBUG
-            // BoW conversion and insertion in Map
-            ProcessNewKeyFrame();
-            // cout << "BoW creation + insertion in map OK" << endl; // DEBUG
-            #ifdef REGISTER_TIMES
-                std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
+            int nNewKF = mlNewKeyFrames.size();
+            std::cout << " Agent " << mpAgent->mnId << " LM - There are " << nNewKF << " to process" << std::endl;
 
-                double timeProcessKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndProcessKF - time_StartProcessKF).count();
-                vdKFInsert_ms.push_back(timeProcessKF);
-            #endif
+            for (int itKF=0 ; itKF < nNewKF ; itKF++) {
+                // cout << "New KF in map" << endl; // DEBUG
+                // BoW conversion and insertion in Map
+                ProcessNewKeyFrame();
+                // cout << "BoW creation + insertion in map OK" << endl; // DEBUG
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndProcessKF = std::chrono::steady_clock::now();
 
-            // Check recent MapPoints
-            MapPointCulling();
-            #ifdef REGISTER_TIMES
-                std::chrono::steady_clock::time_point time_EndMPCulling = std::chrono::steady_clock::now();
+                    double timeProcessKF = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndProcessKF - time_StartProcessKF).count();
+                    vdKFInsert_ms.push_back(timeProcessKF);
+                #endif
 
-                double timeMPCulling = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCulling - time_EndProcessKF).count();
-                vdMPCulling_ms.push_back(timeMPCulling);
-            #endif
+                // Check recent MapPoints
+                MapPointCulling();
+                #ifdef REGISTER_TIMES
+                    std::chrono::steady_clock::time_point time_EndMPCulling = std::chrono::steady_clock::now();
 
-            // Triangulate new MapPoints
-            CreateNewMapPoints();
-            // cout << "New map pts created" << endl; // DEBUG
-            mbAbortBA = false;
+                    double timeMPCulling = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMPCulling - time_EndProcessKF).count();
+                    vdMPCulling_ms.push_back(timeMPCulling);
+                #endif
+
+                // Triangulate new MapPoints
+                CreateNewMapPoints();
+                // cout << "New map pts created" << endl; // DEBUG
+                mbAbortBA = false;
+            }
 
             if(!CheckNewKeyFrames())
             {

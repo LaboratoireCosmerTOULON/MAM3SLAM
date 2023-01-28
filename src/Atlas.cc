@@ -199,7 +199,7 @@ void Atlas::SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs)
 void Atlas::SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs, Agent* pAgent) {
     unique_lock<mutex> lock(mMutexAtlas);
     Map* pAgentCurrentMap = pAgent->GetCurrentMap(false);
-    pAgentCurrentMap->SetReferenceMapPoints(vpMPs);
+    pAgentCurrentMap->SetReferenceMapPoints(vpMPs); // WARNING : MULTI-AGENTS ON SAME MAP ??? -> used for display only
 }
 
 void Atlas::InformNewBigChange()

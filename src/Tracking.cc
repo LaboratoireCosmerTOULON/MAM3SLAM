@@ -2131,6 +2131,7 @@ void Tracking::Track()
                 std::chrono::steady_clock::time_point time_StartNewKF = std::chrono::steady_clock::now();
         #endif
             bool bNeedKF = NeedNewKeyFrame();
+            std::cout << "Agent " << mpAgent->mnId << ": mnKFinsertionsRefusedSinceLast : " << mnKFinsertionsRefusedSinceLast << std::endl;
 
             // Check if we need to insert a new keyframe
             // if(bNeedKF && bOK)
@@ -3000,8 +3001,10 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     const bool c1b = ((mnFramesSinceLastKF>mMinFrames) && bLocalMappingIdle); //mpLocalMapper->KeyframesInQueue() < 2);
     //Condition 1c: tracking is weak
     const bool c1c = mSensor!=Agent::MONOCULAR && mSensor!=Agent::IMU_MONOCULAR && mSensor!=Agent::IMU_STEREO && mSensor!=Agent::IMU_RGBD && (mnMatchesInliers<nRefMatches*0.25 || bNeedToInsertClose) ;
+    const bool c1d = (mnKFinsertionsRefusedSinceLast>5);
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = (((mnMatchesInliers<nRefMatches*thRefRatio || bNeedToInsertClose)) && mnMatchesInliers>15);
+    const bool c5 = (mnMatchesInliers<70 && mnMatchesInliers>15); // PB : AJOUTES MAIS PAS PROCESS CAR BCP
 
     std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
     std::cout << "nRefMatches*thRefRatio : " << nRefMatches*thRefRatio << std::endl;
@@ -3010,23 +3013,30 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     bool c3 = false;
 
     bool c4 = false;
+    if (c2 && !(c1a||c1b||c1c)) {
+        mnKFinsertionsRefusedSinceLast++;
+    }
 
-    if(((c1a||c1b||c1c) && c2)||c3 ||c4)
+    if(((c1a||c1b||c1c||c1d) && c2)||c3 ||c4 || c5)
     {
-        // std::cout << "Need new KF" << std::endl; // DEBUG
-        // If the mapping accepts keyframes, insert keyframe.
-        // Otherwise send a signal to interrupt BA
-        if(bLocalMappingIdle || mpLocalMapper->IsInitializing())
-        {
-            std::cout << "LM OK" << std::endl; // DEBUG
-            return true;
-        }
-        else
-        {
-            std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
-            mpLocalMapper->InterruptBA();
-            return false;
-        }
+        // // std::cout << "Need new KF" << std::endl; // DEBUG
+        // // If the mapping accepts keyframes, insert keyframe.
+        // // Otherwise send a signal to interrupt BA
+        // if(bLocalMappingIdle || mpLocalMapper->IsInitializing())
+        // {
+        //     mnKFinsertionsRefusedSinceLast = 0;
+        //     std::cout << "LM OK" << std::endl; // DEBUG
+        //     return true;
+        // }
+        // else
+        // {
+        //     mnKFinsertionsRefusedSinceLast++;
+        //     std::cout << "LM not OK, calling to interrupt BA" << std::endl; // DEBUG
+        //     mpLocalMapper->InterruptBA();
+        //     return false;
+        // }
+        mnKFinsertionsRefusedSinceLast = 0;
+        return true;
     }
     else
         return false;

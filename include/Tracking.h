@@ -182,6 +182,7 @@ public:
     vector<MapPoint*> GetLocalMapMPS();
 
     bool mbWriteStats;
+    int mnKFinsertionsRefusedSinceLast = 0;
 
 #ifdef REGISTER_TIMES
     void LocalMapStats2File();
