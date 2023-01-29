@@ -225,4 +225,88 @@ void Agent::SaveTrackingStates()
     mpTracker->SaveStates();
 }
 
+void Agent::SaveTrajectory()
+{
+    std::stringstream ss;
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/Trajectory_" << mnId << ".txt";
+    std::string filename = ss.str();
+    std::cout << "Saving trajectory to " << filename << " ..." << std:: endl;
+
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
+    f << setprecision(6) << "ts" << setprecision(7) << " tx ty tz qx qy qz qw agent map" << endl;
+
+    // vector<Map*> vpMaps = mpAtlas->GetAllMaps();
+    // int numMaxKFs = 0;
+    // Map* pBiggerMap;
+    // std::cout << "There are " << std::to_string(vpMaps.size()) << " maps in the atlas" << std::endl;
+    // for(Map* pMap :vpMaps)
+    // {
+    //     std::cout << "  Map " << std::to_string(pMap->GetId()) << " has " << std::to_string(pMap->GetAllKeyFrames().size()) << " KFs" << std::endl;
+    //     if(pMap->GetAllKeyFrames().size() > numMaxKFs)
+    //     {
+    //         numMaxKFs = pMap->GetAllKeyFrames().size();
+    //         pBiggerMap = pMap;
+    //     }
+    // }
+
+    // Frame pose is stored relative to its reference keyframe (which is optimized by BA and pose graph).
+    // We need to get first the keyframe pose and then concatenate the relative transformation.
+    // Frames not localized (tracking failure) are not saved.
+
+    // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
+    // which is true when tracking failed (lbL).
+    list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
+    list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
+    list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+
+    for(auto lit=mpTracker->mlRelativeFramePoses.begin(),
+        lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
+    {
+        //cout << "1" << endl;
+        if(*lbL)
+            continue;
+
+
+        KeyFrame* pKF = *lRit;
+        //cout << "KF: " << pKF->mnId << endl;
+
+        Sophus::SE3f Trw;
+
+        // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
+        if (!pKF)
+            continue;
+
+        //cout << "2.5" << endl;
+
+        while(pKF->isBad())
+        {
+            //cout << " 2.bad" << endl;
+            Trw = Trw * pKF->mTcp;
+            pKF = pKF->GetParent();
+            //cout << "--Parent KF: " << pKF->mnId << endl;
+        }
+
+
+        //cout << "3" << endl;
+
+        Trw = Trw * pKF->GetPose(); // Tcp*Tpw*Twb0=Tcb0 where b0 is the new world reference
+
+        // cout << "4" << endl;
+
+        Sophus::SE3f Twc = ((*lit)*Trw).inverse();
+        Eigen::Quaternionf q = Twc.unit_quaternion();
+        Eigen::Vector3f twc = Twc.translation();
+        f << setprecision(6) << *lT << " " <<  setprecision(9) << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << mnId << " " << pKF->GetMap()->GetId() << endl;
+
+        // cout << "5" << endl;
+    }
+    //cout << "end saving trajectory" << endl;
+    f.close();
+    cout << endl << "End of saving trajectory to " << filename << " ..." << endl;
+
+}
+
 }

@@ -172,6 +172,7 @@ void MultiAgentSystem::SaveKFTrajectory() {
 
     for (int i = 0 ; i < mvpAgents.size() ; i++) {
         mvpAgents[i] -> SaveTrackingStates();
+        mvpAgents[i] -> SaveTrajectory();
     }
 }
 

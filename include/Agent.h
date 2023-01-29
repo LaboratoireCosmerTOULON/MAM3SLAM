@@ -109,6 +109,7 @@ public:
     LocalMapping* mpLocalMapper;
 
     void SaveTrackingStates();
+    void SaveTrajectory();
 
 private:
 

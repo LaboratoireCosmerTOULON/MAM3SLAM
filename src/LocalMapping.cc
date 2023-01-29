@@ -139,7 +139,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
                 // std::cout << "Entering !CheckNewKeyFrames() && !stopRequested() case in LM Agent " << mpAgent->mnId << std::endl; // DEBUG
                 if(mpAtlas->KeyFramesInMap(mpAgent)>2)
                 {
-                    // std::cout << "More thn 2 KF in current map LM Agent " << mpAgent->mnId << std::endl; // DEBUG
+                    std::cout << "More thn 2 KF in current map LM Agent " << mpAgent->mnId << std::endl; // DEBUG
                     Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
                     b_doneLBA = true;
 

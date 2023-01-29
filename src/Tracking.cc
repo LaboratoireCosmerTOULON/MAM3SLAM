@@ -3004,7 +3004,7 @@ bool Tracking::NeedNewKeyFrame() // seems ok
     const bool c1d = (mnKFinsertionsRefusedSinceLast>5);
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = (((mnMatchesInliers<nRefMatches*thRefRatio || bNeedToInsertClose)) && mnMatchesInliers>15);
-    const bool c5 = (mnMatchesInliers<70 && mnMatchesInliers>15); // PB : AJOUTES MAIS PAS PROCESS CAR BCP
+    const bool c5 = (mnMatchesInliers<100 && mnMatchesInliers>15); // PB : AJOUTES MAIS PAS PROCESS CAR BCP
 
     std::cout << "NeedNewKF: c1a=" << c1a << "; c1b=" << c1b << "; c1c=" << c1c << "; c2=" << c2 << std::endl; // DEBUG
     std::cout << "nRefMatches*thRefRatio : " << nRefMatches*thRefRatio << std::endl;
