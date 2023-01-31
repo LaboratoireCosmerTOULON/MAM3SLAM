@@ -158,9 +158,10 @@ public:
     // muti agent on map
     std::mutex mMutexLocalMap;
 
+    long unsigned int mnId;
+
 protected:
 
-    long unsigned int mnId;
 
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;

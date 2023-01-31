@@ -159,6 +159,10 @@ public:
     list<KeyFrame*> mlpReferences;
     list<double> mlFrameTimes;
     list<bool> mlbLost;
+    std::vector<Sophus::SE3f> mvRelativeFramePoses;
+    std::vector<KeyFrame*> mvpReferences;
+    std::vector<double> mvFrameTimes;
+    std::vector<bool> mvbLost;
 
     // frames with estimated pose
     int mTrackedFr;

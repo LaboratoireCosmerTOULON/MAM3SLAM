@@ -81,6 +81,10 @@ int main(int argc, char **argv) {
     
     ros::spin();
 
+    mas.Shutdown();
+    mas.SaveKFTrajectory();
+    // usleep(1000000);
+
     ros::shutdown();
 
     return 0;

@@ -50,10 +50,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, boo
 
 MultiAgentSystem::~MultiAgentSystem() {
     Shutdown();
-    for (int i = 0 ; i < mvpAgents.size() ; i++) {
-        mvpAgents[i] -> Shutdown();
-    }
-    SaveKFTrajectory();
+    // SaveKFTrajectory();
 }
 
 void MultiAgentSystem::addAgent(const string &strSettingsFile) {
@@ -86,6 +83,9 @@ void MultiAgentSystem::Shutdown() {
     }
     mpLoopCloser->RequestFinish();
     cout << "Shutdown MultiAgentsystem" << endl;
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        mvpAgents[i] -> Shutdown();
+    }
 }
 
 

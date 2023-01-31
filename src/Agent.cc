@@ -236,6 +236,118 @@ void Agent::SaveTrajectory()
     f.open(filename.c_str());
     f << fixed;
 
+    f << setprecision(6) << "ts" << setprecision(7) << " tx ty tz qx qy qz qw agent ref_KF_ts" << endl;
+
+    // Frame pose is stored relative to its reference keyframe (which is optimized by BA and pose graph).
+    // We need to get first the keyframe pose and then concatenate the relative transformation.
+    // Frames not localized (tracking failure) are not saved.
+
+    // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
+    // which is true when tracking failed (lbL).
+    
+    std::cout << "mpTracker->mvpReferences.size()" << mpTracker->mvpReferences.size() << std::endl;
+    std::cout << "mpTracker->mvFrameTimes.size()" << mpTracker->mvFrameTimes.size() << std::endl;
+    std::cout << "mpTracker->mvbLost.size()" << mpTracker->mvbLost.size() << std::endl;
+
+    int nMaxIter = mpTracker->mvRelativeFramePoses.size();
+    int nIter = 0;
+
+    for(int i = 0 ; i < nMaxIter ; i++)
+    {
+        bool bLost = mpTracker->mvbLost[i];
+        double frameTime = mpTracker->mvFrameTimes[i];
+        KeyFrame* pKF = mpTracker->mvpReferences[i];
+        Sophus::SE3f relativeFramePose = mpTracker->mvRelativeFramePoses[i];
+
+        std::cout << bLost << std::endl;
+        std::cout << std::fixed;
+        std::cout << frameTime << std::endl;
+        std::cout << pKF->mnId << std::endl;
+        std::cout << relativeFramePose.unit_quaternion().x() << std::endl;
+
+        std::cout << "Iteration " << nIter++ << " out of " << nMaxIter << std::endl;
+        cout << "1" << endl;
+        if(bLost)
+            continue;
+
+        // KeyFrame* pKF = mpTracker->mvpReferences[i];
+
+        Sophus::SE3f Trw;
+
+        // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
+        if (!pKF)
+            continue;
+
+        cout << "2.5" << endl;
+
+        // cout << "KF: " << pKF->mnId << endl;
+        // std::cout << "pKF is from map " << pKF->GetMap()->GetId() << std::endl;
+        // std::cout << "mpTracker->mvRelativeFramePoses[i].unit_quaternion().x : " << mpTracker->mvRelativeFramePoses[i].unit_quaternion().x() << std::endl;
+        // std::cout << std::fixed;
+        // std::cout << "mpTracker->mvFrameTimes[i]: " << mpTracker->mvFrameTimes[i] << std::endl;
+
+        bool bRefOk = true;
+        while(pKF->isBad() && bRefOk)
+        {
+            if (!(pKF->GetParent() == NULL)) 
+            {
+                cout << " 2.bad" << endl;
+                Trw = Trw * pKF->mTcp;
+                pKF = pKF->GetParent();
+                cout << "--Parent KF: " << pKF->mnId << endl;
+            } 
+            else
+            {
+                bRefOk = false;
+            }
+        }
+
+        if (!bRefOk)
+        {
+            std::cout << "ref pas ok" << std::endl;
+            continue;
+        }
+
+        cout << "3" << endl;
+        // cout << "KF: " << pKF->mnId << endl;
+        // std::cout << "pKF is from map " << pKF->GetMap()->GetId() << std::endl;
+
+        Trw = Trw * pKF->GetPose(); // Tcp*Tpw*Twb0=Tcb0 where b0 is the new world reference
+        // std::cout << "Trw.unit_quaternion().x : " << Trw.unit_quaternion().x() << std::endl;
+
+        cout << "4" << endl;
+
+        Sophus::SE3f Twc = (relativeFramePose*Trw).inverse();
+        // std::cout << "Twc.unit_quaternion().x : " << Twc.unit_quaternion().x() << std::endl;
+        Eigen::Quaternionf q = Twc.unit_quaternion();
+        Eigen::Vector3f twc = Twc.translation();
+        // std::cout << mpTracker->mvFrameTimes[i] << std::endl;
+        std::cout << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
+        // std::cout << mnId << std::endl;
+        // std::cout << pKF->GetMap()->GetId() << std::endl;
+        // f << setprecision(6) << frameTime << " " <<  setprecision(9) << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << mnId << " " << pKF->GetMap()->GetId() << endl;
+        // int mapId = 0; //pKF->GetMap()->GetId();
+        // Map* test = pKF->GetMap();
+        // std::cout << test->mnId << std::endl;
+        f << setprecision(6) << frameTime << " " <<  setprecision(9) << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << mnId << " " << setprecision(6) << pKF->mTimeStamp << std::endl;
+
+        cout << "5" << endl;
+    }
+    //cout << "end saving trajectory" << endl;
+    f.close();
+    cout << endl << "End of saving trajectory to " << filename << " ..." << endl;
+
+}
+/*{
+    std::stringstream ss;
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/Trajectory_" << mnId << ".txt";
+    std::string filename = ss.str();
+    std::cout << "Saving trajectory to " << filename << " ..." << std:: endl;
+
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
     f << setprecision(6) << "ts" << setprecision(7) << " tx ty tz qx qy qz qw agent map" << endl;
 
     // vector<Map*> vpMaps = mpAtlas->GetAllMaps();
@@ -261,17 +373,21 @@ void Agent::SaveTrajectory()
     list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
     list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
     list<bool>::iterator lbL = mpTracker->mlbLost.begin();
+    std::cout << "mpTracker->mlpReferences.size()" << mpTracker->mlpReferences.size() << std::endl;
+    std::cout << "mpTracker->mlFrameTimes.size()" << mpTracker->mlFrameTimes.size() << std::endl;
+    std::cout << "mpTracker->mlbLost.size()" << mpTracker->mlbLost.size() << std::endl;
 
-    for(auto lit=mpTracker->mlRelativeFramePoses.begin(),
-        lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
+    int nMaxIter = mpTracker->mlRelativeFramePoses.size();
+    int nIter = 0;
+
+    for(auto lit=mpTracker->mlRelativeFramePoses.begin(), lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
     {
+        std::cout << "Iteration " << nIter++ << " out of " << nMaxIter << std::endl;
         //cout << "1" << endl;
         if(*lbL)
             continue;
 
-
         KeyFrame* pKF = *lRit;
-        //cout << "KF: " << pKF->mnId << endl;
 
         Sophus::SE3f Trw;
 
@@ -279,34 +395,61 @@ void Agent::SaveTrajectory()
         if (!pKF)
             continue;
 
-        //cout << "2.5" << endl;
+        // cout << "2.5" << endl;
 
-        while(pKF->isBad())
+        cout << "KF: " << pKF->mnId << endl;
+        std::cout << "pKF is from map " << pKF->GetMap()->GetId() << std::endl;
+        std::cout << "(*lit).unit_quaternion().x : " << (*lit).unit_quaternion().x() << std::endl;
+        std::cout << std::fixed;
+        std::cout << "*lT: " << *lT << std::endl;
+
+        bool bRefOk = true;
+        while(pKF->isBad() && bRefOk)
         {
-            //cout << " 2.bad" << endl;
-            Trw = Trw * pKF->mTcp;
-            pKF = pKF->GetParent();
-            //cout << "--Parent KF: " << pKF->mnId << endl;
+            if (!(pKF->GetParent() == NULL)) 
+            {
+                cout << " 2.bad" << endl;
+                Trw = Trw * pKF->mTcp;
+                pKF = pKF->GetParent();
+                cout << "--Parent KF: " << pKF->mnId << endl;
+            } 
+            else
+            {
+                bRefOk = false;
+            }
         }
 
+        if (!bRefOk)
+        {
+            std::cout << "ref pas ok" << std::endl;
+            continue;
+        }
 
-        //cout << "3" << endl;
+        cout << "3" << endl;
+        cout << "KF: " << pKF->mnId << endl;
+        std::cout << "pKF is from map " << pKF->GetMap()->GetId() << std::endl;
 
         Trw = Trw * pKF->GetPose(); // Tcp*Tpw*Twb0=Tcb0 where b0 is the new world reference
+        std::cout << "Trw.unit_quaternion().x : " << Trw.unit_quaternion().x() << std::endl;
 
-        // cout << "4" << endl;
+        cout << "4" << endl;
 
         Sophus::SE3f Twc = ((*lit)*Trw).inverse();
+        std::cout << "Twc.unit_quaternion().x : " << Twc.unit_quaternion().x() << std::endl;
         Eigen::Quaternionf q = Twc.unit_quaternion();
         Eigen::Vector3f twc = Twc.translation();
-        f << setprecision(6) << *lT << " " <<  setprecision(9) << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << mnId << " " << pKF->GetMap()->GetId() << endl;
+        std::cout << *lT << std::endl;
+        std::cout << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
+        std::cout << mnId << std::endl;
+        std::cout << pKF->GetMap()->GetId() << std::endl;
+        // f << setprecision(6) << *lT << " " <<  setprecision(9) << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << " " << mnId << " " << pKF->GetMap()->GetId() << endl;
 
-        // cout << "5" << endl;
+        cout << "5" << endl;
     }
     //cout << "end saving trajectory" << endl;
     f.close();
     cout << endl << "End of saving trajectory to " << filename << " ..." << endl;
 
-}
+}*/
 
 }

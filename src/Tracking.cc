@@ -2190,14 +2190,24 @@ void Tracking::Track()
             mlpReferences.push_back(mCurrentFrame.mpReferenceKF);
             mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
             mlbLost.push_back(mState==LOST);
+
+            mvRelativeFramePoses.push_back(Tcr_);
+            mvpReferences.push_back(mCurrentFrame.mpReferenceKF);
+            mvFrameTimes.push_back(mCurrentFrame.mTimeStamp);
+            mvbLost.push_back(mState==LOST);
         }
         else
         {
             // This can happen if tracking is lost
-            mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
+            mlRelativeFramePoses.push_back(mvRelativeFramePoses.back());
             mlpReferences.push_back(mlpReferences.back());
             mlFrameTimes.push_back(mlFrameTimes.back());
             mlbLost.push_back(mState==LOST);
+
+            mvRelativeFramePoses.push_back(mvRelativeFramePoses.back());
+            mvpReferences.push_back(mvpReferences.back());
+            mvFrameTimes.push_back(mvFrameTimes.back());
+            mvbLost.push_back(mState==LOST);
         }
 
     }
@@ -3544,6 +3554,10 @@ void Tracking::Reset(bool bLocMap)
     mlpReferences.clear();
     mlFrameTimes.clear();
     mlbLost.clear();
+    mvRelativeFramePoses.clear();
+    mvpReferences.clear();
+    mvFrameTimes.clear();
+    mvbLost.clear();
     mCurrentFrame = Frame();
     mnLastRelocFrameId = 0; // TO REMOVE
     mnFramesSinceLastReloc = 0;
