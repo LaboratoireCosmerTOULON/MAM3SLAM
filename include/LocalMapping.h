@@ -44,6 +44,7 @@ class LocalMapping
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     LocalMapping(Agent* pAgent, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
+    void ShowDurationStats();
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
 
@@ -111,6 +112,8 @@ public:
     // not consider far points (clouds)
     bool mbFarPoints;
     float mThFarPoints;
+
+    std::vector<double> mvDurationLM;
 
 #ifdef REGISTER_TIMES
     vector<double> vdKFInsert_ms;

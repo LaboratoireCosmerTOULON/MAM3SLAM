@@ -51,6 +51,19 @@ LocalMapping::LocalMapping(Agent* pAgent, Atlas *pAtlas, const float bMonocular,
 
 }
 
+void LocalMapping::ShowDurationStats()
+{
+    std::cout << "Agent " << mpAgent->mnId << std::endl;
+    double sum = std::accumulate(std::begin(mvDurationLM), std::end(mvDurationLM), 0.0);
+    double m =  sum / mvDurationLM.size();
+    std::cout << "Mean LM duration is " << m << std::endl;
+    auto biggest = std::max_element(std::begin(mvDurationLM), std::end(mvDurationLM));
+    std::cout << "Max LM duration is " << *biggest << std::endl;
+
+    auto smallest = std::min_element(std::begin(mvDurationLM), std::end(mvDurationLM));
+    std::cout << "min LM duration is " << *smallest << std::endl;
+}
+
 void LocalMapping::SetLoopCloser(LoopClosing* pLoopCloser)
 {
     mpLoopCloser = pLoopCloser;
@@ -67,8 +80,10 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
     while(1)
     {
+        std::chrono::steady_clock::time_point time_StartLM = std::chrono::steady_clock::now();
         // Tracking will see that Local Mapping is busy
         SetAcceptKeyFrames(false);
+        // SetAcceptKeyFrames(mlNewKeyFrames.size()<2);
 
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames() && !mbBadImu)
@@ -203,11 +218,15 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
         // Tracking will see that Local Mapping is busy
         SetAcceptKeyFrames(true);
+        std::chrono::steady_clock::time_point time_EndLM = std::chrono::steady_clock::now();
+        double timeLM_ms = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLM - time_StartLM).count();
+        mvDurationLM.push_back(timeLM_ms);
+        // std::cout << "LM took " << timeLM_ms << " ms" << std::endl;
 
         if(CheckFinish())
             break;
 
-        usleep(3000);
+        usleep(10000);
     }
     /*{
         // Tracking will see that Local Mapping is busy

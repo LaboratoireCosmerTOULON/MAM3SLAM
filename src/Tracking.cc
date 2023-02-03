@@ -2163,6 +2163,7 @@ void Tracking::Track()
         {
             if(pCurrentMap->KeyFramesInMap()<=10)
             {
+                std::cout << "lost soon after initialization" << std::endl;
                 mpAgent->ResetActiveMap(); // does nothing yet actually
                 return;
             }
