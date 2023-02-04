@@ -97,18 +97,19 @@ void Agent::Run()
         // std::cout << "Agent " << mnId << " is running" << std::endl;
         if (CheckNewFrame()) {
             {
-                unique_lock<mutex> lock(mMutexNewFrame);
+                // unique_lock<mutex> lock(mMutexNewFrame);
                 this -> mGotNewFrame = false;
             }
             // std::cout << "Agent " << mnId << " got new frame" << std::endl; // DEBUG
             this -> TrackMonocular(this -> mIm,  this -> mTimestamp);
+            usleep(3000);
         }
     }
 }
 
 bool Agent::CheckNewFrame()
 {
-    unique_lock<mutex> lock(mMutexNewFrame);
+    // unique_lock<mutex> lock(mMutexNewFrame);
     return mGotNewFrame;
 }
 
@@ -130,7 +131,8 @@ Sophus::SE3f Agent::TrackMonocular(const cv::Mat &im, const double &timestamp)
         exit(-1);
     }
     // cout << "ok4" << endl;
-    cv::Mat imToFeed = mIm.clone();
+    // cv::Mat imToFeed = mIm.clone();
+    cv::Mat imToFeed = mIm;
     // cout << "ok4bis" << endl;
     if(settings_ && settings_->needToResize()){
         // cout << "ok4ter" << endl;

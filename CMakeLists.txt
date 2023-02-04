@@ -156,3 +156,9 @@ target_link_libraries(testPangolin ${PROJECT_NAME})
 add_executable(testFileWriting
          test/testFileWriting.cc)
 target_link_libraries(testFileWriting ${PROJECT_NAME})
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
+
+add_executable(mono_kitti_multi2
+        Examples/Monocular/mono_kitti_multi_2agents.cc)
+target_link_libraries(mono_kitti_multi2 ${PROJECT_NAME})

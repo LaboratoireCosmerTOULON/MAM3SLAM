@@ -113,7 +113,7 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
 
     // mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
     {
-        unique_lock<mutex> lock(mMutexNewFrame);
+        // unique_lock<mutex> lock(mMutexNewFrame);
         cv::Mat im = cv_ptr->image.clone();
         mpAgent -> mIm = im;
         mpAgent -> mTimestamp = cv_ptr->header.stamp.toSec();
