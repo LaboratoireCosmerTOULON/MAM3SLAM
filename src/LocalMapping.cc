@@ -226,7 +226,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
         if(CheckFinish())
             break;
 
-        usleep(10000);
+        usleep(3000);
     }
     /*{
         // Tracking will see that Local Mapping is busy
