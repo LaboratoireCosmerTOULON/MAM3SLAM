@@ -177,29 +177,29 @@ void MapDrawer::DrawMapPoints()
 
     glEnd();
 
-    glPointSize(10.0);
-    glBegin(GL_POINTS);
-    glColor3f(0.0,0.0,1.0);
-    for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
-    {
-        if((*sit)->isBad() || (*sit)->isJustMerged==false)
-            continue;
-        Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
-        glVertex3f(pos(0),pos(1),pos(2));
-    }
-    glEnd();
+    // glPointSize(10.0);
+    // glBegin(GL_POINTS);
+    // glColor3f(0.0,0.0,1.0);
+    // for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    // {
+    //     if((*sit)->isBad() || (*sit)->isJustMerged==false)
+    //         continue;
+    //     Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
+    //     glVertex3f(pos(0),pos(1),pos(2));
+    // }
+    // glEnd();
 
-    glPointSize(10.0);
-    glBegin(GL_POINTS);
-    glColor3f(0.0,1.0,1.0);
-    for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
-    {
-        if((*sit)->isBad() || (*sit)->isToBeMerged==false)
-            continue;
-        Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
-        glVertex3f(pos(0),pos(1),pos(2));
-    }
-    glEnd();
+    // glPointSize(10.0);
+    // glBegin(GL_POINTS);
+    // glColor3f(0.0,1.0,1.0);
+    // for(set<MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    // {
+    //     if((*sit)->isBad() || (*sit)->isToBeMerged==false)
+    //         continue;
+    //     Eigen::Matrix<float,3,1> pos = (*sit)->GetWorldPos();
+    //     glVertex3f(pos(0),pos(1),pos(2));
+    // }
+    // glEnd();
 }
 
 void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph, const bool bDrawOptLba)
@@ -240,24 +240,33 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const b
             {
                 //cout << "Child KF: " << vpKFs[i]->mnId << endl;
                 glLineWidth(mKeyFrameLineWidth);
-                if (bDrawOptLba) {
-                    if(sOptKFs.find(pKF->mnId) != sOptKFs.end())
-                    {
-                        glColor3f(0.0f,1.0f,0.0f); // Green -> Opt KFs
-                    }
-                    else if(sFixedKFs.find(pKF->mnId) != sFixedKFs.end())
-                    {
-                        glColor3f(1.0f,0.0f,0.0f); // Red -> Fixed KFs
-                    }
-                    else
-                    {
-                        glColor3f(0.0f,0.0f,1.0f); // Basic color
-                    }
+                if (pKF->getAgent()->mnId == 0)
+                {
+                    glColor3f(0.0f,0.0f,1.0f); // Blue
                 }
                 else
                 {
-                    glColor3f(0.0f,0.0f,1.0f); // Basic color
+                    glColor3f(1.0f,0.0f,1.0f); // Orange
                 }
+
+                // if (bDrawOptLba) {
+                //     if(sOptKFs.find(pKF->mnId) != sOptKFs.end())
+                //     {
+                //         glColor3f(0.0f,1.0f,0.0f); // Green -> Opt KFs
+                //     }
+                //     else if(sFixedKFs.find(pKF->mnId) != sFixedKFs.end())
+                //     {
+                //         glColor3f(1.0f,0.0f,0.0f); // Red -> Fixed KFs
+                //     }
+                //     else
+                //     {
+                //         glColor3f(0.0f,0.0f,1.0f); // Basic color
+                //     }
+                // }
+                // else
+                // {
+                //     glColor3f(0.0f,0.0f,1.0f); // Basic color
+                // }
                 glBegin(GL_LINES);
             }
 
