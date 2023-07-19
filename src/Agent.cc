@@ -453,4 +453,38 @@ void Agent::SaveTrajectory()
 
 }*/
 
+void Agent::SaveTimes()
+{
+    // Tracking
+    std::stringstream ss;
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesT_" << mnId << ".txt";
+    std::string filename = ss.str();
+    cout << endl << "Saving tracking durations to " << filename << " ..." << endl;
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+    f << "Tracking_duration(ms)" << std::endl;
+    for(int i = 0 ; i < mpTracker->mvdTrack_ms.size() ; i++)
+    {
+        f << setprecision(6) << mpTracker->mvdTrack_ms[i] << std::endl;
+    }
+    f.close();
+    cout << endl << "tracking durations saved!" << endl;
+
+    // LM
+    std::stringstream ss2;
+    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesLM_" << mnId << ".txt";
+    filename = ss2.str();
+    cout << endl << "Saving LM durations to " << filename << " ..." << endl;
+    f.open(filename.c_str());
+    f << fixed;
+    f << "KF_insertion_duration(ms) nb_KF_inserted" << std::endl;
+    for(int i = 0 ; i < mpLocalMapper->mvdNewKFProcessing_ms.size() ; i++)
+    {
+        f << setprecision(6) << mpLocalMapper->mvdNewKFProcessing_ms[i] << " " << mpLocalMapper->mvnKFInserted[i] << std::endl;
+    }
+    f.close();
+    cout << endl << "LM durations saved!" << endl;
+}
+
 }

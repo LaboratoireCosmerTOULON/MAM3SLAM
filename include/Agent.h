@@ -111,6 +111,9 @@ public:
     void SaveTrackingStates();
     void SaveTrajectory();
 
+    // Real-time analysis
+    void SaveTimes();
+
 private:
 
     // Input sensor

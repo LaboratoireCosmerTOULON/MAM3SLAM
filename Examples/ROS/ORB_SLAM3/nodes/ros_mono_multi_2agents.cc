@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
 
     mas.Shutdown();
     mas.SaveKFTrajectory();
+    mas.SaveTimes();
     // usleep(1000000);
 
     ros::shutdown();

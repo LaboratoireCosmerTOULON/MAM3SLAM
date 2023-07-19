@@ -176,4 +176,57 @@ void MultiAgentSystem::SaveKFTrajectory() {
     }
 }
 
+void MultiAgentSystem::SaveTimes()
+{
+    // Place recognition
+    std::stringstream ss;
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesPR.txt";
+    std::string filename = ss.str();
+    cout << endl << "Saving LM durations to " << filename << " ..." << endl;
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+    f << "PR_duration(ms)" << std::endl;
+    for(int i = 0 ; i < mpLoopCloser->mvdPR_ms.size() ; i++)
+    {
+        f << setprecision(6) << mpLoopCloser->mvdPR_ms[i] << std::endl;
+    }
+    f.close();
+    cout << endl << "PR durations saved!" << endl;
+
+    // LC
+    std::stringstream ss2;
+    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesLC.txt";
+    filename = ss2.str();
+    cout << endl << "Saving LC durations to " << filename << " ..." << endl;
+    f.open(filename.c_str());
+    f << fixed;
+    f << "LC_duration(ms)" << std::endl;
+    for(int i = 0 ; i < mpLoopCloser->mvdLC_ms.size() ; i++)
+    {
+        f << setprecision(6) << mpLoopCloser->mvdLC_ms[i] << std::endl;
+    }
+    f.close();
+    cout << endl << "LC durations saved!" << endl;
+
+    // MM
+    std::stringstream ss3;
+    ss3 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesMM.txt";
+    filename = ss3.str();
+    cout << endl << "Saving MM durations to " << filename << " ..." << endl;
+    f.open(filename.c_str());
+    f << fixed;
+    f << "MM_duration(ms)" << std::endl;
+    for(int i = 0 ; i < mpLoopCloser->mvdMM_ms.size() ; i++)
+    {
+        f << setprecision(6) << mpLoopCloser->mvdMM_ms[i] << std::endl;
+    }
+    f.close();
+    cout << endl << "MM durations saved!" << endl;
+
+    for (int i = 0 ; i < mvpAgents.size() ; i++) {
+        mvpAgents[i] -> SaveTimes();
+    }
+}
+
 }

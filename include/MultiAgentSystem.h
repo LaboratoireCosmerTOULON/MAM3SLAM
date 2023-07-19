@@ -92,6 +92,9 @@ public:
 
     void SaveKFTrajectory();
 
+    // Real-time analysis
+    void SaveTimes();
+
 private:
     // ORB vocabulary used for place recognition and feature matching.
     ORBVocabulary* mpVocabulary;
