@@ -92,6 +92,10 @@ public:
     // Multiagent system
     void SetMultiAgentSystem(MultiAgentSystem* pMultiAgentSystem);
 
+    // Real-time analysis
+    std::vector<double> mvdPR_ms;
+    std::vector<double> mvdLC_ms;
+    std::vector<double> mvdMM_ms;
 
 #ifdef REGISTER_TIMES
 

@@ -80,7 +80,9 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
 
     while(1)
     {
+        // Real-time analysis
         std::chrono::steady_clock::time_point time_StartLM = std::chrono::steady_clock::now();
+
         // Tracking will see that Local Mapping is busy
         SetAcceptKeyFrames(false);
         // SetAcceptKeyFrames(mlNewKeyFrames.size()<2);
@@ -88,6 +90,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames() && !mbBadImu)
         {
+            std::chrono::steady_clock::time_point time_StartNewKFProcessing = std::chrono::steady_clock::now();
             // std::cout << "coucou" << std::endl;
             // std::cout << "Calling LM from agent " << mpAgent->mnId << ". Current map is " << mpAgent->GetCurrentMap()->GetId() << " with " << mpAgent->GetCurrentMap()->KeyFramesInMap() << " KFs." << std::endl;
             #ifdef REGISTER_TIMES
@@ -100,6 +103,7 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
             unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
 
             int nNewKF = mlNewKeyFrames.size();
+            mvnKFInserted.push_back(nNewKF);
             std::cout << " Agent " << mpAgent->mnId << " LM - There are " << nNewKF << " to process" << std::endl;
 
             for (int itKF=0 ; itKF < nNewKF ; itKF++) {
@@ -202,6 +206,11 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
                 double timeLocalMap = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLocalMap - time_StartProcessKF).count();
                 vdLMTotal_ms.push_back(timeLocalMap);
             #endif
+
+            // Real-time analysis
+            std::chrono::steady_clock::time_point time_EndNewKFProcessing = std::chrono::steady_clock::now();
+            double timeNewKFProcessing = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndNewKFProcessing - time_StartNewKFProcessing).count();
+            mvdNewKFProcessing_ms.push_back(timeNewKFProcessing);
         }
         else if(Stop() && !mbBadImu)
         {

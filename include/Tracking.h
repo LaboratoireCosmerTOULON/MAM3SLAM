@@ -188,6 +188,9 @@ public:
     bool mbWriteStats;
     int mnKFinsertionsRefusedSinceLast = 0;
 
+    // Real-time analysis
+    std::vector<double> mvdTrack_ms;
+
 #ifdef REGISTER_TIMES
     void LocalMapStats2File();
     void TrackStats2File();

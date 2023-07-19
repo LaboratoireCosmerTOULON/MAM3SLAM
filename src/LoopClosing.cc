@@ -110,6 +110,9 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                 std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
             #endif
 
+            // Real-time analysis
+            std::chrono::steady_clock::time_point time_StartPR = std::chrono::steady_clock::now();
+
             // Retrieve LC/MM status of current KF's origin agent + update LC/MM status for current KF's origin agent via NewDetectCommonRegionsMulti()
 
             bool bFindedRegion = NewDetectCommonRegionsMulti(false);
@@ -119,6 +122,11 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                 double timePRTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
                 vdPRTotal_ms.push_back(timePRTotal);
             #endif
+
+            // Real-time analysis
+            std::chrono::steady_clock::time_point time_EndPR = std::chrono::steady_clock::now();
+            double timePR = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndPR - time_StartPR).count();
+            mvdPR_ms.push_back(timePR);
 
             // Process LC/MM if validated
 
@@ -133,6 +141,10 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                     std::cout << "MERGE DETECTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                     std::cout << "..." << std::endl;
                     std::cout << "..." << std::endl;
+
+                    // Real-time analysis
+                    std::chrono::steady_clock::time_point time_StartMM = std::chrono::steady_clock::now();
+
                     Sophus::SE3d mTmw = mpCurrentAgent->mpMergeMatchedKF->GetPose().cast<double>();
                     g2o::Sim3 gSmw2(mTmw.unit_quaternion(), mTmw.translation(), 1.0);
                     Sophus::SE3d mTcw = mpCurrentKF->GetPose().cast<double>();
@@ -166,6 +178,11 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                         double timeMergeTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMerge - time_StartMerge).count();
                         vdMergeTotal_ms.push_back(timeMergeTotal);
                     #endif
+
+                    // Real-time analysis
+                    std::chrono::steady_clock::time_point time_EndMM = std::chrono::steady_clock::now();
+                    double timeMM = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMM - time_StartMM).count();
+                    mvdMM_ms.push_back(timeMM);
 
                     Verbose::PrintMess("Merge finished!", Verbose::VERBOSITY_QUIET);
 
@@ -222,10 +239,12 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
 
                         #ifdef REGISTER_TIMES
                             std::chrono::steady_clock::time_point time_StartLoop = std::chrono::steady_clock::now();
-
                             nLoop += 1;
-
                         #endif
+
+                        // Real-time analysis
+                        std::chrono::steady_clock::time_point time_StartLC = std::chrono::steady_clock::now();
+
                         // std::cout << "LC : ok3" << std::endl;
                         CorrectLoop();
                         // std::cout << "LC : ok4" << std::endl;
@@ -235,6 +254,11 @@ void LoopClosing::Run() // FIXME : uncomment and update when current map / agent
                             double timeLoopTotal = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLoop - time_StartLoop).count();
                             vdLoopTotal_ms.push_back(timeLoopTotal);
                         #endif
+
+                        // Real-time analysis
+                        std::chrono::steady_clock::time_point time_EndLC = std::chrono::steady_clock::now();
+                        double timeLC = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndLC - time_StartLC).count();
+                        mvdLC_ms.push_back(timeLC);
 
                         mnNumCorrection += 1;
                     }

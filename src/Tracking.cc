@@ -1802,6 +1802,9 @@ void Tracking::ResetFrameIMU()
 
 void Tracking::Track()
 {
+    // Real-time analysis
+    std::chrono::steady_clock::time_point time_StartTracking = std::chrono::steady_clock::now();
+
     // std::cout << "mnFramesSinceLastReloc : " << mnFramesSinceLastReloc << std::endl; // DEBUG
     // std::cout << "mbVelocity : " << mbVelocity << std::endl; // DEBUG
     // std::cout << "Agent " << mpAgent -> mnId << " in track fct" << std::endl; // DEBUG 
@@ -2212,6 +2215,11 @@ void Tracking::Track()
         }
 
     }
+
+    // Real-time analysis
+    std::chrono::steady_clock::time_point time_EndTracking = std::chrono::steady_clock::now();
+    double timeTracking = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndTracking - time_StartTracking).count();
+    mvdTrack_ms.push_back(timeTracking);
 
     #ifdef REGISTER_LOOP
         if (Stop()) {
