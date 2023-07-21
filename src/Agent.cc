@@ -478,10 +478,10 @@ void Agent::SaveTimes()
     cout << endl << "Saving LM durations to " << filename << " ..." << endl;
     f.open(filename.c_str());
     f << fixed;
-    f << "KF_insertion_duration(ms) nb_KF_inserted" << std::endl;
+    f << "KF_insertion_duration(ms) nb_KF_inserted mutex_wait(ms)" << std::endl;
     for(int i = 0 ; i < mpLocalMapper->mvdNewKFProcessing_ms.size() ; i++)
     {
-        f << setprecision(6) << mpLocalMapper->mvdNewKFProcessing_ms[i] << " " << mpLocalMapper->mvnKFInserted[i] << std::endl;
+        f << setprecision(6) << mpLocalMapper->mvdNewKFProcessing_ms[i] << " " << mpLocalMapper->mvnKFInserted[i] << " " << mpLocalMapper->mvdMutexWait_ms[i] << std::endl;
     }
     f.close();
     cout << endl << "LM durations saved!" << endl;

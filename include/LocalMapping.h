@@ -116,6 +116,7 @@ public:
     // Real-time analysis
     std::vector<double> mvDurationLM;
     std::vector<double> mvdNewKFProcessing_ms;
+    std::vector<double> mvdMutexWait_ms;
     std::vector<unsigned int> mvnKFInserted;
 
 #ifdef REGISTER_TIMES

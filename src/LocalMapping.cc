@@ -100,7 +100,13 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
                 std::chrono::steady_clock::time_point time_StartProcessKF = std::chrono::steady_clock::now();
             #endif
 
+            // Real-time analysis
+            std::chrono::steady_clock::time_point time_StartMutex = std::chrono::steady_clock::now();
+
             unique_lock<mutex> lock(mpAgent->GetCurrentMap()->mMutexLocalMap);
+
+            // Real-time analysis
+            std::chrono::steady_clock::time_point time_EndMutex = std::chrono::steady_clock::now();
 
             int nNewKF = mlNewKeyFrames.size();
             mvnKFInserted.push_back(nNewKF);
@@ -211,6 +217,8 @@ void LocalMapping::Run() // FIXME : uncomment and update when current map / agen
             std::chrono::steady_clock::time_point time_EndNewKFProcessing = std::chrono::steady_clock::now();
             double timeNewKFProcessing = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndNewKFProcessing - time_StartNewKFProcessing).count();
             mvdNewKFProcessing_ms.push_back(timeNewKFProcessing);
+            double timeMutexWait = std::chrono::duration_cast<std::chrono::duration<double,std::milli> >(time_EndMutex - time_StartMutex).count();
+            mvdMutexWait_ms.push_back(timeMutexWait);
         }
         else if(Stop() && !mbBadImu)
         {
