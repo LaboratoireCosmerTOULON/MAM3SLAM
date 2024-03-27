@@ -101,7 +101,7 @@ Required to calculate the alignment of the trajectory with the ground truth. **R
 
 * (win) http://www.python.org/downloads/windows
 * (deb) `sudo apt install libpython2.7-dev`
-* (mac) preinstalled with osx
+* (mac) preinstalled with osx 
 
 ### ROS
 
