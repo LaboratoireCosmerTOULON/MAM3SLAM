@@ -19,7 +19,7 @@
 
 #include "Config.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 bool ConfigParser::ParseConfigFile(std::string &strConfigFile)

@@ -24,7 +24,7 @@
 #include <opencv2/opencv.hpp>
 
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class ExtractorNode

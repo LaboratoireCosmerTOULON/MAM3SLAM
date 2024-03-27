@@ -1,6 +1,6 @@
 #include "AgentViewer.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 AgentViewer::AgentViewer(Agent* pAgent, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings) : mpAgent(pAgent), mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpTracker(pTracking), mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)

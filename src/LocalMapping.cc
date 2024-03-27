@@ -27,7 +27,7 @@
 #include<mutex>
 #include<chrono>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 LocalMapping::LocalMapping(Agent* pAgent, Atlas *pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName):

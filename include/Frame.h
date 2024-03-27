@@ -39,7 +39,7 @@
 #include "Eigen/Core"
 #include "sophus/se3.hpp"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 #define FRAME_GRID_ROWS 48
 #define FRAME_GRID_COLS 64

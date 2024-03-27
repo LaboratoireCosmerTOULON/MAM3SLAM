@@ -12,8 +12,8 @@ int main(int argc, char **argv) {
     // Constructor
     std::string strSettingsFile("./settingsForTest_00.yaml");
     std::string pathToVoc("../Vocabulary/ORBvoc.txt");
-    ORB_SLAM3::MultiAgentSystem mas(pathToVoc);
-    ORB_SLAM3::Agent jeanPhilippe(strSettingsFile, &mas);
+    MAM3SLAM::MultiAgentSystem mas(pathToVoc);
+    MAM3SLAM::Agent jeanPhilippe(strSettingsFile, &mas);
 
     // std::mutex mMutexNewFrame;
     // std::this_thread::sleep_for(std::chrono::milliseconds(2000));

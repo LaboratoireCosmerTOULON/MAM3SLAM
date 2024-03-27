@@ -46,8 +46,8 @@
 * SUCH DAMAGE.                                                               *
 ******************************************************************************/
 
-#ifndef ORB_SLAM3_MLPNPSOLVER_H
-#define ORB_SLAM3_MLPNPSOLVER_H
+#ifndef MAM3SLAM_MLPNPSOLVER_H
+#define MAM3SLAM_MLPNPSOLVER_H
 
 #include "MapPoint.h"
 #include "Frame.h"
@@ -55,7 +55,7 @@
 #include<Eigen/Dense>
 #include<Eigen/Sparse>
 
-namespace ORB_SLAM3{
+namespace MAM3SLAM{
     class MLPnPsolver {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -254,4 +254,4 @@ namespace ORB_SLAM3{
 
 
 
-#endif //ORB_SLAM3_MLPNPSOLVER_H
+#endif //MAM3SLAM_MLPNPSOLVER_H

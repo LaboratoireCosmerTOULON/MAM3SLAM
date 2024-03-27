@@ -30,7 +30,7 @@
 
 #include <vector>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 template <class Archive>
@@ -161,6 +161,6 @@ void serializeVectorKeyPoints(Archive& ar, const std::vector<cv::KeyPoint>& vKP,
     }
 }
 
-} // namespace ORB_SLAM3
+} // namespace MAM3SLAM
 
 #endif // SERIALIZATION_UTILS_H

@@ -24,7 +24,7 @@
 
 #include<mutex>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 FrameDrawer::FrameDrawer(Agent* pAgent, Atlas* pAtlas):both(false),mpAtlas(pAtlas), mpAgent(pAgent)

@@ -1,6 +1,6 @@
 #include "Agent.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 long unsigned int Agent::nNextId=0;
@@ -42,13 +42,13 @@ Agent::Agent(const string &strSettingsFile, MultiAgentSystem* pMultiAgentSystem,
     cout << "Seq. Name: " << strSequence << endl;
     mpTracker = new Tracking(this, pVoc, mpFrameDrawer, mpMapDrawer, pAtlas, pKFDB, strSettingsFile, mSensor, settings_, strSequence);
     // TO-DO : make Run() perform Tracking
-    mptTracking = new thread(&ORB_SLAM3::Agent::Run,this);
+    mptTracking = new thread(&MAM3SLAM::Agent::Run,this);
     std::cout << "attached for Agent " << mnId << std::endl;
 
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(this, pAtlas, true, false, strSequence);
     // TO-DO : check Run()
-    mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
+    mptLocalMapping = new thread(&MAM3SLAM::LocalMapping::Run,mpLocalMapper);
 
     mpLocalMapper->mInitFr = initFr;
     if(settings_)
@@ -228,7 +228,7 @@ void Agent::SaveTrackingStates()
 void Agent::SaveTrajectory()
 {
     std::stringstream ss;
-    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/Trajectory_" << mnId << ".txt";
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/Trajectory_" << mnId << ".txt";
     std::string filename = ss.str();
     std::cout << "Saving trajectory to " << filename << " ..." << std:: endl;
 
@@ -341,7 +341,7 @@ void Agent::SaveTrajectory()
 }
 /*{
     std::stringstream ss;
-    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/Trajectory_" << mnId << ".txt";
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/Trajectory_" << mnId << ".txt";
     std::string filename = ss.str();
     std::cout << "Saving trajectory to " << filename << " ..." << std:: endl;
 
@@ -371,7 +371,7 @@ void Agent::SaveTrajectory()
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    list<ORB_SLAM3::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
+    list<MAM3SLAM::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
     list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
     list<bool>::iterator lbL = mpTracker->mlbLost.begin();
     std::cout << "mpTracker->mlpReferences.size()" << mpTracker->mlpReferences.size() << std::endl;
@@ -457,7 +457,7 @@ void Agent::SaveTimes()
 {
     // Tracking
     std::stringstream ss;
-    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesT_" << mnId << ".txt";
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TimesT_" << mnId << ".txt";
     std::string filename = ss.str();
     cout << endl << "Saving tracking durations to " << filename << " ..." << endl;
     ofstream f;
@@ -473,7 +473,7 @@ void Agent::SaveTimes()
 
     // LM
     std::stringstream ss2;
-    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesLM_" << mnId << ".txt";
+    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TimesLM_" << mnId << ".txt";
     filename = ss2.str();
     cout << endl << "Saving LM durations to " << filename << " ..." << endl;
     f.open(filename.c_str());

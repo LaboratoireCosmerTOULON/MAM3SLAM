@@ -32,7 +32,7 @@
 #include <unordered_set>
 
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class Tracking;

@@ -21,7 +21,7 @@
 
 #include<mutex>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 long unsigned int Map::nNextId=0;
@@ -65,7 +65,7 @@ void Map::AddKeyFrame(KeyFrame *pKF)
         mnInitKFid = pKF->mnId;
         mpKFinitial = pKF;
         mpKFlowerID = pKF;
-        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt");
+        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/MapLogs.txt");
         std::ofstream file_out;
         file_out.open(filename, std::ios_base::app);
         file_out << fixed;
@@ -497,4 +497,4 @@ void Map::PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long u
 }
 
 
-} //namespace ORB_SLAM3
+} //namespace MAM3SLAM

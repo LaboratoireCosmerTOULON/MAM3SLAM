@@ -20,7 +20,7 @@
 
 #include "KeyFrame.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 Eigen::Matrix3f GeometricTools::ComputeF12(KeyFrame* &pKF1, KeyFrame* &pKF2)

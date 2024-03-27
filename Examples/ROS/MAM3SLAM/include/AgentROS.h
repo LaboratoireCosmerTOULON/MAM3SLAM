@@ -13,7 +13,7 @@
 
 #include"../../../include/Agent.h"
 
-namespace ORB_SLAM3 
+namespace MAM3SLAM 
 {
 
 class AgentROS : public Agent 

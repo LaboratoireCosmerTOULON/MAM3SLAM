@@ -5,7 +5,7 @@
 
 #include <mutex>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class AgentViewer;

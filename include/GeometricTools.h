@@ -24,7 +24,7 @@
 #include <sophus/se3.hpp>
 #include <Eigen/Core>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class KeyFrame;

@@ -23,7 +23,7 @@
 #include "Pinhole.h"
 #include "KannalaBrandt8.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 template<class Archive>
@@ -497,4 +497,4 @@ void Atlas::SetAgentCurrentMap(Agent* agent, Map* map) { // the mutex is in agen
     agent -> SetCurrentMap(map);
 }
 
-} //namespace ORB_SLAM3
+} //namespace MAM3SLAM

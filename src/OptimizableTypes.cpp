@@ -18,7 +18,7 @@
 
 #include "OptimizableTypes.h"
 
-namespace ORB_SLAM3 {
+namespace MAM3SLAM {
     bool EdgeSE3ProjectXYZOnlyPose::read(std::istream& is){
         for (int i=0; i<2; i++){
             is >> _measurement[i];

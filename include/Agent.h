@@ -18,7 +18,7 @@
 #include "MultiAgentSystem.h"
 #include "Map.h"
 
-namespace ORB_SLAM3 {
+namespace MAM3SLAM {
 
 class FrameDrawer;
 class MapDrawer;

@@ -25,7 +25,7 @@
 
 #include <sophus/se3.hpp>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
     class TwoViewReconstruction

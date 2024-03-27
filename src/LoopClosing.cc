@@ -29,7 +29,7 @@
 #include<thread>
 
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, const bool bFixScale, const bool bActiveLC):
@@ -2276,7 +2276,7 @@ void LoopClosing::MergeLocal(){}
 
 void LoopClosing::MergeLocalMulti()
 {
-    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt");
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/MapLogs.txt");
     std::ofstream file_out;
     file_out.open(filename, std::ios_base::app);
     file_out << fixed;

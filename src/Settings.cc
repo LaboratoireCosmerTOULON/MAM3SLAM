@@ -30,7 +30,7 @@
 
 using namespace std;
 
-namespace ORB_SLAM3 {
+namespace MAM3SLAM {
 
     template<>
     float Settings::readParameter<float>(cv::FileStorage& fSettings, const std::string& name, bool& found, const bool required){

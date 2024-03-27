@@ -34,11 +34,11 @@ using namespace std;
 
 class ImageGrabber {
     public:
-        ImageGrabber(ORB_SLAM3::Agent* pAgent, bool is_img_mono):mpAgent(pAgent), is_img_mono(is_img_mono){}
+        ImageGrabber(MAM3SLAM::Agent* pAgent, bool is_img_mono):mpAgent(pAgent), is_img_mono(is_img_mono){}
 
         void GrabImage(const sensor_msgs::ImageConstPtr& msg);
 
-        ORB_SLAM3::Agent* mpAgent;
+        MAM3SLAM::Agent* mpAgent;
 
         bool is_img_mono;
 
@@ -46,44 +46,45 @@ class ImageGrabber {
 };
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "Mono");
+    ros::init(argc, argv, "MonoMulti2");
     ros::start();
 
-    if(argc != 3 && argc != 4)
+    if(argc != 6 && argc != 7)
     {
-        cerr << endl << "Usage: rosrun ORB_SLAM3 Mono path_to_vocabulary path_to_settings [is_mono]" << endl;        
+        cerr << endl << "Usage: rosrun MAM3SLAM MonoMulti2 path_to_vocabulary path_to_settings_1 topic_1 path_to_settings_2 topic_2 [is_mono]" << endl;        
         ros::shutdown();
         return 1;
     }    
 
     bool is_img_mono = false;
-    if (argc == 4) {
-        std::string is_img_mono_str(argv[3]);
+    if (argc == 7) {
+        std::string is_img_mono_str(argv[6]);
         is_img_mono = is_img_mono_str == "true";
     }
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     bool bUseViewer = true;
-    ORB_SLAM3::MultiAgentSystem mas(argv[1], true, bUseViewer);
-    std::string strSettingsFile1("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_00.yaml");
-    std::string strSettingsFile2("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
-    // std::string strSettingsFile3("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/test/settingsForTest_01.yaml");
+    MAM3SLAM::MultiAgentSystem mas(argv[1], true, bUseViewer);
+    std::string strSettingsFile1(argv[2]);
+    std::string strSettingsFile2(argv[4]);
     mas.addAgent(strSettingsFile1);
     mas.addAgent(strSettingsFile2);
-    // mas.addAgent(strSettingsFile3);
     ImageGrabber igb1(mas.getAgent(0), is_img_mono);
     ImageGrabber igb2(mas.getAgent(1), is_img_mono);
-    // ImageGrabber igb3(mas.getAgent(2), is_img_mono);
     if (bUseViewer) {
         mas.StartViewer();
     } 
 
     ros::NodeHandle nodeHandler;
-    ros::Subscriber sub1 = nodeHandler.subscribe("/camera/left00_1/image_raw", 1, &ImageGrabber::GrabImage, &igb1);
-    ros::Subscriber sub2 = nodeHandler.subscribe("/camera/left00_2/image_raw", 1, &ImageGrabber::GrabImage, &igb2);
-    // ros::Subscriber sub3 = nodeHandler.subscribe("/camera/left00_2/image_raw", 1, &ImageGrabber::GrabImage, &igb3);
+    ros::Subscriber sub1 = nodeHandler.subscribe(argv[3], 1, &ImageGrabber::GrabImage, &igb1);
+    ros::Subscriber sub2 = nodeHandler.subscribe(argv[5], 1, &ImageGrabber::GrabImage, &igb2);
     
     ros::spin();
+
+    mas.Shutdown();
+    mas.SaveKFTrajectory();
+    mas.SaveTimes();
+    // usleep(1000000);
 
     ros::shutdown();
 

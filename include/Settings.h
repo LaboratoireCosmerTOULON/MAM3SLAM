@@ -16,8 +16,8 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ORB_SLAM3_SETTINGS_H
-#define ORB_SLAM3_SETTINGS_H
+#ifndef MAM3SLAM_SETTINGS_H
+#define MAM3SLAM_SETTINGS_H
 
 
 // Flag to activate the measurement of time in each process (track,localmap, place recognition).
@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string>
 
-namespace ORB_SLAM3 {
+namespace MAM3SLAM {
 
     class System;
 
@@ -232,4 +232,4 @@ namespace ORB_SLAM3 {
 };
 
 
-#endif //ORB_SLAM3_SETTINGS_H
+#endif //MAM3SLAM_SETTINGS_H

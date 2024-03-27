@@ -27,7 +27,7 @@
 
 
 using namespace std;
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
     TwoViewReconstruction::TwoViewReconstruction(const Eigen::Matrix3f& k, float sigma, int iterations)
     {

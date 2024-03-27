@@ -18,7 +18,7 @@
 
 #include "Converter.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 std::vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors)

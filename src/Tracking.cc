@@ -37,7 +37,7 @@
 
 using namespace std;
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 Tracking::Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Atlas *pAtlas, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor, Settings* settings, const string &_nameSeq):
@@ -47,7 +47,7 @@ Tracking::Tracking(Agent* pAgent, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpAtlas(pAtlas), mnLastRelocFrameId(0), time_recently_lost(5.0),
     mnInitialFrameId(0), mbCreatedMap(false), mnFirstFrameId(0), mpCamera2(nullptr), mpLastKeyFrame(static_cast<KeyFrame*>(NULL)), mnFramesSinceLastReloc(0), mnFramesSinceLastKF(0)
 {
-    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt");
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/reloc.txt");
     std::ofstream file_out;
     file_out.open(filename, std::ios_base::app);
     file_out << "Reloc_frame_ts Map_before Map_after" << endl;
@@ -3505,7 +3505,7 @@ bool Tracking::Relocalization()
         mnFramesSinceLastReloc = 0;
         cout << "Relocalized!!" << endl;
         unsigned int mapIdAfter = mpAtlas->GetAgentCurrentMap(mpAgent)->GetId();
-        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt");
+        std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/reloc.txt");
         std::ofstream file_out;
         file_out.open(filename, std::ios_base::app);
         file_out << fixed;
@@ -3727,7 +3727,7 @@ void Tracking::UpdateFrameIMU(const float s, const IMU::Bias &b, KeyFrame* pCurr
 {
     Map * pMap = pCurrentKeyFrame->GetMap();
     unsigned int index = mnFirstFrameId;
-    list<ORB_SLAM3::KeyFrame*>::iterator lRit = mlpReferences.begin();
+    list<MAM3SLAM::KeyFrame*>::iterator lRit = mlpReferences.begin();
     list<bool>::iterator lbL = mlbLost.begin();
     for(auto lit=mlRelativeFramePoses.begin(),lend=mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lbL++)
     {
@@ -3872,7 +3872,7 @@ void Tracking::Release()
 void Tracking::SaveStates() 
 {
     std::stringstream ss;
-    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TrackingStatus_" << mpAgent->mnId << ".txt";
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TrackingStatus_" << mpAgent->mnId << ".txt";
     std::string filename = ss.str();
     cout << endl << "Saving tracking status to " << filename << " ..." << endl;
     ofstream f;

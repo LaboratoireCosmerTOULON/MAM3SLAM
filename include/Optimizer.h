@@ -38,7 +38,7 @@
 #include "Thirdparty/g2o/g2o/core/robust_kernel_impl.h"
 #include "Thirdparty/g2o/g2o/solvers/linear_solver_dense.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class LoopClosing;
@@ -101,6 +101,6 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
 
-} //namespace ORB_SLAM3
+} //namespace MAM3SLAM
 
 #endif // OPTIMIZER_H

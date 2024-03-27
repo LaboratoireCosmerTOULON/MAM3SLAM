@@ -28,7 +28,7 @@
 
 #include "Thirdparty/DBoW2/DUtils/Random.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 

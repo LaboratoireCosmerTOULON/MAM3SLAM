@@ -30,7 +30,7 @@
 #include"Frame.h"
 
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
     class ORBmatcher

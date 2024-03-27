@@ -1,6 +1,6 @@
 #include "MultiAgentSystem.h"
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
@@ -9,9 +9,9 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, boo
 {
     // Clear files
     std::ofstream ofs;
-    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/MapLogs.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/MapLogs.txt", std::ofstream::out | std::ofstream::trunc);
     ofs.close();
-    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/reloc.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.open("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/reloc.txt", std::ofstream::out | std::ofstream::trunc);
     ofs.close();
 
     mStrVocabularyFilePath = strVocFile;
@@ -41,7 +41,7 @@ MultiAgentSystem::MultiAgentSystem(const string &strVocFile, bool bActiveLC, boo
     bool bFixScale = false;
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, bFixScale, bActiveLC);
     mpLoopCloser->SetMultiAgentSystem(this);
-    mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
+    mptLoopClosing = new thread(&MAM3SLAM::LoopClosing::Run, mpLoopCloser);
 
     // // Fix verbosity
     // Verbose::SetTh(Verbose::VERBOSITY_QUIET);
@@ -120,7 +120,7 @@ void MultiAgentSystem::StartViewer() {
     for (int i = 0 ; i < mvpAgents.size() ; i++) {
         mpMultiAgentViewer -> AddAgentViewer(mvpAgents[i] -> getAgentViewer());
     }
-    mptMultiAgentViewer = new thread(&ORB_SLAM3::MultiAgentViewer::Run, mpMultiAgentViewer);
+    mptMultiAgentViewer = new thread(&MAM3SLAM::MultiAgentViewer::Run, mpMultiAgentViewer);
 }
 
 std::vector<Agent*> MultiAgentSystem::GetAgentsInMap(long unsigned int nMapId)
@@ -137,7 +137,7 @@ std::vector<Agent*> MultiAgentSystem::GetAgentsInMap(long unsigned int nMapId)
 }
 
 void MultiAgentSystem::SaveKFTrajectory() {
-    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/KF_traj.txt");
+    std::string filename("/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/KF_traj.txt");
     std::cout << "Saving KF trajectory to " << filename << " ..." << std:: endl;
     
     ofstream f;
@@ -180,7 +180,7 @@ void MultiAgentSystem::SaveTimes()
 {
     // Place recognition
     std::stringstream ss;
-    ss << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesPR.txt";
+    ss << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TimesPR.txt";
     std::string filename = ss.str();
     cout << endl << "Saving LM durations to " << filename << " ..." << endl;
     ofstream f;
@@ -196,7 +196,7 @@ void MultiAgentSystem::SaveTimes()
 
     // LC
     std::stringstream ss2;
-    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesLC.txt";
+    ss2 << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TimesLC.txt";
     filename = ss2.str();
     cout << endl << "Saving LC durations to " << filename << " ..." << endl;
     f.open(filename.c_str());
@@ -211,7 +211,7 @@ void MultiAgentSystem::SaveTimes()
 
     // MM
     std::stringstream ss3;
-    ss3 << "/home/ju/Copie_de_travail_ORBSLAM3/ORB_SLAM3/output/TimesMM.txt";
+    ss3 << "/home/ju/Copie_de_travail_ORBSLAM3/MAM3SLAM/output/TimesMM.txt";
     filename = ss3.str();
     cout << endl << "Saving MM durations to " << filename << " ..." << endl;
     f.open(filename.c_str());

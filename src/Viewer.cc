@@ -22,7 +22,7 @@
 
 #include <mutex>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 Viewer::Viewer(Agent* pAgent, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath, Settings* settings):

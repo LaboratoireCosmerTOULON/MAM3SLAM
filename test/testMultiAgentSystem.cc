@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 
     // Constructor
     std::string pathToVoc("../Vocabulary/ORBvoc.txt");
-    ORB_SLAM3::MultiAgentSystem mas(pathToVoc);
+    MAM3SLAM::MultiAgentSystem mas(pathToVoc);
 
     // void MultiAgentSystem::addAgent(const string &strSettingsFile)
     std::string strSettingsFile1("./settingsForTest_00.yaml");

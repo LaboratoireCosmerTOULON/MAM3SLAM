@@ -40,7 +40,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 
 class Map;

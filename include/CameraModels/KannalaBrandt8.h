@@ -26,7 +26,7 @@
 
 #include "TwoViewReconstruction.h"
 
-namespace ORB_SLAM3 {
+namespace MAM3SLAM {
     class KannalaBrandt8 : public GeometricCamera {
 
     friend class boost::serialization::access;

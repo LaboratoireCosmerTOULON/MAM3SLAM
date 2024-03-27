@@ -33,7 +33,7 @@
 #include <boost/serialization/export.hpp>
 
 
-namespace ORB_SLAM3
+namespace MAM3SLAM
 {
 class Viewer;
 class Map;
@@ -179,6 +179,6 @@ protected:
 
 }; // class Atlas
 
-} // namespace ORB_SLAM3
+} // namespace MAM3SLAM
 
 #endif // ATLAS_H

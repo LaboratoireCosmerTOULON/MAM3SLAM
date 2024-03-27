@@ -34,11 +34,11 @@ using namespace std;
 
 class ImageGrabber {
     public:
-        ImageGrabber(ORB_SLAM3::Agent* pAgent, bool is_img_mono):mpAgent(pAgent), is_img_mono(is_img_mono){}
+        ImageGrabber(MAM3SLAM::Agent* pAgent, bool is_img_mono):mpAgent(pAgent), is_img_mono(is_img_mono){}
 
         void GrabImage(const sensor_msgs::ImageConstPtr& msg);
 
-        ORB_SLAM3::Agent* mpAgent;
+        MAM3SLAM::Agent* mpAgent;
 
         bool is_img_mono;
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
     if(argc != 4 && argc != 5)
     {
-        cerr << endl << "Usage: rosrun ORB_SLAM3 MonoSingle path_to_vocabulary path_to_settings topic [is_mono]" << endl;        
+        cerr << endl << "Usage: rosrun MAM3SLAM MonoSingle path_to_vocabulary path_to_settings topic [is_mono]" << endl;        
         ros::shutdown();
         return 1;
     }    
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     bool bUseViewer = true;
-    ORB_SLAM3::MultiAgentSystem mas(argv[1], true, bUseViewer);
+    MAM3SLAM::MultiAgentSystem mas(argv[1], true, bUseViewer);
     std::string strSettingsFile(argv[2]);
     mas.addAgent(strSettingsFile);
     ImageGrabber igb(mas.getAgent(0), is_img_mono);
