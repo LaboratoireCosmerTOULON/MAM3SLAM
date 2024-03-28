@@ -85,7 +85,7 @@ The current code has been developped and tested using **Ubuntu 18.04**.
 We use the new thread and chrono functionalities of C++11.
 
 ### Pangolin
-We use [Pangolin](https://github.com/stevenlovegrove/Pangolin) for visualization and user interface. Dowload and install instructions can be found at: https://github.com/stevenlovegrove/Pangolin.
+We use [Pangolin](https://github.com/stevenlovegrove/Pangolin) for visualization and user interface. Dowload and install instructions can be found at: https://github.com/stevenlovegrove/Pangolin. The current code has been tested using version 0.8, which you can find here: https://github.com/stevenlovegrove/Pangolin/tree/aff6883c83f3fd7e8268a9715e84266c42e2efe3.
 
 ### OpenCV
 We use [OpenCV](http://opencv.org) to manipulate images and features. Dowload and install instructions can be found at: http://opencv.org. **Required at leat 3.0**.
