@@ -111,7 +111,7 @@ The code is interfaced with ROS, and has been tested with ROS Melodic. An exempl
 
 Clone the repository:
 ```
-git clone https://github.com/LaboratoireCosmerTOULON/MAMMM-SLAM.git
+git clone https://github.com/LaboratoireCosmerTOULON/MAM3SLAM.git
 ```
 
 We provide a script `build.sh` to build the *Thirdparty* libraries and *ORB-SLAM3*. Please make sure you have installed all required dependencies. Execute:
@@ -129,7 +129,7 @@ Build the ROS nodes:
 and add at the end the following line. Replace PATH by the folder where you cloned MAM3SLAM:
 
   ```
-  export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:PATH/MAMMM-SLAM/Examples/ROS
+  export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:PATH/MAM3SLAM/Examples/ROS
   ```
   
 2. Execute `build_ros.sh` script:
